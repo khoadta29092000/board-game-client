@@ -1,0 +1,14 @@
+{
+  "loginTitle": "Login",
+  "loginFailed": "Login Failed",
+  "registerTitle": "Register",
+  "registerDes": "Register Success",
+  "registerFailed": "Register Failed",
+  "verifyCode": "Verify Code",
+  "verifyCodeFailed": "Verify Code Failed",
+  "resetPasswordTitle": "Reset Password",
+  "resetPasswordDes": "Reset Password Success",
+  "resetPasswordFailed": "Reset Password Failed",
+  "sendCodeTitle": "Send Code",
+  "sendCodeFailed": "Send Code Failed"
+}
