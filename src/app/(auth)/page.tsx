@@ -18,6 +18,12 @@ export default function Home() {
         >
           Register
         </Link>
+        <Link
+          href="/lobby"
+          className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
+        >
+          Lobby
+        </Link>
       </div>
     </div>
   );

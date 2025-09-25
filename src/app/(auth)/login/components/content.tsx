@@ -14,7 +14,7 @@ import Image from "next/image";
 import { useDisclosure } from "@/src/hook/common/useDisclosure";
 import { ModalForgetPassword } from "./reset-password/modalForgetPassword";
 import { ModalVerifyCode } from "../../register/component/verifyCode/modalVerifyCode";
-import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 const schema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),
@@ -22,7 +22,6 @@ const schema = yup.object().shape({
 });
 
 export default function ContentLogin() {
-  const router = useRouter();
   const {
     isOpen: isOpenLostPassword,
     onClose: onCloseLostPassword,
@@ -44,7 +43,7 @@ export default function ContentLogin() {
     if (googleBtn) {
       googleBtn.click();
     } else {
-      console.warn("Không tìm thấy Google Login button!");
+      console.warn("not find google button!");
     }
   };
 
@@ -60,14 +59,18 @@ export default function ContentLogin() {
   } = useForm({
     resolver: yupResolver(schema)
   });
-  const { login, loginGoogle } = useApi();
+  const { login, loginGoogle, refreshToken, loading } = useApi();
   const onSubmit = async (data: TLogin) => {
     const res: { success: boolean; code: string } = await login(data);
-    if (res.code == "NotVerified") {
+    console.log("res", res);
+    if (res.code.toString() == "402") {
+      await refreshToken({
+        username: getValues("email")
+      });
       onOpenVerify();
       return;
     }
-    if (res.code === "NotActive") {
+    if (res.code.toString() == "403") {
       return;
     }
   };
@@ -84,9 +87,7 @@ export default function ContentLogin() {
         isOpen={isOpenVerify}
         onClose={onCloseVerify}
         username={getValues("email")}
-        handleVerify={() => {
-          router.push("/");
-        }}
+        mode="login"
       />
 
       {/* Left - Image */}
@@ -161,9 +162,13 @@ export default function ContentLogin() {
             {/* Submit */}
             <button
               type="submit"
-              className="mt-2 w-full bg-primary-200 text-white py-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
+              className="flex justify-center items-center mt-2 w-full bg-primary-200 text-white py-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
             >
-              Login
+              {loading ? (
+                <Loader2 className="animate-spin " size={20} />
+              ) : (
+                "Login"
+              )}
             </button>
 
             <div className="flex items-center mt-2">
@@ -177,7 +182,7 @@ export default function ContentLogin() {
             <button
               type="button"
               onClick={handleCustomClick}
-              className="mt-5 gap-4 flex items-center justify-center w-full bg-[#dd4b39] text-white p-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
+              className="mt-5 gap-4 flex items-center justify-center w-full bg-primary-400 text-white p-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
             >
               <FaGoogle size={20} className="left-12 " />
               <span>Login with Google</span>

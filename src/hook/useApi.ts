@@ -21,6 +21,7 @@ import {
   callVerificationCode
 } from "../service/user";
 import { setAuth } from "../redux/global/slice";
+import { AxiosError } from "axios";
 
 const useApi = () => {
   const dispatch = useDispatch();
@@ -35,6 +36,7 @@ const useApi = () => {
       const { message } = res.data;
       if (message) {
         return true;
+        setLoading(false);
       }
     } catch (error) {
       console.error(error);
@@ -59,13 +61,19 @@ const useApi = () => {
           dispatch(setAuth(decoded));
           router.push("/");
         }
+        setLoading(false);
         return { success: true, code: "Ok" };
       }
       return { success: false, code: code };
-    } catch (error) {
+    } catch (error: unknown) {
+      let code: number | string = "Unknown";
+      if (error instanceof AxiosError) {
+        // message = error.response?.data?.message || error.message;
+        code = error.response?.data?.status || "Unknown";
+      }
       console.error(error);
       setLoading(false);
-      return { success: false, code: "Error" };
+      return { success: false, code };
     }
   };
 
@@ -83,6 +91,7 @@ const useApi = () => {
           dispatch(setAuth(decoded));
           router.push("/");
         }
+        setLoading(false);
         return true;
       }
     } catch (error) {
@@ -102,6 +111,7 @@ const useApi = () => {
       );
       const { statusCode } = res?.data;
       if (statusCode == 200) {
+        setLoading(false);
         return true;
       }
     } catch (error) {
@@ -120,6 +130,7 @@ const useApi = () => {
       );
       const { statusCode } = res?.data;
       if (statusCode == 200) {
+        setLoading(false);
         return true;
       }
     } catch (error) {
@@ -139,6 +150,7 @@ const useApi = () => {
       );
       const { statusCode } = res?.data;
       if (statusCode == 200) {
+        setLoading(false);
         return true;
       }
     } catch (error) {
@@ -156,8 +168,19 @@ const useApi = () => {
         "verifyCode",
         false
       );
-      const { statusCode } = res?.data;
+      const { statusCode, data: userToken } = res?.data;
       if (statusCode == 200) {
+        if (data.mode === "login") {
+          localStorage.setItem("user_token", userToken);
+          const decoded = jwtDecode(userToken);
+          if (decoded) {
+            dispatch(setAuth(decoded));
+            router.push("/");
+          }
+        } else {
+          router.push("/login");
+        }
+        setLoading(false);
         return true;
       }
     } catch (error) {

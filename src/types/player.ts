@@ -23,6 +23,7 @@ export type TResetPasssword = {
 export type TVerify = {
   code: string;
   username: string;
+  mode: "login" | "register";
 };
 
 export type TSendCode = {

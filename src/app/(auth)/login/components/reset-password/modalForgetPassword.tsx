@@ -36,7 +36,6 @@ export function ModalForgetPassword({ isOpen, onClose }: TProps) {
   const handleClose = () => {
     onClose();
   };
-
   const [email, setEmail] = useState("");
   const debouncedEmail = useDebounce(email, 1500);
   const { checkMail, resetPassword } = useApi();

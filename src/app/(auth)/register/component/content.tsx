@@ -9,7 +9,7 @@ import useApi from "@/src/hook/useApi";
 import { TRegister } from "@/src/types/player";
 import { useDisclosure } from "@/src/hook/common/useDisclosure";
 import { ModalVerifyCode } from "./verifyCode/modalVerifyCode";
-import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 const schema = yup.object().shape({
   fullName: yup.string().required("Full Name is required"),
@@ -26,14 +26,12 @@ export default function ContentRegister() {
     register,
     handleSubmit,
     getValues,
-    reset,
     formState: { errors }
   } = useForm({
     resolver: yupResolver(schema)
   });
-  const router = useRouter();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { register: registerApi } = useApi();
+  const { register: registerApi, loading } = useApi();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = async (data: any) => {
     const newData: TRegister = {
@@ -55,10 +53,7 @@ export default function ContentRegister() {
         isOpen={isOpen}
         onClose={onClose}
         username={getValues("email")}
-        handleVerify={() => {
-          reset();
-          router.push("/login");
-        }}
+        mode="register"
       />
 
       {/* Left - Image */}
@@ -152,9 +147,13 @@ export default function ContentRegister() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="mt-2 w-full bg-primary-200 text-white py-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
+              className="flex items-center justify-center mt-2 w-full bg-primary-200 text-white py-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
             >
-              Register
+              {loading ? (
+                <Loader2 className="animate-spin " size={20} />
+              ) : (
+                "Register"
+              )}
             </button>
 
             <p className="text-center text-sm text-gray-600 mt-4">

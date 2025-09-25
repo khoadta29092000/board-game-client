@@ -10,14 +10,16 @@ type TProps = {
   isOpen: boolean;
   onClose: () => void;
   username: string;
-  handleVerify: () => void;
+  handleVerify?: () => void;
+  mode: "login" | "register";
 };
 
 export function ModalVerifyCode({
   isOpen,
   onClose,
   username,
-  handleVerify
+  handleVerify,
+  mode
 }: TProps) {
   const handleClose = () => {
     onClose();
@@ -153,11 +155,14 @@ export function ModalVerifyCode({
 
       const result = await verifyCode({
         username,
-        code: token
+        code: token,
+        mode
       });
 
       if (result) {
-        handleVerify();
+        if (handleVerify) {
+          handleVerify();
+        }
         handleClose();
       } else {
         setSubmitError("Invalid verification code or reset failed");
@@ -297,9 +302,9 @@ export function ModalVerifyCode({
   return ModalCommon({
     isOpen,
     handleClose,
-    title: "Reset Password",
+    title: "Verify Code",
     description:
-      "Please fill in all required information to reset your password.",
+      "Please enter the PIN sent to your email to verify your account.",
     content: ContentModal,
     footer: FooterModal,
     positionTop: "100px"
