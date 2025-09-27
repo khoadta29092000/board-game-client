@@ -190,7 +190,6 @@ export function ModalForgetPassword({ isOpen, onClose }: TProps) {
       });
 
       if (result) {
-        console.log("Password reset successfully");
         handleClose();
       } else {
         setSubmitError("Invalid verification code or reset failed");

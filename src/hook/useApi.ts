@@ -51,13 +51,12 @@ const useApi = () => {
       const res = await wrapAsync(() => callLogin(data), "login", false);
 
       const { statusCode, data: token, code } = res?.data;
-      console.log("res?.data", res?.data);
       if (statusCode == 200) {
         const userToken = token;
-
-        localStorage.setItem("user_token", userToken);
         const decoded = jwtDecode(userToken);
         if (decoded) {
+          localStorage.setItem("user_token", userToken);
+          localStorage.setItem("user_data", JSON.stringify(decoded));
           dispatch(setAuth(decoded));
           router.push("/");
         }

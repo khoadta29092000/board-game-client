@@ -47,7 +47,7 @@ export default function ContentRegister() {
   };
 
   return (
-    <div className="text-black sm:min-h-[calc(100vh-17.5px)]  txt-14 sm:grid grid-cols-1 md:grid-cols-2 ">
+    <div className=" text-black sm:min-h-[calc(100vh-17.5px)]  txt-14 sm:grid grid-cols-1 md:grid-cols-2 ">
       {/* Modal Verify Code */}
       <ModalVerifyCode
         isOpen={isOpen}
@@ -57,7 +57,10 @@ export default function ContentRegister() {
       />
 
       {/* Left - Image */}
-      <div className="max-h-[200px] sm:max-h-[100%] flex items-center justify-center bg-white w-full rounded-xl p-2 sm:p-4 md:p-8">
+      <Link
+        href={"/"}
+        className="max-h-[200px] sm:max-h-[100%] flex items-center justify-center  w-full rounded-xl p-2 sm:p-4 md:p-8"
+      >
         <Image
           priority
           src="/images/logo.svg"
@@ -66,7 +69,7 @@ export default function ContentRegister() {
           width={500}
           height={500}
         />
-      </div>
+      </Link>
 
       {/* Right - Form (Card) */}
       <div className="flex mt-12 sm:mt-0 sm:items-center justify-center p-2 sm:p-6">

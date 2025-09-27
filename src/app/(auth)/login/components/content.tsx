@@ -39,7 +39,6 @@ export default function ContentLogin() {
       googleLoginRef.current?.querySelector<HTMLDivElement>(
         'div[role="button"]'
       );
-    console.log("googleBtn", googleBtn);
     if (googleBtn) {
       googleBtn.click();
     } else {
@@ -62,7 +61,6 @@ export default function ContentLogin() {
   const { login, loginGoogle, refreshToken, loading } = useApi();
   const onSubmit = async (data: TLogin) => {
     const res: { success: boolean; code: string } = await login(data);
-    console.log("res", res);
     if (res.code.toString() == "402") {
       await refreshToken({
         username: getValues("email")
@@ -76,7 +74,7 @@ export default function ContentLogin() {
   };
 
   return (
-    <div className="text-black sm:min-h-[calc(100vh-17.5px)]  txt-14 sm:grid grid-cols-1 md:grid-cols-2 ">
+    <div className=" text-black sm:min-h-[calc(100vh-17.5px)]  txt-14 sm:grid grid-cols-1 md:grid-cols-2 ">
       {/* Modal */}
       <ModalForgetPassword
         isOpen={isOpenLostPassword}
@@ -91,7 +89,10 @@ export default function ContentLogin() {
       />
 
       {/* Left - Image */}
-      <div className="max-h-[200px] sm:max-h-[100%] flex items-center justify-center bg-white w-full rounded-xl p-2 sm:p-4 md:p-8">
+      <Link
+        href={"/"}
+        className="max-h-[200px] sm:max-h-[100%] flex items-center justify-center  w-full rounded-xl p-2 sm:p-4 md:p-8"
+      >
         <Image
           priority
           src="/images/logo.svg"
@@ -100,10 +101,10 @@ export default function ContentLogin() {
           width={500}
           height={500}
         />
-      </div>
+      </Link>
 
       {/* Right - Form (Card) */}
-      <div className="flex mt-4 sm:mt-0 sm:items-center justify-center p-2 sm:p-6">
+      <div className=" flex mt-4 sm:mt-0 sm:items-center justify-center p-2 sm:p-6">
         <div className="bg-white w-full max-w-md rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] p-4 sm:p-8">
           <h2 className="txt-46 font-bold text-primary-500 text-center">
             Login

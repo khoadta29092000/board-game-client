@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, {
@@ -27,13 +28,14 @@ import {
   Wifi,
   WifiOff
 } from "lucide-react";
-import { useSignalR } from "@/src/hook/common/useSignalR";
 import { toast } from "sonner";
 import { PlayerLeftRoom, Room, RoomPlayer } from "@/src/types/room";
+import { useSignalR } from "@/src/components/signalR/signalRProvider";
 
 export default function ContentRoomDetail() {
   const router = useRouter();
   const params = useParams();
+
   const roomId = params.id as string;
 
   const [room, setRoom] = useState<Room | null>(null);
@@ -46,10 +48,7 @@ export default function ContentRoomDetail() {
   const hasJoinedRef = useRef(false);
   const toastShownRef = useRef(new Set<string>());
 
-  const { isConnected, invoke, on, off } = useSignalR({
-    hubUrl: process.env.NEXT_PUBLIC_SOCKET_URL + "/roomHub",
-    autoConnect: true
-  });
+  const { isConnected, invoke, on, off } = useSignalR();
 
   // Memoized current user check
   useEffect(() => {
@@ -58,22 +57,6 @@ export default function ContentRoomDetail() {
   }, []);
 
   // Memoized handlers để tránh re-render
-  const handleRoomCreated = useCallback(
-    (data: { room: Room; success: boolean }) => {
-      if (data.success) {
-        setRoom(data.room);
-        setIsLoading(false);
-
-        const toastKey = `room-created-${data.room.id}`;
-        if (!toastShownRef.current.has(toastKey)) {
-          toast.success("Welcome to your new room!");
-          toastShownRef.current.add(toastKey);
-        }
-      }
-    },
-    []
-  );
-
   const handleJoinedRoom = useCallback(
     (data: { room: Room; success: boolean }) => {
       if (data.success && !hasJoinedRef.current) {
@@ -92,7 +75,6 @@ export default function ContentRoomDetail() {
   );
 
   const handleRoomUpdated = (playerLeft: PlayerLeftRoom) => {
-    console.log("updatedRoom", playerLeft);
     setRoom(playerLeft.room);
   };
 
@@ -136,29 +118,48 @@ export default function ContentRoomDetail() {
     [router]
   );
 
+  const handleLeaveRoom = useCallback(async () => {
+    if (!isConnected) {
+      toast.error("Not connected to server");
+      return;
+    }
+    try {
+      const room = await invoke("leaveRoom");
+      if (room.success) {
+        router.push("/lobby");
+        return;
+      }
+    } catch (error) {
+      console.error("Leave room error:", error);
+      toast.error("Failed to leave room");
+    }
+  }, [isConnected, invoke, router]);
+
+  const handleJoinRoomError = (data: { error: string }) => {
+    const toastKey = `joined-room-err`;
+    if (!toastShownRef.current.has(toastKey)) {
+      toast.error(data.error);
+      toastShownRef.current.add(toastKey);
+    }
+    router.push("/lobby");
+  };
+
   // Setup SignalR event handlers with stable references
   useEffect(() => {
-    on("RoomCreated", handleRoomCreated);
     on("JoinedRoom", handleJoinedRoom);
     on("PlayerJoined", handlePlayerJoined);
     on("Error", handleError);
     on("PlayerLeft", handleRoomUpdated);
+    on("JoinRoomError", handleJoinRoomError);
 
     return () => {
-      off("RoomCreated", handleRoomCreated);
       off("JoinedRoom", handleJoinedRoom);
       off("PlayerJoined", handlePlayerJoined);
       off("Error", handleError);
+      off("JoinRoomError", handleJoinRoomError);
       off("PlayerLeft", handleRoomUpdated);
     };
-  }, [
-    on,
-    off,
-    handleRoomCreated,
-    handleJoinedRoom,
-    handlePlayerJoined,
-    handleError
-  ]);
+  }, [on, off, handleJoinedRoom, handlePlayerJoined, handleError]);
 
   // Join room effect với dependency optimization
   useEffect(() => {
@@ -174,7 +175,13 @@ export default function ContentRoomDetail() {
 
       try {
         setIsJoining(true);
-        await invoke("JoinRoom", roomId);
+        const room = await invoke("JoinRoom", roomId);
+
+        if (room?.room) {
+          setIsJoining(false);
+          setIsLoading(false);
+          setRoom(room.room);
+        }
       } catch (error) {
         console.error("Failed to join room:", error);
         setIsLoading(false);
@@ -185,17 +192,18 @@ export default function ContentRoomDetail() {
     joinRoom();
   }, [isConnected, roomId, invoke]);
 
-  // Memoized handlers
   const handleCopyRoomId = useCallback(async () => {
     if (!room) return;
 
     try {
-      await navigator.clipboard.writeText(room.id);
+      const url = `${window.location.origin}/room/${room.id}`;
+      await navigator.clipboard.writeText(url);
+
       setCopied(true);
-      toast.success("Room ID copied to clipboard!");
+      toast.success("Room link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast.error("Failed to copy room ID");
+      toast.error("Failed to copy room link");
     }
   }, [room]);
 
@@ -206,10 +214,6 @@ export default function ContentRoomDetail() {
     }
     toast.info("Start game functionality will be implemented soon!");
   }, [isConnected]);
-
-  const handleLeaveRoom = useCallback(() => {
-    router.push("/lobby");
-  }, [router]);
 
   // Memoized computed values
   const isOwner = useMemo(
@@ -235,7 +239,7 @@ export default function ContentRoomDetail() {
   // Loading state
   if (isLoading || isJoining) {
     return (
-      <div className="min-h-[calc(100vh-8px)] flex items-center justify-center">
+      <div className="min-h-[calc(80vh)] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4" />
           <p>{isJoining ? "Joining room..." : "Loading room..."}</p>
@@ -247,7 +251,7 @@ export default function ContentRoomDetail() {
   // Room not found state
   if (!room) {
     return (
-      <div className="min-h-[calc(100vh-8px)] flex items-center justify-center">
+      <div className="min-h-[calc(80vh)] flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             Room not found
@@ -266,7 +270,7 @@ export default function ContentRoomDetail() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-8px)] bg-gray-50 py-8">
+    <div className="min-h-[calc(80vh)] bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

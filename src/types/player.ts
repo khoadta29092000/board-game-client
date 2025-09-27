@@ -37,3 +37,13 @@ export type TProfile = {
   isVerified: boolean;
   isActive: boolean;
 };
+
+export type TDataToken = {
+  Email: string;
+  Id: string;
+  Name: string;
+  TokenId: string;
+  nbf: number;
+  exp: number;
+  iat: number;
+};

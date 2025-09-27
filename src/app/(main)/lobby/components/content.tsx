@@ -11,9 +11,9 @@ import {
 } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import { Loader2, Users, Play, Plus, Wifi, WifiOff } from "lucide-react";
-import { useSignalR } from "@/src/hook/common/useSignalR";
 import { toast } from "sonner";
 import { Room } from "@/src/types/room";
+import { useSignalR } from "@/src/components/signalR/signalRProvider";
 
 export default function ContentLobby() {
   const router = useRouter();
@@ -21,23 +21,14 @@ export default function ContentLobby() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
-  const { isConnected, invoke, on, off } = useSignalR({
-    hubUrl: process.env.NEXT_PUBLIC_SOCKET_URL + "/roomHub",
-    autoConnect: true
-  });
+  const { isConnected, invoke, on, off } = useSignalR();
+
   useEffect(() => {
     // Setup SignalR event handlers
     const handleActiveRoomsLoaded = (loadedRooms: Room[]) => {
+      console.log("loadedRooms", loadedRooms);
       setRooms(loadedRooms);
       setIsLoading(false);
-    };
-
-    const handleRoomCreated = (data: { room: Room; success: boolean }) => {
-      if (data.success) {
-        toast.success("Room created successfully!");
-        router.push(`/lobby/${data.room.id}`);
-      }
-      setIsCreating(false);
     };
 
     const handleRoomUpdated = (updatedRoom: Room) => {
@@ -55,6 +46,14 @@ export default function ContentLobby() {
       });
     };
 
+    const handleRemoveRoom = (roomId: string) => {
+      setRooms(prevRooms => {
+        const filteredRooms = prevRooms.filter(room => room.id !== roomId);
+
+        return filteredRooms;
+      });
+    };
+
     const handleError = (error: string) => {
       toast.error(error);
       setIsLoading(false);
@@ -62,13 +61,13 @@ export default function ContentLobby() {
     };
 
     on("ActiveRoomsLoaded", handleActiveRoomsLoaded);
-    on("RoomCreated", handleRoomCreated);
+    on("RoomRemoved", handleRemoveRoom);
     on("RoomUpdated", handleRoomUpdated);
     on("Error", handleError);
 
     return () => {
       off("ActiveRoomsLoaded", handleActiveRoomsLoaded);
-      off("RoomCreated", handleRoomCreated);
+      off("RoomRemoved", handleRemoveRoom);
       off("RoomUpdated", handleRoomUpdated);
       off("Error", handleError);
     };
@@ -97,7 +96,11 @@ export default function ContentLobby() {
 
     try {
       setIsCreating(true);
-      await invoke("CreateRoom");
+      off("RoomUpdated");
+      const roomId = await invoke("createRoom");
+      if (roomId.room) {
+        router.push(`/lobby/${roomId.room.id}`);
+      }
     } catch (error) {
       console.error("Create room error:", error);
       toast.error("Failed to create room");
@@ -112,7 +115,6 @@ export default function ContentLobby() {
     }
 
     try {
-      // await invoke("JoinRoom", roomId);
       router.push(`/lobby/${roomId}`);
     } catch (error) {
       console.error("Join room error:", error);
@@ -135,7 +137,7 @@ export default function ContentLobby() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[calc(100vh-8px)] flex items-center justify-center">
+      <div className="min-h-[calc(80vh)] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4" />
           <p>{"Loading rooms..."}</p>
@@ -146,7 +148,7 @@ export default function ContentLobby() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-[calc(100vh-8px)] flex items-center justify-center">
+      <div className="min-h-[calc(80vh)] flex items-center justify-center">
         <div className="text-center">
           <WifiOff className="h-12 w-12 mx-auto mb-4 text-red-500" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -160,7 +162,7 @@ export default function ContentLobby() {
   }
 
   return (
-    <div className="sm:min-h-[calc(100vh-8px)] bg-gray-50 py-8">
+    <div className="sm:min-h-[calc(80vh)] bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <div>

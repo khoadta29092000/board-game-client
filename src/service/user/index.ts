@@ -89,7 +89,7 @@ export const callLogout = async () => {
 
 export const callProfile = async () => {
   try {
-    const response = await api.get(`/auth/profile`);
+    const response = await api.get(`/Players/Get_Profile`);
     return response;
   } catch (error) {
     console.error(error);

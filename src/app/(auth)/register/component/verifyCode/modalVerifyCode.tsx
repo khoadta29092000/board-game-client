@@ -123,7 +123,6 @@ export function ModalVerifyCode({
         setTimeLeft(10 * 60); // Reset to 10 minutes
         setPinCode(["", "", "", "", "", ""]);
         inputRefs.current[0]?.focus();
-        console.log("Token refreshed successfully");
       } else {
         setSubmitError("Failed to refresh verification code");
       }
