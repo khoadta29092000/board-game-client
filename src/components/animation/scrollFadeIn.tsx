@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { Variants } from "framer-motion";
 
 interface ScrollFadeInProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ export default function ScrollFadeIn({
   const ref = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  const blurFadeInVariant = {
+  const blurFadeInVariant: Variants = {
     hidden: { opacity: 0, filter: "blur(10px)", y: 30 },
     visible: {
       opacity: 1,

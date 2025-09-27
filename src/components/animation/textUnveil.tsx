@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 interface TextUnveilProps {
@@ -8,7 +8,7 @@ interface TextUnveilProps {
   children?: React.ReactNode;
 }
 
-const containerVariant = {
+const containerVariant: Variants = {
   hidden: { y: "-100%", opacity: 0 },
   visible: {
     y: "0",
@@ -22,7 +22,7 @@ const containerVariant = {
   }
 };
 
-const textVariant = {
+const textVariant: Variants = {
   hidden: { y: "-100%", opacity: 0 },
   visible: (custom: { delay: number; duration: number }) => ({
     y: "0",
