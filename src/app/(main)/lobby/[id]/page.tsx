@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/src/utils";
 import ContentRoomDetail from "./components/content";
 
-export default function Login() {
+export default function LobbyDetail() {
   return (
     <div className="bg-white min-h-[calc(80vh)]">
       <div className="w-full h-2 bg-primary-200"></div>

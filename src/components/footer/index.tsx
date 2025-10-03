@@ -15,6 +15,7 @@ export const Footer = () => {
               className="w-auto h-12 object-contain filter brightness-0 invert"
               height={12}
               width={12}
+              priority
             />
             <p className="text-gray-400 leading-relaxed">
               Experience the thrill of multiplayer board games online. Connect

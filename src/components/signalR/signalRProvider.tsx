@@ -10,7 +10,9 @@ import React, {
   useRef
 } from "react";
 import * as signalR from "@microsoft/signalr";
-import * as signalRMsgPack from "@microsoft/signalr-protocol-msgpack";
+import { useFetchProfile } from "@/src/hook/user/useGetProfile";
+
+// import * as signalRMsgPack from "@microsoft/signalr-protocol-msgpack";
 
 interface SignalRContextType {
   isConnected: boolean;
@@ -48,21 +50,25 @@ export const SignalRProvider = ({
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Information)
-      .withHubProtocol(new signalRMsgPack.MessagePackHubProtocol())
+      // .withHubProtocol(new signalRMsgPack.MessagePackHubProtocol())
       .build();
 
     newConnection.onclose(() => setIsConnected(false));
     newConnection.onreconnected(() => setIsConnected(true));
 
-    await newConnection.start();
+    try {
+      await newConnection.start();
 
-    handlersRef.current.forEach(({ method, handler }) => {
-      newConnection.on(method, handler);
-    });
-    handlersRef.current = [];
+      handlersRef.current.forEach(({ method, handler }) => {
+        newConnection.on(method, handler);
+      });
+      handlersRef.current = [];
 
-    setConnection(newConnection);
-    setIsConnected(true);
+      setConnection(newConnection);
+      setIsConnected(true);
+    } catch (err) {
+      console.error("❌ Error while starting connection:", err);
+    }
   }, [connection]);
 
   const disconnect = useCallback(async () => {
@@ -101,11 +107,20 @@ export const SignalRProvider = ({
     [connection]
   );
 
+  const fetchProfile = useFetchProfile();
+
   useEffect(() => {
+    const init = async () => {
+      const profile = await fetchProfile();
+      if (profile) {
+        await connect();
+      }
+    };
+
     if (localStorage.getItem("user_token")) {
-      connect();
+      init();
     }
-  }, [connect]);
+  }, [fetchProfile, connect]);
 
   return (
     <SignalRContext.Provider

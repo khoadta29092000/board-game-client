@@ -1,5 +1,6 @@
 export interface RoomPlayer {
   isOwner: boolean;
+  isReady: boolean;
   name: string;
   playerId: string;
 }

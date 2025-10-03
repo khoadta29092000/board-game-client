@@ -11,13 +11,13 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center max-w-5xl mx-auto">
-              <div className="mb-8">
+              <div className="relative w-full max-w-[500px] aspect-[1/1] mx-auto">
                 <Image
                   src="/images/logo.svg"
                   alt="Logo"
-                  className="w-full h-auto max-w-[300px] sm:max-w-[400px] md:max-w-[500px] object-contain mx-auto"
-                  width={500}
-                  height={500}
+                  fill
+                  priority
+                  className="object-contain"
                 />
               </div>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">

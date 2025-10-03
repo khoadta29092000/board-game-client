@@ -26,7 +26,6 @@ export default function ContentLobby() {
   useEffect(() => {
     // Setup SignalR event handlers
     const handleActiveRoomsLoaded = (loadedRooms: Room[]) => {
-      console.log("loadedRooms", loadedRooms);
       setRooms(loadedRooms);
       setIsLoading(false);
     };
@@ -115,6 +114,7 @@ export default function ContentLobby() {
     }
 
     try {
+      off("RoomUpdated");
       router.push(`/lobby/${roomId}`);
     } catch (error) {
       console.error("Join room error:", error);

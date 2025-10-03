@@ -2,46 +2,30 @@
 // hooks/useAuthSWR.ts
 "use client";
 
-import useSWR from "swr";
-import { useDispatch, useSelector } from "react-redux";
 import { callProfile } from "@/src/service/user";
 import { TProfile } from "@/src/types/player";
-import { RootState } from "@/src/redux/store";
 import { setAuth } from "@/src/redux/global/slice";
+import { useCallback } from "react";
+import { useDispatch } from "react-redux";
 
-const fetchProfile = async () => {
-  const token = localStorage.getItem("user_token");
-  if (!token) return null;
-  const res = await callProfile();
-
-  return res.data.data as TProfile;
-};
-
-export const useGetProfile = () => {
-  const auth = useSelector((state: RootState) => state.global.auth);
+export const useFetchProfile = () => {
   const dispatch = useDispatch();
 
-  const hasToken =
-    typeof window !== "undefined" && !!localStorage.getItem("user_token");
+  return useCallback(async (): Promise<TProfile | null> => {
+    const token = localStorage.getItem("user_token");
+    if (!token) return null;
 
-  const shouldFetch = hasToken && !auth?.username;
-
-  const { data, isLoading, error } = useSWR(
-    shouldFetch ? "auth/profile" : null,
-    fetchProfile,
-    {
-      onSuccess: (data: any) => {
-        if (data) {
-          dispatch(setAuth(data));
-        }
-      },
-      revalidateOnFocus: false
+    try {
+      const res = await callProfile();
+      dispatch(setAuth(res.data.data));
+      return res.data.data as TProfile;
+    } catch (err: any) {
+      if (err?.response?.status === 401) {
+        localStorage.removeItem("user_token");
+        localStorage.removeItem("user_data");
+        window.location.href = "/login";
+      }
+      return null;
     }
-  );
-
-  return {
-    auth: auth?.username ? auth : data,
-    isLoading,
-    error
-  };
+  }, [dispatch]);
 };

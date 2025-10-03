@@ -31,11 +31,9 @@ export type TSendCode = {
 };
 
 export type TProfile = {
-  _id: string;
+  id: string;
   name: string;
   username: string;
-  isVerified: boolean;
-  isActive: boolean;
 };
 
 export type TDataToken = {

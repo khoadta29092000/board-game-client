@@ -1,13 +1,13 @@
 import React from "react";
 import { cn } from "@/src/utils";
-import ContentLobby from "./components/content";
+import ContentGameDetail from "./components/content";
 
-export default function Lobby() {
+export default function Game() {
   return (
     <div className="bg-white min-h-[calc(80vh)]">
       <div className="w-full h-2 bg-primary-200"></div>
       <div className={cn("container max-w-12/12 mx-auto", "")}>
-        <ContentLobby />
+        <ContentGameDetail />
       </div>
     </div>
   );

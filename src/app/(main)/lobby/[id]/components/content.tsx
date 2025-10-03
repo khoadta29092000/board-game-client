@@ -31,16 +31,17 @@ import {
 import { toast } from "sonner";
 import { PlayerLeftRoom, Room, RoomPlayer } from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
+import { useAuth } from "@/src/redux/global/selectors";
 
 export default function ContentRoomDetail() {
   const router = useRouter();
   const params = useParams();
+  const auth = useAuth();
 
   const roomId = params.id as string;
 
   const [room, setRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
 
@@ -51,10 +52,6 @@ export default function ContentRoomDetail() {
   const { isConnected, invoke, on, off } = useSignalR();
 
   // Memoized current user check
-  useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    setCurrentUserId(userId);
-  }, []);
 
   // Memoized handlers để tránh re-render
   const handleJoinedRoom = useCallback(
@@ -81,7 +78,7 @@ export default function ContentRoomDetail() {
   const handlePlayerJoined = useCallback(
     (data: { playerId: string; playerName: string; room: Room }) => {
       // Only update if it's not the current user joining (to avoid duplicate toast)
-      if (data.playerId !== currentUserId) {
+      if (data.playerId !== auth?.id) {
         setRoom(data.room);
 
         const toastKey = `player-joined-${data.playerId}-${Date.now()}`;
@@ -96,7 +93,7 @@ export default function ContentRoomDetail() {
         }
       }
     },
-    [currentUserId]
+    [auth?.id]
   );
 
   const handleError = useCallback(
@@ -135,14 +132,59 @@ export default function ContentRoomDetail() {
     }
   }, [isConnected, invoke, router]);
 
-  const handleJoinRoomError = (data: { error: string }) => {
-    const toastKey = `joined-room-err`;
-    if (!toastShownRef.current.has(toastKey)) {
-      toast.error(data.error);
-      toastShownRef.current.add(toastKey);
+  const handleToggleReady = useCallback(
+    async (newReady: boolean) => {
+      if (!isConnected) {
+        toast.error("Not connected to server");
+        return;
+      }
+      try {
+        const room = await invoke("PlayerChangeReady", newReady);
+        console.log("player change ready", room);
+        if (room.success) {
+          setRoom(room.room);
+          return;
+        }
+      } catch (error) {
+        console.error("Change ready error:", error);
+        toast.error("Failed to change ready state");
+      }
+    },
+    [isConnected, invoke]
+  );
+
+  const handleToggleStart = useCallback(async () => {
+    if (!isConnected) {
+      toast.error("Not connected to server");
+      return;
     }
-    router.push("/lobby");
-  };
+    try {
+      const room = await invoke("StartGame");
+      if (room.success) {
+        router.push(`/game/${roomId}`);
+        return;
+      } else {
+        console.log("game is not start", room.error);
+        toast.error(room.error);
+      }
+    } catch (error) {
+      console.error("Change ready error:", error);
+      toast.error("Failed to change ready state");
+    }
+  }, [isConnected, invoke]);
+
+  const handleStartGame = useCallback(() => {
+    router.push(`/game/${roomId}`);
+    console.log(" chu phong da bat dau");
+  }, []);
+
+  const handlePlayerChangeReady = useCallback((data: { updatedRoom: Room }) => {
+    // Only update if it's not the current user joining (to avoid duplicate toast)
+    if (data) {
+      console.log("updatedRoom", data);
+      setRoom(data.updatedRoom);
+    }
+  }, []);
 
   // Setup SignalR event handlers with stable references
   useEffect(() => {
@@ -150,14 +192,16 @@ export default function ContentRoomDetail() {
     on("PlayerJoined", handlePlayerJoined);
     on("Error", handleError);
     on("PlayerLeft", handleRoomUpdated);
-    on("JoinRoomError", handleJoinRoomError);
+    on("PlayerChangeReady", handlePlayerChangeReady);
+    on("GameStarted", handleStartGame);
 
     return () => {
       off("JoinedRoom", handleJoinedRoom);
       off("PlayerJoined", handlePlayerJoined);
       off("Error", handleError);
-      off("JoinRoomError", handleJoinRoomError);
       off("PlayerLeft", handleRoomUpdated);
+      off("PlayerChangeReady", handleStartGame);
+      on("off", handleStartGame);
     };
   }, [on, off, handleJoinedRoom, handlePlayerJoined, handleError]);
 
@@ -176,11 +220,18 @@ export default function ContentRoomDetail() {
       try {
         setIsJoining(true);
         const room = await invoke("JoinRoom", roomId);
-
         if (room?.room) {
           setIsJoining(false);
           setIsLoading(false);
           setRoom(room.room);
+        }
+        if (!room?.success) {
+          const toastKey = `joined-room-err`;
+          if (!toastShownRef.current.has(toastKey)) {
+            toast.error(room.error);
+            toastShownRef.current.add(toastKey);
+          }
+          router.push("/lobby");
         }
       } catch (error) {
         console.error("Failed to join room:", error);
@@ -207,25 +258,10 @@ export default function ContentRoomDetail() {
     }
   }, [room]);
 
-  const handleStartGame = useCallback(async () => {
-    if (!isConnected) {
-      toast.error("Not connected to server");
-      return;
-    }
-    toast.info("Start game functionality will be implemented soon!");
-  }, [isConnected]);
-
   // Memoized computed values
   const isOwner = useMemo(
-    () =>
-      room?.players.find(p => p.playerId === currentUserId)?.isOwner ?? false,
-    [room?.players, currentUserId]
-  );
-
-  const canStartGame = useMemo(
-    () =>
-      isOwner && room?.status === "Waiting" && room && room.currentPlayers >= 2,
-    [isOwner, room?.status, room?.currentPlayers]
+    () => room?.players.find(p => p.playerId === auth?.id)?.isOwner ?? false,
+    [room?.players, auth.id]
   );
 
   const emptySlots = useMemo(
@@ -353,7 +389,7 @@ export default function ContentRoomDetail() {
 
         {/* Players List */}
         <Card className="mb-6">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Players in Room</CardTitle>
           </CardHeader>
           <CardContent>
@@ -362,7 +398,14 @@ export default function ContentRoomDetail() {
                 <PlayerCard
                   key={player.playerId}
                   player={player}
-                  isCurrentUser={player.playerId === currentUserId}
+                  isCurrentUser={player.playerId === auth.id}
+                  onToggleReady={(isReady: boolean) => {
+                    if (player.playerId === auth.id && player.isOwner) {
+                      handleToggleStart();
+                      return;
+                    }
+                    handleToggleReady(isReady);
+                  }}
                 />
               ))}
 
@@ -375,13 +418,6 @@ export default function ContentRoomDetail() {
         </Card>
 
         {/* Game Actions */}
-        <GameActions
-          room={room}
-          isOwner={isOwner}
-          canStartGame={canStartGame}
-          isConnected={isConnected}
-          onStartGame={handleStartGame}
-        />
       </div>
     </div>
   );
@@ -391,39 +427,86 @@ export default function ContentRoomDetail() {
 const PlayerCard = React.memo(
   ({
     player,
-    isCurrentUser
+    isCurrentUser,
+    onToggleReady
   }: {
     player: RoomPlayer;
     isCurrentUser: boolean;
-  }) => (
-    <div
-      className={`flex items-center gap-3 p-3 rounded-lg border ${
-        isCurrentUser
-          ? "bg-blue-50 border-blue-200"
-          : "bg-gray-50 border-gray-200"
-      }`}
-    >
-      <Avatar className="h-10 w-10">
-        <AvatarFallback className="bg-blue-500 text-white font-semibold">
-          {player.name.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{player.name}</span>
-          {player.isOwner && <Crown className="h-4 w-4 text-yellow-500" />}
-          {isCurrentUser && (
-            <Badge variant="secondary" className="text-xs">
-              You
-            </Badge>
-          )}
+    onToggleReady?: (isReady: boolean) => void;
+  }) => {
+    const handleToggle = (isReady: boolean) => {
+      if (onToggleReady) {
+        onToggleReady(isReady);
+      }
+    };
+
+    return (
+      <div
+        className={`flex items-center gap-3 p-3 rounded-lg border ${
+          isCurrentUser
+            ? "bg-blue-50 border-blue-200"
+            : "bg-gray-50 border-gray-200"
+        }`}
+      >
+        {/* Avatar */}
+        <Avatar className="h-10 w-10">
+          <AvatarFallback className="bg-blue-500 text-white font-semibold">
+            {player.name.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+
+        {/* Info */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{player.name}</span>
+            {player.isOwner && <Crown className="h-4 w-4 text-yellow-500" />}
+            {isCurrentUser && (
+              <Badge variant="secondary" className="text-xs">
+                You
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">
+              {player.isOwner ? "Room Owner" : "Player"}
+            </span>
+
+            {/* Trạng thái Ready */}
+            {player.isReady ? (
+              <Badge className="bg-green-500 text-white text-xs">Ready</Badge>
+            ) : (
+              <Badge className="bg-gray-400 text-white text-xs">
+                Not Ready
+              </Badge>
+            )}
+          </div>
         </div>
-        <span className="text-sm text-gray-500">
-          {player.isOwner ? "Room Owner" : "Player"}
-        </span>
+
+        {/* Actions */}
+        {isCurrentUser && !player.isOwner && (
+          <Button
+            size="sm"
+            variant={player.isReady ? "destructive" : "default"}
+            onClick={() => handleToggle(!player.isReady)}
+          >
+            {player.isReady ? "Unready" : "Ready"}
+          </Button>
+        )}
+
+        {/* Nếu là Owner + CurrentUser thì có thể Start Game */}
+        {isCurrentUser && player.isOwner && (
+          <Button
+            onClick={() => handleToggle(!player.isReady)}
+            size="sm"
+            className="bg-green-600 text-white"
+          >
+            Start Game
+          </Button>
+        )}
       </div>
-    </div>
-  )
+    );
+  }
 );
 
 const EmptySlot = React.memo(() => (
@@ -437,82 +520,5 @@ const EmptySlot = React.memo(() => (
   </div>
 ));
 
-const GameActions = React.memo(
-  ({
-    room,
-    isOwner,
-    canStartGame,
-    isConnected,
-    onStartGame
-  }: {
-    room: Room;
-    isOwner: boolean;
-    canStartGame: boolean;
-    isConnected: boolean;
-    onStartGame: () => void;
-  }) => {
-    if (room.status === "Playing") {
-      return (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-yellow-600 mb-2">
-                Game in Progress
-              </h3>
-              <p className="text-gray-600">
-                The game is currently being played.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (room.status === "Waiting") {
-      return (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              {isOwner ? (
-                <>
-                  <h3 className="text-lg font-semibold">Ready to Start?</h3>
-                  <p className="text-gray-600">
-                    {room.currentPlayers >= 2
-                      ? "You can start the game now or wait for more players."
-                      : "You need at least 2 players to start the game."}
-                  </p>
-                  <Button
-                    onClick={onStartGame}
-                    disabled={!canStartGame || !isConnected}
-                    size="lg"
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    Start Game
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-lg font-semibold">
-                    Waiting for Game to Start
-                  </h3>
-                  <p className="text-gray-600">
-                    The room owner will start the game when ready.
-                  </p>
-                  <div className="flex justify-center">
-                    <Loader2 className="animate-spin h-6 w-6 text-blue-500" />
-                  </div>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    return null;
-  }
-);
-
 PlayerCard.displayName = "PlayerCard";
 EmptySlot.displayName = "EmptySlot";
-GameActions.displayName = "GameActions";

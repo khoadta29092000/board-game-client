@@ -11,7 +11,6 @@ import { TDataToken } from "@/src/types/player";
 
 export default function Header() {
   const [auth, setAtuh] = useState<TDataToken | null>(null);
-  console.log(auth);
   useEffect(() => {
     const userData = localStorage.getItem("user_data");
     if (userData) {
@@ -34,6 +33,7 @@ export default function Header() {
               className="w-auto h-10 object-contain"
               height={10}
               width={10}
+              priority
             />
           </Link>
           <Menu />
