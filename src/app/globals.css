@@ -73,6 +73,40 @@
   --color-bg-400: rgba(112, 132, 254, 0.1);
   --color-text-100: rgba(164, 164, 164, 1);
   --color-black-100: rgba(72, 72, 72, 1);
+
+  --color-amethyst-100: #b8a8d8;
+  --color-amethyst-200: #9888c8;
+  --color-amethyst-300: #7868a8;
+  --color-amethyst-400: #6858a0;
+
+  --color-emerald-100: #a8d875;
+  --color-emerald-200: #65b548;
+  --color-emerald-300: #58a840;
+
+  --color-gold-100: #f4d888;
+  --color-gold-200: #d8b858;
+  --color-gold-300: #c0a048;
+  --color-gold-400: #a88838;
+
+  --color-diamond-100: #e8f7fa;
+  --color-diamond-200: #c8e5f0;
+  --color-diamond-300: #a8d5e2;
+  --color-diamond-400: #90c8d8;
+
+  --color-sapphire-100: #8dc8e8;
+  --color-sapphire-200: #5ba8e8;
+  --color-sapphire-300: #2878c0;
+  --color-sapphire-400: #1850a0;
+
+  --color-ruby-100: #f08080;
+  --color-ruby-200: #e45858;
+  --color-ruby-300: #c04040;
+  --color-ruby-400: #802828;
+
+  --color-onyx-100: #888888;
+  --color-onyx-200: #444444;
+  --color-onyx-300: #222222;
+  --color-onyx-400: #000000;
 }
 
 @layer utilities {
@@ -423,4 +457,53 @@ div[style*="position: fixed"] {
   color: white;
   font-size: 14px;
   font-weight: bold;
+}
+
+.gradient-ruby {
+  background: linear-gradient(
+    180deg,
+    #f5a0a0 0%,
+    #e06060 50%,
+    #c03030 100%
+  ) !important;
+}
+
+.gradient-emerald {
+  background: linear-gradient(
+    180deg,
+    #a8e0b8 0%,
+    #58b070 50%,
+    #308050 100%
+  ) !important;
+}
+
+.gradient-sapphire {
+  background: linear-gradient(
+    180deg,
+    #a5d8f0 0%,
+    #2878c0 50%,
+    #1850a0 100%
+  ) !important;
+}
+
+.gradient-diamond {
+  background: linear-gradient(
+    180deg,
+    #e8f7fa 0%,
+    #b8e0ea 50%,
+    #90c8d8 100%
+  ) !important;
+}
+
+.gradient-onyx {
+  background: linear-gradient(180deg, #444 0%, #222 50%, #000 100%) !important;
+}
+
+.gradient-gold {
+  background: linear-gradient(
+    180deg,
+    #f4d888 0%,
+    #d8b858 50%,
+    #a88838 100%
+  ) !important;
 }

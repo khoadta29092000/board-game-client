@@ -1,15 +1,14 @@
 import React from "react";
 import { cn } from "@/src/utils";
-import ContentLobby from "./components/content";
+import ContentGameDetail from "./components/content";
 import { SignalRProvider } from "@/src/components/signalR/signalRProvider";
 
-export default function Lobby() {
+export default function Game() {
   return (
-    <div className="bg-white min-h-[calc(80vh)]">
-      <div className="w-full h-2 bg-primary-200"></div>
+    <div className="bg-gradient-to-b from-purple-950 to-gray-900 h-auto sm:h-auto">
       <div className={cn("container max-w-12/12 mx-auto", "")}>
-        <SignalRProvider hubURL="/roomHub">
-          <ContentLobby />
+        <SignalRProvider hubURL="/gameHub">
+          <ContentGameDetail />
         </SignalRProvider>
       </div>
     </div>

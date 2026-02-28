@@ -1,0 +1,61 @@
+<svg
+  width="120"
+  height="120"
+  viewBox="0 0 120 120"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g>
+    <path d="M45 30 L60 25 L75 30 L70 40 L60 37 L50 40 Z" fill="#b8a8d8" />
+    <path d="M75 30 L90 45 L83 50 L70 40 Z" fill="#c8b8e8" />
+    <path d="M90 45 L95 60 L88 60 L83 50 Z" fill="#a898c8" />
+    <path d="M95 60 L90 75 L83 70 L88 60 Z" fill="#9888b8" />
+    <path d="M90 75 L75 90 L70 80 L83 70 Z" fill="#8878a8" />
+    <path d="M75 90 L60 95 L60 83 L70 80 Z" fill="#7868a0" />
+    <path d="M60 95 L45 90 L50 80 L60 83 Z" fill="#7868a0" />
+    <path d="M45 90 L30 75 L37 70 L50 80 Z" fill="#8878a8" />
+    <path d="M30 75 L25 60 L32 60 L37 70 Z" fill="#9888b8" />
+    <path d="M25 60 L30 45 L37 50 L32 60 Z" fill="#a898c8" />
+    <path d="M30 45 L45 30 L50 40 L37 50 Z" fill="#b8a8d8" />
+
+    <path
+      d="M50 40 L60 37 L70 40 L83 50 L88 60 L83 70 L70 80 L60 83 L50 80 L37 70 L32 60 L37 50 Z"
+      fill="url(#purpleGradient)"
+    />
+
+    <path
+      d="M52 45 L60 42 L68 45 L78 52 L82 60 L78 68 L68 75 L60 78 L52 75 L42 68 L38 60 L42 52 Z"
+      fill="#8878b0"
+    />
+
+    <path
+      d="M55 48 L60 46 L65 48 L73 54 L76 60 L73 66 L65 72 L60 74 L55 72 L47 66 L44 60 L47 54 Z"
+      fill="#6858a0"
+    />
+
+    <ellipse cx="60" cy="55" rx="10" ry="6" fill="#b098d0" opacity="0.4" />
+  </g>
+
+  <path d="M58 44 L62 44 L68 48 L68 52 L62 48 L58 48 Z" fill="#ffffff" opacity="0.3" />
+
+  <defs>
+    <radialGradient id="purpleGradient" cx="0.5" cy="0.4">
+      <stop offset="0%" stop-color="#a090c8" />
+      <stop offset="50%" stop-color="#8070a8" />
+      <stop offset="100%" stop-color="#6858a0" />
+    </radialGradient>
+  </defs>
+
+  <g>
+    <path
+      d="M88 32 L89 27 L90 32 L95 33 L90 34 L89 39 L88 34 L83 33 Z"
+      fill="#ffffff"
+    />
+    <path
+      d="M28 50 L28.5 47 L29 50 L32 50.5 L29 51 L28.5 54 L28 51 L25 50.5 Z"
+      fill="#ffffff"
+      opacity="0.8"
+    />
+  </g>
+</svg>
+

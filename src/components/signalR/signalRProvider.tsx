@@ -27,9 +27,11 @@ interface SignalRContextType {
 const SignalRContext = createContext<SignalRContextType | null>(null);
 
 export const SignalRProvider = ({
-  children
+  children,
+  hubURL
 }: {
   children: React.ReactNode;
+  hubURL: string;
 }) => {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
@@ -43,7 +45,7 @@ export const SignalRProvider = ({
     if (connection || !localStorage.getItem("user_token")) return;
 
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(process.env.NEXT_PUBLIC_SOCKET_URL + "/roomHub", {
+      .withUrl(process.env.NEXT_PUBLIC_SOCKET_URL + hubURL, {
         transport: signalR.HttpTransportType.WebSockets,
         skipNegotiation: true,
         accessTokenFactory: () => localStorage.getItem("user_token") || ""

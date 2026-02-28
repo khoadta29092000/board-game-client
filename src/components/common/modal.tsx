@@ -18,6 +18,7 @@ type TProps = {
   description?: string;
   content?: ReactNode;
   footer?: ReactNode;
+  inconRemove?: boolean; // nếu true => không cho đóng
 };
 
 export function ModalCommon({
@@ -27,19 +28,34 @@ export function ModalCommon({
   title = "Modal Title",
   description,
   content,
-  positionTop
+  positionTop,
+  inconRemove
 }: TProps) {
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      if (!inconRemove) {
+        handleClose();
+      }
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className={`max-w-lg ${
-          positionTop ? `top-[${positionTop}] translate-y-0` : ""
-        }`}
+        hideCloseButton={inconRemove}
+        onPointerDownOutside={e => inconRemove && e.preventDefault()}
+        onEscapeKeyDown={e => inconRemove && e.preventDefault()}
+        onInteractOutside={e => inconRemove && e.preventDefault()}
+        className={`max-w-lg ${positionTop ? `top-[${positionTop}] translate-y-0` : ""}`}
         style={positionTop ? { top: positionTop } : {}}
       >
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+        <DialogHeader className="flex items-start justify-between">
+          <div>
+            <DialogTitle>{title}</DialogTitle>
+            {description && (
+              <DialogDescription>{description}</DialogDescription>
+            )}
+          </div>
         </DialogHeader>
 
         {content}

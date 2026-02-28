@@ -140,7 +140,6 @@ export default function ContentRoomDetail() {
       }
       try {
         const room = await invoke("PlayerChangeReady", newReady);
-        console.log("player change ready", room);
         if (room.success) {
           setRoom(room.room);
           return;
@@ -164,7 +163,6 @@ export default function ContentRoomDetail() {
         router.push(`/game/${roomId}`);
         return;
       } else {
-        console.log("game is not start", room.error);
         toast.error(room.error);
       }
     } catch (error) {
@@ -175,13 +173,11 @@ export default function ContentRoomDetail() {
 
   const handleStartGame = useCallback(() => {
     router.push(`/game/${roomId}`);
-    console.log(" chu phong da bat dau");
   }, []);
 
   const handlePlayerChangeReady = useCallback((data: { updatedRoom: Room }) => {
     // Only update if it's not the current user joining (to avoid duplicate toast)
     if (data) {
-      console.log("updatedRoom", data);
       setRoom(data.updatedRoom);
     }
   }, []);
@@ -473,7 +469,7 @@ const PlayerCard = React.memo(
             </span>
 
             {/* Trạng thái Ready */}
-            {player.isReady ? (
+            {player.isOwner ? <></> : player.isReady ? (
               <Badge className="bg-green-500 text-white text-xs">Ready</Badge>
             ) : (
               <Badge className="bg-gray-400 text-white text-xs">

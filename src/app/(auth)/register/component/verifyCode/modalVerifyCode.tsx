@@ -216,8 +216,8 @@ export function ModalVerifyCode({
                 timeLeft <= 60
                   ? "text-red-500"
                   : timeLeft <= 300
-                  ? "text-orange-500"
-                  : "text-green-500"
+                    ? "text-orange-500"
+                    : "text-green-500"
               }`}
             >
               {formatTime(timeLeft)}
@@ -298,14 +298,15 @@ export function ModalVerifyCode({
     </div>
   );
 
-  return ModalCommon({
-    isOpen,
-    handleClose,
-    title: "Verify Code",
-    description:
-      "Please enter the PIN sent to your email to verify your account.",
-    content: ContentModal,
-    footer: FooterModal,
-    positionTop: "100px"
-  });
+  return (
+    <ModalCommon
+      isOpen={isOpen}
+      handleClose={handleClose}
+      title="Verify Code"
+      description={`Please enter the PIN sent to your email to verify your account.`}
+      content={ContentModal}
+      footer={FooterModal}
+      positionTop="100px"
+    />
+  );
 }

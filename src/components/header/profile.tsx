@@ -20,7 +20,8 @@ export function Profile({ auth }: TProps) {
   const handleLogout = () => {
     dispatch(setAuth(null));
     localStorage.removeItem("user_token");
-    router.push("/");
+    localStorage.removeItem("user_data");
+    router.push("/login");
   };
   return (
     <Popover>

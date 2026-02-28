@@ -1,0 +1,56 @@
+<svg
+  width="120"
+  height="120"
+  viewBox="0 0 120 120"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Outer coin circle -->
+  <circle cx="60" cy="60" r="35" fill="url(#goldGradient)" />
+  
+  <!-- Inner decorative ring -->
+  <circle cx="60" cy="60" r="32" fill="none" stroke="#d4a754" stroke-width="1.5" />
+  
+  <!-- Embossed symbol - ornate design -->
+  <g fill="#c89840" opacity="0.8">
+    <!-- Center vertical element -->
+    <ellipse cx="60" cy="60" rx="3" ry="15" />
+    
+    <!-- Top loop -->
+    <path d="M60 48 Q52 48 52 55 Q52 58 56 58 Q56 52 60 52 Q64 52 64 58 Q68 58 68 55 Q68 48 60 48 Z" />
+    
+    <!-- Bottom decorative swirls -->
+    <path d="M56 65 Q52 65 48 68 Q46 70 48 72 Q50 72 52 70 Q54 68 56 68 Z" />
+    <path d="M64 65 Q68 65 72 68 Q74 70 72 72 Q70 72 68 70 Q66 68 64 68 Z" />
+    
+    <!-- Side curves -->
+    <path d="M45 60 Q43 58 43 55 Q43 52 45 50 Q46 51 45 55 Q45 58 46 60 Z" />
+    <path d="M75 60 Q77 58 77 55 Q77 52 75 50 Q74 51 75 55 Q75 58 74 60 Z" />
+  </g>
+  
+  <!-- Highlight on coin -->
+  <ellipse cx="60" cy="50" rx="20" ry="12" fill="#ffffff" opacity="0.2" />
+  <ellipse cx="55" cy="48" rx="10" ry="6" fill="#ffffff" opacity="0.3" />
+  
+  <!-- Outer rim shading -->
+  <circle cx="60" cy="60" r="35" fill="none" stroke="#b8883c" stroke-width="2" opacity="0.6" />
+  <circle cx="60" cy="60" r="37" fill="none" stroke="#e8c870" stroke-width="1" opacity="0.4" />
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <radialGradient id="goldGradient" cx="0.4" cy="0.3">
+      <stop offset="0%" stop-color="#f4d888" />
+      <stop offset="40%" stop-color="#d8b858" />
+      <stop offset="70%" stop-color="#c0a048" />
+      <stop offset="100%" stop-color="#a88838" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Sparkle -->
+  <g>
+    <path
+      d="M88 40 L89 35 L90 40 L95 41 L90 42 L89 47 L88 42 L83 41 Z"
+      fill="#ffffff"
+    />
+  </g>
+</svg>

@@ -352,15 +352,15 @@ export function ModalForgetPassword({ isOpen, onClose }: TProps) {
       )}
     </div>
   );
-
-  return ModalCommon({
-    isOpen,
-    handleClose,
-    title: "Reset Password",
-    description:
-      "Please fill in all required information to reset your password.",
-    content: ContentModal,
-    footer: FooterModal,
-    positionTop: "100px"
-  });
+  return (
+    <ModalCommon
+      isOpen={isOpen}
+      handleClose={handleClose}
+      title="Reset Password"
+      description={`Please fill in all required information to reset your password.`}
+      content={ContentModal}
+      footer={FooterModal}
+      positionTop="100px"
+    />
+  );
 }

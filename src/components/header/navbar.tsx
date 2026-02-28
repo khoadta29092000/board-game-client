@@ -29,6 +29,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("user_token");
+    localStorage.removeItem("user_data");
     router.push("/login");
   };
 
@@ -41,7 +42,6 @@ export default function Navbar() {
         <DrawerTitle></DrawerTitle>
         <div className="card w-full bg-white p-5 rounded-md">
           <ul className="w-full flex flex-col gap-1">
-          
             {menuData.map((item: TMenuItem) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
