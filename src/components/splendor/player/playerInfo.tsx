@@ -1,16 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { SplendorCard, SplendorGameState } from "@/src/types/splendor";
-import { cn, gemIconMap } from "@/src/utils";
+import { gemIconMap } from "@/src/utils";
 import Image from "next/image";
 import React, { useState } from "react";
 import SplendorCardUI from "../gameBoard/SplendorCardUI";
 import ModalCardAction from "../gameBoard/modal/modalCardAction";
+import {
+  registerGemPlayer,
+  registerCardSlot,
+  registerNoblePlayer,
+  registerCardReserved
+} from "@/src/redux/animation/Animationrefs"; // ← thêm
+
+const WIN_POINTS = 15;
 
 type TProps = {
   gameState: SplendorGameState;
   myId: string;
   isMyTurn?: boolean;
+  isLandscape?: boolean;
+  playerCount?: number;
+  baseH?: number;
   onPurchase?: (cardId: string) => void;
 };
 
@@ -18,85 +29,302 @@ export default function PlayerInfo({
   gameState,
   myId,
   isMyTurn,
+  isLandscape = true,
   onPurchase
 }: TProps) {
   const [showReserved, setShowReserved] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<SplendorCard | null>(null);
 
+  const players = gameState.players ? Object.values(gameState.players) : [];
+
+  const sortPlayers = gameState.info?.players ?? [];
+  const myIndex = sortPlayers.findIndex(p => p === myId);
+  const sortedIds =
+    myIndex <= 0
+      ? sortPlayers
+      : [...sortPlayers.slice(myIndex), ...sortPlayers.slice(0, myIndex)];
+  const sortedPlayers = sortedIds
+    .map(id => players.find(p => p.playerId === id))
+    .filter(p => p !== undefined);
+
+  const turnNumber = gameState.turn?.turnNumber ?? 1;
+  const currentPlayerId = gameState.turn?.currentPlayer;
+  const totalPlayers = sortPlayers.length || players.length;
+  const currentPlayerIndex = gameState.turn?.currentPlayerIndex ?? 0;
+  const turnPositionInRound = (currentPlayerIndex % totalPlayers) + 1;
+
   return (
-    <aside className="w-full lg:w-[260px] xl:w-80 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:overflow-x-visible flex-shrink-0">
-      {gameState.players &&
-        Object.values(gameState.players).map(player => {
+    <>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: isLandscape ? "column" : "row",
+          gap: 6,
+          padding: isLandscape ? "8px 10px" : "6px 8px",
+          background: "rgba(17,24,39,0.85)",
+          backdropFilter: "blur(4px)",
+          width: isLandscape ? 240 : "100%",
+          height: isLandscape ? "100%" : "auto",
+          flexShrink: 0,
+          overflowX: isLandscape ? "hidden" : "auto",
+          overflowY: isLandscape ? "auto" : "hidden"
+        }}
+      >
+        {/* Turn info header */}
+        <div
+          style={{
+            flexShrink: 0,
+            display: isLandscape ? "flex" : "none",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: isLandscape ? "6px 4px" : "4px 8px",
+            borderRadius: 8,
+            background: "rgba(250,204,21,0.08)",
+            border: "1px solid rgba(250,204,21,0.2)",
+            gap: 6,
+            minWidth: isLandscape ? 0 : "max-content"
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: !isLandscape ? "column" : "row",
+              alignItems: "center",
+              gap: 4
+            }}
+          >
+            <span style={{ color: "#9ca3af", fontSize: 10 }}>Turn</span>
+            <span style={{ color: "#facc15", fontWeight: 900, fontSize: 14 }}>
+              {Math.floor((turnNumber + 1) / totalPlayers)}
+            </span>
+          </div>
+          <span style={{ color: "#374151", fontSize: 12 }}>|</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ color: "#9ca3af", fontSize: 10 }}>Move</span>
+            <span style={{ color: "#a78bfa", fontWeight: 700, fontSize: 14 }}>
+              {turnPositionInRound}/{totalPlayers}
+            </span>
+          </div>
+          <span style={{ color: "#374151", fontSize: 12 }}>|</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ color: "#9ca3af", fontSize: 10 }}>Win</span>
+            <span style={{ color: "#4ade80", fontWeight: 700, fontSize: 14 }}>
+              {WIN_POINTS}pt
+            </span>
+          </div>
+        </div>
+
+        {/* Players */}
+        {sortedPlayers?.map((player, idx) => {
           const isMe = player.playerId === myId;
-          const isCurrentTurn =
-            gameState.turn?.currentPlayer === player.playerId;
-          const totalGems = Object.values(player.gems).reduce(
+          const isCurrentTurn = currentPlayerId === player.playerId;
+          const totalGems = Object.values(player.gems ?? {}).reduce(
             (a, b) => a + b,
             0
           );
+          const playerTurnOrder =
+            (sortPlayers.findIndex(id => id === player.playerId) %
+              totalPlayers) +
+            1;
 
           return (
             <div
               key={player.playerId}
-              className={`
-                flex-shrink-0 w-[190px] sm:w-[240px] lg:w-full rounded-xl shadow-md
-                border-2 transition-all duration-200 bg-gray-800
-                ${isCurrentTurn ? "border-yellow-400 shadow-yellow-400/10 shadow-lg" : "border-gray-700"}
-                ${isMe ? "ring-2 ring-blue-500" : ""}
-              `}
+              style={{
+                flexShrink: 0,
+                width: isLandscape
+                  ? "100%"
+                  : `calc(${100 / sortedPlayers.length}% - ${
+                      ((sortedPlayers.length - 1) * 6) / sortedPlayers.length
+                    }px)`,
+                height: isLandscape ? "auto" : "100%",
+                borderRadius: 10,
+                border: `2px solid ${isCurrentTurn ? "#facc15" : "#374151"}`,
+                outline: isMe ? "2px solid #3b82f6" : "none",
+                outlineOffset: 1,
+                background: "#1f2937",
+                boxShadow: isCurrentTurn
+                  ? "0 0 16px rgba(250,204,21,0.25)"
+                  : undefined,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                minWidth: 0,
+                position: "relative" // ← cần cho noble slot ẩn
+              }}
             >
               {/* Header */}
               <div
-                className={`flex items-center justify-between px-3 py-[2px] sm:py-2 rounded-t-xl ${isCurrentTurn ? "bg-yellow-400/10" : "bg-gray-700/40"}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "6px 10px",
+                  flexShrink: 0,
+                  background: isCurrentTurn
+                    ? "rgba(250,204,21,0.12)"
+                    : "rgba(55,65,81,0.5)"
+                }}
               >
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    minWidth: 0
+                  }}
+                >
+                  <span
+                    style={{
+                      background: isCurrentTurn ? "#facc15" : "#374151",
+                      color: isCurrentTurn ? "#111" : "#9ca3af",
+                      fontSize: 10,
+                      fontWeight: 900,
+                      borderRadius: 4,
+                      padding: "1px 5px",
+                      flexShrink: 0
+                    }}
+                  >
+                    #{playerTurnOrder}
+                  </span>
                   {isCurrentTurn && (
-                    <span className="text-yellow-400 text-xs animate-pulse">
+                    <span
+                      style={{ color: "#facc15", fontSize: 11, flexShrink: 0 }}
+                    >
                       ▶
                     </span>
                   )}
-                  <span className="text-white font-bold text-xs sm:text-sm truncate max-w-[90px]">
+                  <span
+                    style={{
+                      color: "white",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
                     {player.name}
                   </span>
                   {isMe && (
-                    <span className="text-blue-400 text-[9px] shrink-0">
+                    <span
+                      style={{
+                        color: "#60a5fa",
+                        fontSize: 10,
+                        flexShrink: 0,
+                        marginLeft: 2
+                      }}
+                    >
                       (you)
                     </span>
                   )}
                 </div>
-                <div className="flex items-baseline gap-0.5 shrink-0">
-                  <span className="text-yellow-400 font-black text-sm sm:text-xl">
-                    {player.points}
-                  </span>
-                  <span className="text-yellow-600 text-[9px]">pt</span>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end",
+                    flexShrink: 0
+                  }}
+                >
+                  <div
+                    style={{ display: "flex", alignItems: "baseline", gap: 2 }}
+                  >
+                    <span
+                      style={{
+                        color: "#facc15",
+                        fontWeight: 900,
+                        fontSize: 18
+                      }}
+                    >
+                      {player.points}
+                    </span>
+                    <span style={{ color: "#ca8a04", fontSize: 10 }}>
+                      /{WIN_POINTS}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 3,
+                      background: "#374151",
+                      borderRadius: 2,
+                      overflow: "hidden"
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${Math.min((player.points / WIN_POINTS) * 100, 100)}%`,
+                        height: "100%",
+                        background:
+                          player.points >= WIN_POINTS ? "#4ade80" : "#facc15",
+                        transition: "width 0.3s"
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="px-2.5 py-2 space-y-2">
+              {/* Body */}
+              <div
+                style={{
+                  padding: "6px 10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 5,
+                  flex: 1,
+                  overflowY: "auto",
+                  minHeight: 0
+                }}
+              >
                 {/* Gems */}
                 <div>
                   <div
-                    className={cn(
-                      "items-center justify-between mb-1",
-                      "sm:flex hidden"
-                    )}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: 3
+                    }}
                   >
-                    <span className="text-[9px] text-gray-400 uppercase tracking-wider">
+                    <span
+                      style={{
+                        fontSize: 9,
+                        color: "#9ca3af",
+                        textTransform: "uppercase",
+                        letterSpacing: 1
+                      }}
+                    >
                       Gems
                     </span>
-                    <span className="text-[9px] text-gray-500">
+                    <span style={{ fontSize: 9, color: "#6b7280" }}>
                       {totalGems}/10
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {Object.entries(player.gems)
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                    {Object.entries(player?.gems ?? {})
                       .filter(([, v]) => v > 0)
                       .map(([color, amount]) => (
                         <div
                           key={color}
-                          className="flex items-center gap-0.5 bg-gray-700 rounded-md px-1.5 py-0.5"
+                          ref={el =>
+                            registerGemPlayer(player.playerId, color, el)
+                          } // ← thêm
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+                            background: "#374151",
+                            borderRadius: 5,
+                            padding: "2px 6px"
+                          }}
                         >
-                          <div className="relative w-3 h-3 sm:w-4 sm:h-4">
+                          <div
+                            style={{
+                              position: "relative",
+                              width: 14,
+                              height: 14
+                            }}
+                          >
                             <Image
                               src={gemIconMap[color as keyof typeof gemIconMap]}
                               alt={color}
@@ -104,86 +332,164 @@ export default function PlayerInfo({
                               className="object-contain"
                             />
                           </div>
-                          <span className="text-white text-xs sm:text-sm font-bold">
+                          <span
+                            style={{
+                              color: "white",
+                              fontSize: 12,
+                              fontWeight: 700
+                            }}
+                          >
                             {amount}
                           </span>
                         </div>
                       ))}
+
+                    {/* Slot ẩn cho gem = 0: vẫn register để animation biết điểm đích dù chưa có gem */}
+                    {Object.entries(player?.gems ?? {})
+                      .filter(([, v]) => v === 0)
+                      .map(([color]) => (
+                        <div
+                          key={`slot-${color}`}
+                          ref={el =>
+                            registerGemPlayer(player.playerId, color, el)
+                          } // ← thêm
+                          style={{
+                            position: "absolute",
+                            opacity: 0,
+                            pointerEvents: "none",
+                            width: 1,
+                            height: 1
+                          }}
+                        />
+                      ))}
+
                     {totalGems === 0 && (
-                      <span className="text-gray-600 text-[8px] sm:text-sm">
-                        none
-                      </span>
+                      <span style={{ color: "#6b7280", fontSize: 12 }}>—</span>
                     )}
                   </div>
                 </div>
 
                 {/* Bonuses */}
-                <div>
-                  <span
-                    className={cn(
-                      "text-[9px] text-gray-400 uppercase tracking-wider",
-                      "sm:flex hidden"
-                    )}
-                  >
-                    Bonuses
-                  </span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {Object.entries(player.bonuses)
-                      .filter(([, v]) => v > 0)
-                      .map(([color, amount]) => (
-                        <div
-                          key={color}
-                          className="flex items-center gap-0.5 bg-gray-900 rounded-md px-1.5 py-0.5"
-                        >
-                          <div className="relative w-3 h-3 sm:w-4 sm:h-4">
-                            <Image
-                              src={gemIconMap[color as keyof typeof gemIconMap]}
-                              alt={color}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                          <span className="text-green-400 text-xs sm:text-sm font-bold">
-                            +{amount}
-                          </span>
-                        </div>
-                      ))}
-                    {Object.values(player.bonuses).every(v => v === 0) && (
-                      <span className="text-gray-600 text-[8px] sm:text-sm">
-                        none
+                {Object.values(player?.bonuses ?? {}).some(v => v > 0) && (
+                  <div>
+                    <div style={{ marginBottom: 3 }}>
+                      <span
+                        style={{
+                          fontSize: 9,
+                          color: "#9ca3af",
+                          textTransform: "uppercase",
+                          letterSpacing: 1
+                        }}
+                      >
+                        Bonuses
                       </span>
-                    )}
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                      {Object.entries(player?.bonuses ?? {})
+                        .filter(([, v]) => v > 0)
+                        .map(([color, amount]) => (
+                          <div
+                            key={color}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 3,
+                              background: "#111827",
+                              borderRadius: 5,
+                              padding: "2px 6px"
+                            }}
+                          >
+                            <div
+                              style={{
+                                position: "relative",
+                                width: 14,
+                                height: 14
+                              }}
+                            >
+                              <Image
+                                src={
+                                  gemIconMap[color as keyof typeof gemIconMap]
+                                }
+                                alt={color}
+                                fill
+                                className="object-contain"
+                              />
+                            </div>
+                            <span
+                              style={{
+                                color: "#4ade80",
+                                fontSize: 12,
+                                fontWeight: 700
+                              }}
+                            >
+                              +{amount}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
                   </div>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between border-t border-gray-700 pt-1.5">
-                  <span className="text-gray-500 text-[8px] sm:text-[10px]">
-                    {player.totalOwnedCards} purchased cards
-                  </span>
-                  <button
-                    onClick={() => setShowReserved(player.playerId)}
-                    className="flex items-center gap-1 bg-gray-700 hover:bg-gray-600 rounded-md px-2 py-0.5 transition"
-                  >
-                    <span className="text-[8px] sm:text-[10px] text-gray-300">
-                      Reserved
-                    </span>
-                    <span className="text-yellow-400 text-[8px] sm:text-[10px] font-bold">
-                      {player.reservedCards.length}/3
-                    </span>
-                  </button>
-                </div>
+                )}
               </div>
+
+              {/* Footer — registerCardSlot: điểm đích card bay về khi purchase/reserve */}
+              <div
+                ref={el => registerCardSlot(player.playerId, el)} // ← thêm
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderTop: "1px solid #374151",
+                  padding: "4px 10px",
+                  flexShrink: 0
+                }}
+              >
+                <span style={{ color: "#6b7280", fontSize: 10 }}>
+                  {player?.totalOwnedCards} cards
+                </span>
+                <button
+                  onClick={() => setShowReserved(player?.playerId)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    background: "#374151",
+                    borderRadius: 5,
+                    padding: "2px 7px",
+                    border: "none",
+                    cursor: "pointer"
+                  }}
+                >
+                  <span style={{ color: "#d1d5db", fontSize: 10 }}>
+                    Reserved
+                  </span>
+                  <span
+                    style={{ color: "#facc15", fontSize: 10, fontWeight: 700 }}
+                  >
+                    {player?.reservedCards?.length}/3
+                  </span>
+                </button>
+              </div>
+              <div
+                ref={el => registerNoblePlayer(player.playerId, el)}
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 3,
+                  minHeight: 2,
+                  minWidth: 0
+                }}
+              />
+
+              {/* Noble slot ẩn — registerNoblePlayer: điểm đích noble bay về */}
             </div>
           );
         })}
+      </div>
 
-      {/* Modal reserved cards */}
+      {/* Reserved modal */}
       {showReserved &&
         (() => {
-          const p = Object.values(gameState.players).find(
-            p => p.playerId === showReserved
-          );
+          const p = players.find(p => p.playerId === showReserved);
           const isMe = p?.playerId === myId;
           return (
             <div
@@ -210,17 +516,25 @@ export default function PlayerInfo({
                     No reserved cards
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div
+                    className="grid grid-cols-3 gap-2"
+                    style={{ minHeight: 160 }}
+                  >
                     {p.reservedCards.map((card: SplendorCard) => (
-                      <SplendorCardUI
+                      // registerCardReserved: vị trí card trong reserved để animation biết điểm xuất phát khi mua từ reserved
+                      <div
                         key={card.cardId}
-                        card={card}
-                        isMyTurn={isMyTurn}
-                        onClick={() => {
-                          if (!isMyTurn || !isMe) return;
-                          setSelectedCard(card);
-                        }}
-                      />
+                        ref={el => registerCardReserved(card.cardId, el)} // ← thêm
+                      >
+                        <SplendorCardUI
+                          card={card}
+                          isMyTurn={isMyTurn}
+                          onClick={() => {
+                            if (!isMyTurn || !isMe) return;
+                            setSelectedCard(card);
+                          }}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -228,6 +542,7 @@ export default function PlayerInfo({
             </div>
           );
         })()}
+
       {selectedCard && (
         <ModalCardAction
           isOpen={!!selectedCard}
@@ -240,6 +555,6 @@ export default function PlayerInfo({
           }}
         />
       )}
-    </aside>
+    </>
   );
 }

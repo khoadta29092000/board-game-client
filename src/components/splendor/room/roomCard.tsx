@@ -1,0 +1,142 @@
+import { Room } from "@/src/types/room";
+import { Crown, Loader2, Play, Swords, Users } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/src/components/ui/card";
+import { Button } from "../../ui/button";
+import { Badge } from "../../ui/badge";
+export function RoomCard({
+  room,
+  onJoin,
+  joiningRoomId,
+  isConnected
+}: {
+  room: Room;
+  onJoin: (id: string) => void;
+  joiningRoomId: string | null;
+  isConnected: boolean;
+}) {
+  const isFull = room.currentPlayers >= room.quantityPlayer;
+  // const isWaiting = room.status === "Waiting";
+  // const isPlaying = room.status === "Playing";
+  // const isJoining = joiningRoomId === room.id;
+  // const canJoin = isWaiting && !isFull && isConnected && !joiningRoomId;
+
+  const statusConfig = {
+    Waiting: { color: "#4ade80", label: "Waiting", dot: "bg-green-400" },
+    Playing: { color: "#facc15", label: "In Progress", dot: "bg-yellow-400" },
+    Finished: { color: "#6b7280", label: "Finished", dot: "bg-gray-500" }
+  };
+  const status =
+    statusConfig[room.status as keyof typeof statusConfig] ??
+    statusConfig.Finished;
+
+  return (
+    <Card key={room.id} className="hover:shadow-lg transition-shadow">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <CardTitle className="capitalize text-lg">{room.roomId}</CardTitle>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`}
+            />
+            <span className="text-xs text-gray-400">{status.label}</span>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-sm text-gray-500">Players</span>
+              </div>
+              <span
+                className="text-xs font-bold"
+                style={{ color: isFull ? "#f87171" : "#4ade80" }}
+              >
+                {room.currentPlayers}/{room.quantityPlayer}
+              </span>
+            </div>
+            {/* Progress bar */}
+            <div className="w-full h-1.5 rounded-full bg-gray-400 mb-3">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${(room.currentPlayers / room.quantityPlayer) * 100}%`,
+                  background: isFull
+                    ? "linear-gradient(90deg, #f87171, #ef4444)"
+                    : "linear-gradient(90deg, #4ade80, #22c55e)"
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="space-y-1">
+              {room.players.map(player => (
+                <div key={player.playerId} className="flex items-center gap-2">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    style={{
+                      background: "rgba(167,139,250,0.2)",
+                      color: "#a78bfa"
+                    }}
+                  >
+                    {player.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm text-gray-600 truncate flex-1">
+                    {player.name}
+                  </span>
+                  {player.isOwner && (
+                    <Crown className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                  )}
+                </div>
+              ))}
+              {Array.from({
+                length: room.quantityPlayer - room.currentPlayers
+              }).map((_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className="flex items-center gap-2 opacity-30"
+                >
+                  <div className="w-5 h-5 rounded-full border border-dashed border-gray-600" />
+                  <span className="text-sm text-gray-600">Waiting...</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            onClick={() => onJoin(room.id)}
+            disabled={
+              room.status !== "Waiting" ||
+              room.currentPlayers >= room.quantityPlayer ||
+              !isConnected
+            }
+            className="w-full"
+            variant={room.status === "Waiting" ? "default" : "secondary"}
+          >
+            {room.status === "Playing" ? (
+              <>
+                <Play className="mr-2 h-4 w-4" />
+                Game in Progress
+              </>
+            ) : room.currentPlayers >= room.quantityPlayer ? (
+              "Room Full"
+            ) : (
+              <>
+                <Swords className="w-4 h-4" />
+                Join Room
+              </>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

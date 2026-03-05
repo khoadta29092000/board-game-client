@@ -16,17 +16,24 @@ import {
 
 import { menuData } from "@/src/utils/contants";
 import { TMenuItem } from "@/src/types/header";
+import { History } from "lucide-react";
+import { useAuth } from "@/src/redux/global/selectors";
+import { useProfile } from "@/src/hook/user/useGetProfile";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [hasToken, setHasToken] = React.useState(false);
+  const { profile } = useProfile();
+  const reduxProfile = useAuth();
 
-  React.useEffect(() => {
-    const token = localStorage.getItem("user_token");
-    setHasToken(!!token);
-  }, []);
+  console.log("profile", profile,reduxProfile);
 
+  // derive hasToken/LoggedIn from profile or localStorage (fallback)
+  const hasToken = Boolean(
+    profile ||
+    reduxProfile ||
+    (typeof window !== "undefined" && localStorage.getItem("user_token"))
+  );
   const handleLogout = () => {
     localStorage.removeItem("user_token");
     localStorage.removeItem("user_data");
@@ -71,10 +78,23 @@ export default function Navbar() {
           {hasToken && (
             <ul className="w-full flex-col mt-1 flex sm:hidden">
               <li className="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
-                <Link href="/booking" passHref>
+                <Link href="/profile" passHref>
                   <button className="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-lg bg-cover hover:bg-custom-green200 hover:shadow-inner focus:bg-custom-green200 text-gray-700 transition-all ease-linear focus:shadow-inner shadow-purple-200/50">
                     <FiUser size={24} />
                     Profile
+                  </button>
+                </Link>
+              </li>
+            </ul>
+          )}
+
+          {hasToken && (
+            <ul className="w-full flex-col mt-1 flex sm:hidden">
+              <li className="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
+                <Link href="/history" passHref>
+                  <button className="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-lg bg-cover hover:bg-custom-green200 hover:shadow-inner focus:bg-custom-green200 text-gray-700 transition-all ease-linear focus:shadow-inner shadow-purple-200/50">
+                    <History size={24} />
+                    History
                   </button>
                 </Link>
               </li>

@@ -257,7 +257,7 @@ export default function ContentRoomDetail() {
   // Memoized computed values
   const isOwner = useMemo(
     () => room?.players.find(p => p.playerId === auth?.id)?.isOwner ?? false,
-    [room?.players, auth.id]
+    [room?.players, auth?.id]
   );
 
   const emptySlots = useMemo(
@@ -394,9 +394,9 @@ export default function ContentRoomDetail() {
                 <PlayerCard
                   key={player.playerId}
                   player={player}
-                  isCurrentUser={player.playerId === auth.id}
+                  isCurrentUser={player.playerId === auth?.id}
                   onToggleReady={(isReady: boolean) => {
-                    if (player.playerId === auth.id && player.isOwner) {
+                    if (player.playerId === auth?.id && player.isOwner) {
                       handleToggleStart();
                       return;
                     }
@@ -469,7 +469,9 @@ const PlayerCard = React.memo(
             </span>
 
             {/* Trạng thái Ready */}
-            {player.isOwner ? <></> : player.isReady ? (
+            {player.isOwner ? (
+              <></>
+            ) : player.isReady ? (
               <Badge className="bg-green-500 text-white text-xs">Ready</Badge>
             ) : (
               <Badge className="bg-gray-400 text-white text-xs">

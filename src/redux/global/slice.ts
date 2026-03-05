@@ -3,18 +3,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export type GlobalState = {
   isOpen: boolean;
-  auth: TProfile;
+  auth: TProfile | null;
 };
 
 const initialState = {
   isOpen: false,
-  auth: {
-    _id: "",
-    name: "",
-    username: "",
-    isVerified: true,
-    isActive: true
-  }
+  auth: null
 };
 
 export const userSlice = createSlice({

@@ -22,6 +22,7 @@ import {
 } from "../service/user";
 import { setAuth } from "../redux/global/slice";
 import { AxiosError } from "axios";
+import { callMyHistoryApi } from "../service/history";
 
 const useApi = () => {
   const dispatch = useDispatch();
@@ -81,12 +82,12 @@ const useApi = () => {
     try {
       const res = await wrapAsync(() => callLoginGoogle(data), "login", false);
       const { statusCode, data: token } = res?.data;
-      if (statusCode == 200) {
+      if (statusCode == 201 || statusCode == 200) {
         const userToken = token;
-
-        localStorage.setItem("user_token", userToken);
         const decoded = jwtDecode(userToken);
         if (decoded) {
+          localStorage.setItem("user_token", userToken);
+          localStorage.setItem("user_data", JSON.stringify(decoded));
           dispatch(setAuth(decoded));
           router.push("/");
         }
@@ -167,12 +168,14 @@ const useApi = () => {
         "verifyCode",
         false
       );
-      const { statusCode, data: userToken } = res?.data;
-      if (statusCode == 200) {
+      const { statusCode, data: token } = res?.data;
+      if (statusCode == 200 && statusCode == 201) {
         if (data.mode === "login") {
-          localStorage.setItem("user_token", userToken);
+          const userToken = token;
           const decoded = jwtDecode(userToken);
           if (decoded) {
+            localStorage.setItem("user_token", userToken);
+            localStorage.setItem("user_data", JSON.stringify(decoded));
             dispatch(setAuth(decoded));
             router.push("/");
           }

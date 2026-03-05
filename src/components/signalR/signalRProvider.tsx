@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// providers/SignalRProvider.tsx
 "use client";
 
 import React, {
@@ -10,9 +11,8 @@ import React, {
   useRef
 } from "react";
 import * as signalR from "@microsoft/signalr";
-import { useFetchProfile } from "@/src/hook/user/useGetProfile";
-
-// import * as signalRMsgPack from "@microsoft/signalr-protocol-msgpack";
+import { useAuth } from "@/src/redux/global/selectors"; // <-- your selector
+import { useProfile } from "@/src/hook/user/useGetProfile";
 
 interface SignalRContextType {
   isConnected: boolean;
@@ -40,19 +40,22 @@ export const SignalRProvider = ({
   const handlersRef = useRef<
     { method: string; handler: (...args: any[]) => void }[]
   >([]);
+  const initRef = useRef(false);
+
+  const reduxProfile = useAuth();
+  const { profile } = useProfile();
 
   const connect = useCallback(async () => {
     if (connection || !localStorage.getItem("user_token")) return;
 
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(process.env.NEXT_PUBLIC_SOCKET_URL + hubURL, {
+      .withUrl((process.env.NEXT_PUBLIC_SOCKET_URL ?? "") + hubURL, {
         transport: signalR.HttpTransportType.WebSockets,
         skipNegotiation: true,
         accessTokenFactory: () => localStorage.getItem("user_token") || ""
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Information)
-      // .withHubProtocol(new signalRMsgPack.MessagePackHubProtocol())
       .build();
 
     newConnection.onclose(() => setIsConnected(false));
@@ -71,7 +74,7 @@ export const SignalRProvider = ({
     } catch (err) {
       console.error("❌ Error while starting connection:", err);
     }
-  }, [connection]);
+  }, [connection, hubURL]);
 
   const disconnect = useCallback(async () => {
     if (connection) {
@@ -109,20 +112,26 @@ export const SignalRProvider = ({
     [connection]
   );
 
-  const fetchProfile = useFetchProfile();
-
+  // Init: prefer reduxProfile (already in store). If not present, wait for SWR profile.
   useEffect(() => {
-    const init = async () => {
-      const profile = await fetchProfile();
-      if (profile) {
-        await connect();
-      }
-    };
+    if (initRef.current) return;
 
-    if (localStorage.getItem("user_token")) {
-      init();
+    const token = localStorage.getItem("user_token");
+    if (!token) return;
+
+    const effectiveProfile = reduxProfile ?? profile;
+    if (effectiveProfile) {
+      initRef.current = true;
+      (async () => {
+        try {
+          await connect();
+        } catch (err) {
+          console.error("SignalR connect failed", err);
+        }
+      })();
     }
-  }, [fetchProfile, connect]);
+    // Note: include reduxProfile and profile in deps so effect fires when SWR fills Redux
+  }, [reduxProfile, profile, connect]);
 
   return (
     <SignalRContext.Provider

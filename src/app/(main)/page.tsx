@@ -174,8 +174,8 @@ export default function Home() {
                       index % 3 === 0
                         ? "from-blue-500 to-purple-600"
                         : index % 3 === 1
-                        ? "from-green-500 to-blue-600"
-                        : "from-purple-500 to-pink-600"
+                          ? "from-green-500 to-blue-600"
+                          : "from-purple-500 to-pink-600"
                     } flex items-center justify-center`}
                   >
                     <Gamepad2 className="w-16 h-16 text-white" />
@@ -192,10 +192,12 @@ export default function Home() {
                       <span className="text-green-600 font-semibold">
                         Online Now: {Math.floor(Math.random() * 500) + 100}
                       </span>
-                      <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all flex items-center space-x-2">
-                        <span>Play</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
+                      <Link href={`/lobby`}>
+                        <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all flex items-center space-x-2">
+                          <span>Play</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

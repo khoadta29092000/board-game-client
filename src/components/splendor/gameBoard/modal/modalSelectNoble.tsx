@@ -20,7 +20,6 @@ export function ModalSelectNoble({
 }: Props) {
   const eligibleNoblesData =
     gameNobles?.filter(n => nobles.includes(n.nobleId)) ?? [];
-
   return (
     <ModalCommon
       isOpen={isOpen}

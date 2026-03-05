@@ -1,5 +1,5 @@
-import Header from "@/src/components/header";
 import { Footer } from "@/src/components/footer";
+import Header from "@/src/components/header";
 
 export default function RootLayout({
   children
@@ -7,12 +7,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Header />
-        {children}
-        <Footer />
-      </body>
-    </html>
+    <>
+      <Header />
+      {children}
+      <Footer />
+    </>
   );
 }

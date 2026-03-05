@@ -17,20 +17,33 @@ import { ModalSelectNoble } from "@/src/components/splendor/gameBoard/modal/moda
 import PlayerInfo from "@/src/components/splendor/player/playerInfo";
 import useTurn from "@/src/hook/game/useTurn";
 import { ModalDiscardGems } from "@/src/components/splendor/gameBoard/modal/modalDiscardGems";
+import { ScaleWrapper, useCanvas } from "@/src/components/common/scaleWrapper";
+import { GameOverOverlay } from "@/src/components/splendor/gameBoard/gameOverlay";
+import { diffGameState } from "@/src/hook/game/useGameDiff";
+import { pushEvents } from "@/src/redux/animation/slice";
+import { useDispatch } from "react-redux";
+import { preloadSounds } from "@/src/sounds.ts/splendorSounds";
+import AnimationLayer from "@/src/components/common/AnimationLayer";
+import { getGemBankRect } from "@/src/redux/animation/Animationrefs";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export default function ContentGameDetail() {
+
+function GameContent() {
   const params = useParams();
   const router = useRouter();
-  const { id: userId } = useAuth();
+  const dispatch = useDispatch(); // ← Fix 1: cần dispatch để pushEvents vào Redux
+  const profile = useAuth();
+  const userId = profile?.id;
   const gameId = params.id as string;
   const toastShownRef = useRef(new Set<string>());
-  const { isConnected, invoke, on, off, connect } = useSignalR();
+  const { isConnected, invoke, on, off } = useSignalR();
   const [gameState, setGameState] = useState<SplendorGameState | null>(null);
+  const prevGameStateRef = useRef<SplendorGameState | null>(null); // ← lưu state trước để diff
+
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const [dataDiscardGem, setDataDiscardGem] = useState<DiscardGemData | null>({
-    currentGems: { Black: 1, Blue: 2, Gold: 2, Green: 2, Red: 2, White: 2 },
-    excessCount: 1
-  });
+  const [dataDiscardGem, setDataDiscardGem] = useState<DiscardGemData | null>(
+    null
+  );
   const [dataSelectNoble, setDataSelectNoble] =
     useState<SelectNobleData | null>(null);
   const {
@@ -40,103 +53,153 @@ export default function ContentGameDetail() {
   } = useDisclosure();
   const lastTurnRef = useRef<string | null>(null);
   const { isMyTurn } = useTurn(gameState?.turn, userId);
+  const { isDesktop, isTablet, vw, vh, baseH, scale } = useCanvas();
+  const screenRatio = vw / vh;
+  const isLandscape = isDesktop || (isTablet && screenRatio > 1.0);
+  const playerCount = gameState?.players
+    ? Object.keys(gameState.players).length
+    : 2;
+  const isGameOver = gameState?.info?.state === "Completed";
+
+  // Preload sounds sau lần click đầu (browser autoplay policy)
+  useEffect(() => {
+    const handle = () => {
+      preloadSounds();
+      window.removeEventListener("click", handle);
+    };
+    window.addEventListener("click", handle);
+    return () => window.removeEventListener("click", handle);
+  }, []);
 
   useEffect(() => {
-    if (!isConnected || !gameId) {
-      return;
-    }
-
+    if (!isConnected || !gameId) return;
     const JoinGame = async () => {
-      if (gameId === "new") {
-        return;
-      }
-
+      if (gameId === "new") return;
       try {
         const result = await invoke("JoinGame", gameId, userId);
-        console.log("roomroomroom", result);
         if (!result?.success) {
-          const toastKey = `joined-game-err`;
-          if (!toastShownRef.current.has(toastKey)) {
-            toast.error("Join Game Failed", {
-              description: result.message
-            });
-            toastShownRef.current.add(toastKey);
+          const k = `joined-game-err`;
+          if (!toastShownRef.current.has(k)) {
+            toast.error("Join Game Failed", { description: result.message });
+            toastShownRef.current.add(k);
           }
           router.push("/lobby");
         }
-      } catch (error) {
-        console.error("Failed to join game:", error);
+      } catch (e) {
+        console.error(e);
       }
     };
     JoinGame();
   }, [isConnected, gameId, invoke]);
 
-  // stable handler: update turn only if changed
+  // ── Fix 2: tách GameStateLoaded (lần đầu, không animate) ──────────────────
   const handleGameStateLoaded = useCallback((data: SplendorGameState) => {
     if (!data) return;
-
-    const t = data.turn;
-    const fingerprint = `${t?.turnNumber ?? ""}-${t?.lastActionTime ?? ""}`;
-    if (lastTurnRef.current === fingerprint) return;
-    lastTurnRef.current = fingerprint;
-
+    prevGameStateRef.current = data;
     setGameState(data);
   }, []);
+
+  // ── Fix 2: GameStateUpdated (mỗi turn) → diff → animate → delay setState ──
+  const handleGameStateUpdated = useCallback(
+    (data: SplendorGameState) => {
+      if (!data) return;
+
+      // Completed: skip animation
+      if (data.info?.state === "Completed") {
+        prevGameStateRef.current = data;
+        setGameState(data);
+        return;
+      }
+
+      // Dedup
+      const fp = `${data.turn?.turnNumber ?? ""}-${data.turn?.lastActionTime ?? ""}`;
+      if (lastTurnRef.current === fp) return;
+      lastTurnRef.current = fp;
+
+      const prev = prevGameStateRef.current;
+      if (prev) {
+        const events = diffGameState(prev, data);
+
+        if (events.length > 0) {
+          dispatch(pushEvents(events)); // ← Fix 1: dispatch đúng cách
+
+          // Tính delay dựa trên tổng thời gian animation
+          const totalDuration = events.reduce((acc, e) => {
+            if (e.type === "COLLECT_GEM") return acc + e.gems.length * 90 + 600;
+            if (e.type === "RETURN_GEM") return acc + e.gems.length * 70 + 600;
+            if (e.type === "PURCHASE_CARD") return acc + 750;
+            if (e.type === "RESERVE_CARD") return acc + 700;
+            if (e.type === "NOBLE_VISIT") return acc + 900;
+            return acc + 700;
+          }, 0);
+
+          setTimeout(() => {
+            prevGameStateRef.current = data;
+            setGameState(data);
+          }, totalDuration);
+
+          return;
+        }
+      }
+
+      // Không có events → update ngay
+      prevGameStateRef.current = data;
+      setGameState(data);
+    },
+    [dispatch]
+  );
+
   const handleDiscardGem = useCallback((data: DiscardGemData) => {
     if (!data) return;
     setDataDiscardGem(data);
     onOpen();
   }, []);
 
-  const submitDiscardGem = useCallback(
-    async (toDiscard: GemSet) => {
-      if (!isConnected) {
-        toast.error("Not connected to server");
-        return;
-      }
-      try {
-        const result = await invoke("DiscardGem", gameId, userId, toDiscard);
-        if (result.success) {
-          const discardedList = Object.entries(toDiscard)
-            .filter(([, amount]) => amount > 0)
-            .map(([color, amount]) => `${amount} ${color}`)
-            .join(", ");
-
-          toast.success("Gems discarded", {
-            description: `Discarded: ${discardedList}`
-          });
-          return;
-        }
-      } catch (error) {
-        console.error("Discard gem error:", error);
-        toast.error("Failed to discard gems");
-      }
-    },
-    [isConnected, invoke]
-  );
   const handleNeedSelectNoble = useCallback((data: SelectNobleData) => {
     if (!data) return;
     setDataSelectNoble(data);
     onOpenNoble();
   }, []);
 
-  // Submit
+  const handleGameOver = useCallback((_data: { winner: string }) => {}, []);
+
+  const handleLastRound = useCallback((data: { triggeredBy: string }) => {
+    if (!data) return;
+    toast.warning("LAST ROUND!", {
+      description: (
+        <>
+          &nbsp;
+          <span style={{ color: "#fca5a5" }}>{data.triggeredBy}</span>
+          &nbsp;hit 15pts — one more turn each!
+        </>
+      )
+    });
+  }, []);
+
+  const submitDiscardGem = useCallback(
+    async (toDiscard: GemSet) => {
+      if (!isConnected) return;
+      try {
+        const r = await invoke("DiscardGem", gameId, userId, toDiscard);
+        if (r.success) toast.success("Gems discarded");
+      } catch {
+        toast.error("Failed to discard gems");
+      }
+    },
+    [isConnected, invoke]
+  );
+
   const submitSelectNoble = useCallback(
     async (nobleId: string) => {
-      if (!isConnected) {
-        toast.error("Not connected to server");
-        return;
-      }
+      if (!isConnected) return;
       try {
-        const result = await invoke("SelectNoble", gameId, userId, nobleId);
-        if (result.success) {
+        const r = await invoke("SelectNoble", gameId, userId, nobleId);
+        if (r.success) {
           toast.success("Noble selected");
           setDataSelectNoble(null);
           onCloseNoble();
-          return;
         }
-      } catch (error) {
-        console.error("Select noble error:", error);
+      } catch {
         toast.error("Failed to select noble");
       }
     },
@@ -145,27 +208,12 @@ export default function ContentGameDetail() {
 
   const handleCollectGems = useCallback(
     async (gems: Record<GemColor, number>) => {
-      if (!isConnected) {
-        toast.error("Not connected to server");
-        return;
-      }
+      if (!isConnected) return;
       try {
-        const result = await invoke("CollectGem", gameId, userId, gems);
-        console.log("result claim gem", result);
-        if (result.success) {
-          return;
-        }
-        if (!result.success) {
-          const toastKey = `collect-gems-err`;
-          if (!toastShownRef.current.has(toastKey)) {
-            toast.error("Collect Gems Failed", {
-              description: result.message
-            });
-            toastShownRef.current.add(toastKey);
-          }
-        }
-      } catch (error) {
-        console.error("Collect gems error:", error);
+        const r = await invoke("CollectGem", gameId, userId, gems);
+        if (!r.success)
+          toast.error("Collect Gems Failed", { description: r.message });
+      } catch {
         toast.error("Failed to collect gems");
       }
     },
@@ -174,26 +222,12 @@ export default function ContentGameDetail() {
 
   const handlePurchaseCard = useCallback(
     async (cardId: string) => {
-      if (!isConnected) {
-        toast.error("Not connected to server");
-        return;
-      }
+      if (!isConnected) return;
       try {
-        const result = await invoke("PurchaseCard", gameId, userId, cardId);
-        if (result.success) {
-          return;
-        }
-        if (!result.success) {
-          const toastKey = `purchase-card-err`;
-          if (!toastShownRef.current.has(toastKey)) {
-            toast.error("Purchase Card Failed", {
-              description: result.message
-            });
-            toastShownRef.current.add(toastKey);
-          }
-        }
-      } catch (error) {
-        console.error("Purchase card error:", error);
+        const r = await invoke("PurchaseCard", gameId, userId, cardId);
+        if (!r.success)
+          toast.error("Purchase Card Failed", { description: r.message });
+      } catch {
         toast.error("Failed to purchase card");
       }
     },
@@ -202,104 +236,136 @@ export default function ContentGameDetail() {
 
   const handleReserveCard = useCallback(
     async (cardId?: string, level?: number) => {
-      if (!isConnected) {
-        toast.error("Not connected to server");
-        return;
-      }
+      if (!isConnected) return;
       try {
-        const result = await invoke(
+        const r = await invoke(
           "ReserveCard",
           gameId,
           userId,
           cardId ?? null,
           level ?? null
         );
-        if (result.success) return;
-
-        if (!result.success) {
-          const toastKey = `reserve-card-err`;
-          if (!toastShownRef.current.has(toastKey)) {
-            toast.error("Reserve Card Failed", {
-              description: result.message
-            });
-            toastShownRef.current.add(toastKey);
-          }
-        }
-      } catch (error) {
-        console.error("Reserve card error:", error);
+        if (!r.success)
+          toast.error("Reserve Card Failed", { description: r.message });
+      } catch {
         toast.error("Failed to reserve card");
       }
     },
     [isConnected, invoke]
   );
 
-  // subscribe to GameStateLoaded only when connected
   useEffect(() => {
     if (!isConnected) return;
-    // subscribe
-    on("GameStateLoaded", handleGameStateLoaded);
-    on("GameStateUpdated", handleGameStateLoaded);
+    on("GameStateLoaded", handleGameStateLoaded); // ← Fix 2: tách riêng
+    on("GameStateUpdated", handleGameStateUpdated); // ← Fix 2: tách riêng
     on("NeedSelectNoble", handleNeedSelectNoble);
     on("NeedDiscard", handleDiscardGem);
-    // cleanup
+    on("GameOver", handleGameOver);
+    on("LastRound", handleLastRound);
     return () => {
       off("GameStateLoaded", handleGameStateLoaded);
-      off("GameStateUpdated", handleGameStateLoaded);
+      off("GameStateUpdated", handleGameStateUpdated);
       off("NeedSelectNoble", handleNeedSelectNoble);
       off("NeedDiscard", handleDiscardGem);
+      off("GameOver", handleGameOver);
+      off("LastRound", handleLastRound);
     };
-  }, [isConnected, on, off, handleGameStateLoaded, handleDiscardGem]);
+  }, [
+    isConnected,
+    on,
+    off,
+    handleGameStateLoaded,
+    handleGameStateUpdated,
+    handleDiscardGem,
+    handleGameOver,
+    handleLastRound
+  ]);
 
   return (
-    <div className="h-auto flex flex-col lg:flex-row w-full p-2 sm:p-4 gap-2">
-      {isOpen && dataDiscardGem && (
-        <ModalDiscardGems
-          isOpen={isOpen}
-          onClose={() => {
-            setDataDiscardGem(null);
-            onClose();
-          }}
-          currentGems={dataDiscardGem.currentGems}
-          excessCount={dataDiscardGem.excessCount}
-          onConfirm={toDiscard => {
-            submitDiscardGem(toDiscard);
-          }}
-        />
-      )}
-      {isOpenNoble && dataSelectNoble && (
-        <ModalSelectNoble
-          isOpen={isOpenNoble}
-          nobles={dataSelectNoble.eligibleNobles}
-          onConfirm={nobleId => submitSelectNoble(nobleId)}
-          onClose={() => {
-            // Không cho đóng vì bắt buộc phải chọn
-          }}
-        />
-      )}
-      {/* PLAYER LIST - Responsive positioning */}
+    <>
+      <AnimationLayer />
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: isLandscape ? "row" : "column",
+          background: "linear-gradient(180deg, #2e1065 0%, #111827 100%)",
+          overflow: "hidden"
+        }}
+      >
+        {isGameOver && gameState && (
+          <GameOverOverlay
+            gameState={gameState}
+            myId={userId ?? ""}
+            onLeave={() => router.push("/lobby")}
+          />
+        )}
+        {isOpen && dataDiscardGem && (
+          <ModalDiscardGems
+            isOpen={isOpen}
+            onClose={() => {
+              setDataDiscardGem(null);
+              onClose();
+            }}
+            currentGems={dataDiscardGem.currentGems}
+            excessCount={dataDiscardGem.excessCount}
+            onConfirm={toDiscard => submitDiscardGem(toDiscard)}
+          />
+        )}
+        {isOpenNoble && dataSelectNoble && (
+          <ModalSelectNoble
+            isOpen={isOpenNoble}
+            nobles={dataSelectNoble.eligibleNobles}
+            gameNobles={gameState?.board?.nobles}
+            onConfirm={nobleId => submitSelectNoble(nobleId)}
+            onClose={() => {}}
+          />
+        )}
 
-      {gameState && (
-        <PlayerInfo
-          gameState={gameState}
-          myId={userId}
-          isMyTurn={isMyTurn}
-          onPurchase={handlePurchaseCard} // pass actual handler
-        />
-      )}
+        {gameState && (
+          <PlayerInfo
+            gameState={gameState}
+            myId={userId ?? ""}
+            isMyTurn={isMyTurn}
+            isLandscape={isLandscape}
+            playerCount={playerCount}
+            baseH={baseH}
+            onPurchase={handlePurchaseCard}
+          />
+        )}
 
-      {/* BOARD CONTAINER */}
-      <main className="flex-1 flex flex-col gap-2">
-        <BoardContainer
-          isConnected={isConnected}
-          gameState={gameState}
-          gameId={gameId}
-          onCollectGem={handleCollectGems}
-          onPurchase={handlePurchaseCard}
-          onReserve={handleReserveCard}
-          onReserveFromDeck={level => handleReserveCard(undefined, level)}
-          isMyTurn={isMyTurn}
-        />
-      </main>
-    </div>
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            minWidth: 0,
+            overflow: "hidden",
+            padding: 8
+          }}
+        >
+          <BoardContainer
+            isConnected={isConnected}
+            gameState={gameState}
+            gameId={gameId}
+            onCollectGem={handleCollectGems}
+            onPurchase={handlePurchaseCard}
+            onReserve={handleReserveCard}
+            onReserveFromDeck={level => handleReserveCard(undefined, level)}
+            isMyTurn={isMyTurn}
+            isLandscape={isLandscape}
+            baseH={baseH}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function ContentGameDetail() {
+  return (
+    <ScaleWrapper>
+      <GameContent />
+    </ScaleWrapper>
   );
 }

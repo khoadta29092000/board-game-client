@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { TDataToken } from "@/src/types/player";
 import { setAuth } from "@/src/redux/global/slice";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { History } from "lucide-react";
 
 type TProps = {
   auth: TDataToken;
@@ -67,6 +68,15 @@ export function Profile({ auth }: TProps) {
             >
               <FiUser className="w-5 h-5" />
               Profile
+            </button>
+          </Link>
+          <Link href={"/history"}>
+            <button
+              type="button"
+              className="txt-18 px-4 py-2 flex items-center gap-4 text-left hover:bg-custom-hover-bg-200 transition-colors w-full cursor-pointer"
+            >
+              <History className="w-5 h-5" />
+              History
             </button>
           </Link>
 

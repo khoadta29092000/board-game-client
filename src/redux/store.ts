@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import globalReducer from "./global";
+import AnimationReducer from "./animation";
 
 const store = configureStore({
   devTools: true,
   reducer: {
-    global: globalReducer
+    global: globalReducer,
+    animation: AnimationReducer
   }
 });
 

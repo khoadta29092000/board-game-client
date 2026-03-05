@@ -54,6 +54,7 @@ export default function ContentRegister() {
         onClose={onClose}
         username={getValues("email")}
         mode="register"
+        
       />
 
       {/* Left - Image */}

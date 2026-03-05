@@ -209,28 +209,28 @@
     font-weight: 700;
   }
   .font-helveticaneue-light {
-    font-family: var(--font-helveticaneue), "Helvetica Neue", "Helvetica",
-      sans-serif;
+    font-family:
+      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
     font-weight: 300;
   }
   .font-helveticaneue {
-    font-family: var(--font-helveticaneue), "Helvetica Neue", "Helvetica",
-      sans-serif;
+    font-family:
+      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
     font-weight: 400;
   }
   .font-helveticaneue-medium {
-    font-family: var(--font-helveticaneue), "Helvetica Neue", "Helvetica",
-      sans-serif;
+    font-family:
+      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
     font-weight: 500;
   }
   .font-helveticaneue-semibold {
-    font-family: var(--font-helveticaneue), "Helvetica Neue", "Helvetica",
-      sans-serif;
+    font-family:
+      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
     font-weight: 600;
   }
   .font-helveticaneue-bold {
-    font-family: var(--font-helveticaneue), "Helvetica Neue", "Helvetica",
-      sans-serif;
+    font-family:
+      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
     font-weight: 700;
   }
   .btn-primary {
@@ -507,3 +507,5 @@ div[style*="position: fixed"] {
     #a88838 100%
   ) !important;
 }
+
+/* Thêm vào globals.css hoặc layout.tsx của game route */

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   VisibleCards,
   SplendorCard,
-  fakeNobles,
   SplendorNoble
 } from "@/src/types/splendor";
 import SplendorCardUI from "./SplendorCardUI";
@@ -29,58 +28,113 @@ export default function CardsBoard({
   cardsNobles
 }: Props) {
   const [selectedCard, setSelectedCard] = useState<SplendorCard | null>(null);
-
-  const levels = dataCards && Object.entries(dataCards);
+  const levels = dataCards ? Object.entries(dataCards) : [];
 
   return (
-    <div className="w-full lg:min-h-[calc(100vh-48px)]">
-      <NobleCard nobles={cardsNobles} />
-      <div className="flex flex-col-reverse gap-3 sm:gap-6 px-2 pb-6">
-        {levels &&
-          levels.map(([levelKey, cards]) => (
-            <section key={levelKey} className="space-y-2">
-              <div className="text-xs uppercase tracking-wider text-gray-300">
-                Level {levelKey.replace(/\D/g, "")}
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "auto",
+        overflowX: "hidden"
+      }}
+    >
+      {/* Nobles */}
+      <div style={{ flexShrink: 0, marginBottom: 6 }}>
+        <NobleCard nobles={cardsNobles} />
+      </div>
+
+      {/* 3 levels — col-reverse, fill remaining height */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column-reverse",
+          gap: 6,
+          minHeight: 500
+        }}
+      >
+        {levels.map(([levelKey, cards]) => (
+          <section
+            key={levelKey}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0
+            }}
+            className="m-1 sm:m-3"
+          >
+            <div
+              style={{
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+                color: "#9ca3af",
+                marginBottom: 3,
+                flexShrink: 0
+              }}
+            >
+              Level {levelKey.replace(/\D/g, "")}
+            </div>
+
+            <div style={{ display: "flex", gap: 6, flex: 1, minHeight: 0 }}>
+              {/* Deck button */}
+              <div
+                onClick={() => {
+                  if (!isMyTurn) return;
+                  onReserveFromDeck?.(Number(levelKey.replace(/\D/g, "")));
+                }}
+                style={{
+                  flexShrink: 0,
+                  width: 52,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 8,
+                  border: "2px solid #4b5563",
+                  background: "#1f2937",
+                  color: "#9ca3af",
+                  cursor: isMyTurn ? "pointer" : "default",
+                  transition: "border-color 0.15s",
+                  minHeight: 0
+                }}
+                className=" sm:max-h-[200px] max-h-[160px]"
+              >
+                <span style={{ fontSize: 24 }}>≡</span>
+                <span style={{ fontSize: 20, color: "#6b7280", marginTop: 2 }}>
+                  x{cardDecks[levelKey] ?? 0}
+                </span>
               </div>
 
-              <div className="flex gap-2">
-                {/* Deck - click để reserve blind */}
-                <div
-                  onClick={() => {
-                    if (!isMyTurn) return;
-                    const level = Number(levelKey.replace(/\D/g, ""));
-                    onReserveFromDeck?.(level);
-                  }}
-                  className={`
-                    flex-shrink-0 relative flex items-center justify-center
-                    rounded-lg border-2 border-gray-600
-                    bg-gray-800 text-gray-300 italic
-                    w-[32px] h-[32px] sm:w-[80px] sm:h-[80px]
-                    ${isMyTurn ? "cursor-pointer hover:border-yellow-400 transition" : "cursor-default"}
-                  `}
-                >
-                  <span className="text-[10px] sm:text-sm">...</span>
-                  <div className="absolute bottom-[2px] right-[2px] sm:bottom-1 sm:right-1 text-[8px] sm:text-xs">
-                    x{cardDecks[levelKey] ?? 0}
-                  </div>
-                </div>
-
-                <div className="flex-1 grid gap-1.5 grid-cols-4 sm:grid-cols-[repeat(auto-fit,minmax(100px,1fr))]">
-                  {(cards as SplendorCard[]).map(card => (
-                    <SplendorCardUI
-                      key={card.cardId}
-                      card={card}
-                      isMyTurn={isMyTurn}
-                      onClick={() => {
-                        if (!isMyTurn) return;
-                        setSelectedCard(card);
-                      }}
-                    />
-                  ))}
-                </div>
+              {/* 4 cards */}
+              <div
+                style={{
+                  flex: 1,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: 6,
+                  minHeight: 0
+                }}
+              >
+                {(cards as SplendorCard[]).map(card => (
+                  <SplendorCardUI
+                    key={card.cardId}
+                    card={card}
+                    isMyTurn={isMyTurn}
+                    onClick={() => {
+                      if (!isMyTurn) return;
+                      setSelectedCard(card);
+                    }}
+                  />
+                ))}
               </div>
-            </section>
-          ))}
+            </div>
+          </section>
+        ))}
       </div>
 
       {selectedCard && (

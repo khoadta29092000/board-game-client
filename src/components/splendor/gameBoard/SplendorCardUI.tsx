@@ -2,12 +2,9 @@ import React from "react";
 import { SplendorCard } from "@/src/types/splendor";
 import { cn, gemIconMap } from "@/src/utils";
 import Image from "next/image";
+import { registerCardBoard } from "@/src/redux/animation/Animationrefs"; // ← thêm
 
-type Props = {
-  card: SplendorCard;
-  isMyTurn?: boolean;
-  onClick?: () => void;
-};
+type Props = { card: SplendorCard; isMyTurn?: boolean; onClick?: () => void };
 
 export default function SplendorCardUI({
   card,
@@ -32,33 +29,37 @@ export default function SplendorCardUI({
 
   return (
     <button
+      ref={el => registerCardBoard(card.cardId, el as HTMLDivElement | null)} // ← thêm
       onClick={onClick}
       disabled={!isMyTurn}
       className={`
-        ${bg}
-        rounded-md border
-        flex flex-col justify-between
-        aspect-[2/3]  w-full sm:max-h-[180px]
-        p-2 sm:p-3 text-white
+        ${bg} rounded-lg border w-full h-full
+        sm:max-h-[200px] max-h-[160px]
+        
+        flex flex-col justify-between p-2 text-white
         transition-all duration-150
         ${
           isMyTurn
-            ? "border-yellow-400 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-400/20 active:scale-95 cursor-pointer"
-            : "border-gray-600 opacity-80 cursor-default"
+            ? "border-yellow-400 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-400/30 active:scale-95 cursor-pointer"
+            : "border-gray-600 opacity-75 cursor-default"
         }
       `}
     >
-      {/* TOP */}
+      {/* TOP: points + bonus gem */}
       <div className="flex justify-between items-start">
         <div
           className={cn(
-            "text-yellow-400 font-black text-xs sm:text-base lg:text-3xl drop-shadow",
+            "text-yellow-400 font-black text-2xl drop-shadow",
             card.points === 0 ? "invisible" : "visible"
           )}
         >
           {card.points ?? 0}
         </div>
-        <div className="relative w-5 h-5 sm:w-16 sm:h-16 shrink-0">
+        {/* Bonus gem icon — 32×32 */}
+        <div
+          className="relative flex-shrink-0"
+          style={{ width: 40, height: 40 }}
+        >
           <Image
             src={gemIconMap[card.bonusColor]}
             alt={card.bonusColor}
@@ -69,31 +70,31 @@ export default function SplendorCardUI({
       </div>
 
       {/* COST */}
-      <div className="mt-auto">
-        <div
-          className={`grid gap-0.5
-    ${costCount === 4 ? "grid-cols-2 grid-rows-2" : ""}
-    ${costCount === 3 ? "grid-cols-2" : ""}
-    ${costCount === 2 ? "grid-cols-2" : ""}
-    ${costCount === 1 ? "grid-cols-1" : ""}
-  `}
-        >
-          {costEntries.map(([color, amount]) => (
-            <div key={color} className="flex items-center gap-0.5">
-              <div className="relative w-4 h-4 sm:w-8 sm:h-8 shrink-0">
-                <Image
-                  src={gemIconMap[color]}
-                  alt={color}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <span className="font-black text-xs sm:text-xl drop-shadow">
-                {amount}
-              </span>
+      <div
+        className={`grid gap-1
+        ${costCount >= 4 ? "grid-cols-2" : ""}
+        ${costCount === 3 ? "grid-cols-2" : ""}
+        ${costCount === 2 ? "grid-cols-2" : ""}
+        ${costCount === 1 ? "grid-cols-1" : ""}
+      `}
+      >
+        {costEntries.map(([color, amount]) => (
+          <div key={color} className="flex items-center gap-1">
+            {/* Cost gem icon — 20×20 */}
+            <div
+              className="relative flex-shrink-0"
+              style={{ width: 28, height: 28 }}
+            >
+              <Image
+                src={gemIconMap[color]}
+                alt={color}
+                fill
+                className="object-contain"
+              />
             </div>
-          ))}
-        </div>
+            <span className="font-black text-xl drop-shadow">{amount}</span>
+          </div>
+        ))}
       </div>
     </button>
   );
