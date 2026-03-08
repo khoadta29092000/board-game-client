@@ -62,7 +62,7 @@ export default function SplendorCardUI({
       `}
     >
       {/* TOP: points + bonus gem */}
-      <div className="flex justify-between items-start">
+      <div className="w-full flex justify-between items-start">
         <div
           className={cn(
             "text-yellow-400 font-black text-2xl drop-shadow",

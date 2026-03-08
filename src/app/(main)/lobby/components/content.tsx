@@ -19,7 +19,7 @@ export default function ContentLobby() {
   const [joiningRoomId, setJoiningRoomId] = useState<string | null>(null);
   const { isConnected, invoke, on, off } = useSignalR();
 
-  useEffect(() => { 
+  useEffect(() => {
     // Setup SignalR event handlers
     const handleActiveRoomsLoaded = (loadedRooms: Room[]) => {
       setRooms(loadedRooms);
@@ -223,9 +223,12 @@ export default function ContentLobby() {
       {isCreating && <LoadingOverlay message="Creating room..." />}
       <div className="sm:min-h-[calc(80vh)] bg-gray-50 py-8">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Game Rooms</h1>
+              <h1 className="w-[200px] sm:w-full text-2xl sm:text-3xl font-bold text-gray-900">
+                Game Rooms
+              </h1>
+
               <p className="text-gray-600 mt-2">
                 Join an existing room or create your own
               </p>
