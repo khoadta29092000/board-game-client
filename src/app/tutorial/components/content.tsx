@@ -43,6 +43,7 @@ function TutorialContent() {
   const dispatch = useDispatch();
   const profile = useAuth();
   const userId = profile?.id ?? "";
+  console.log("da vao2", profile, userId);
   const { isConnected, invoke, on, off } = useSignalR();
   const [isLoading, setIsLoading] = useState(true);
   const [gameState, setGameState] = useState<SplendorGameState | null>(null);
@@ -50,7 +51,6 @@ function TutorialContent() {
   const lastTurnRef = useRef<string | null>(null);
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [botThinkingMsg, setBotThinkingMsg] = useState("Bot đang suy nghĩ...");
-  const [tutorialStarted, setTutorialStarted] = useState(false);
   const [tutorialWon, setTutorialWon] = useState(false);
   const [showBotWon, setShowBotWon] = useState(false);
 
@@ -146,7 +146,6 @@ function TutorialContent() {
   const saveTutorialStep = useCallback(
     (index: number, currentPhase: string) => {
       if (!isConnected) return;
-      console.log("data da vao", index);
       invoke("SaveTutorialStep", userId, index, currentPhase).catch(() => {});
     },
     [isConnected, invoke, userId]
@@ -176,12 +175,12 @@ function TutorialContent() {
   // ─── Start tutorial khi connected ────────────────────────────────────────
   // Đăng ký TutorialReady TRƯỚC khi invoke để không miss event
   useEffect(() => {
-    if (!isConnected || tutorialStarted || !userId) return;
-    setTutorialStarted(true);
+    console.log("da vao", isConnected, userId, profile);
+    if (!isConnected || !userId) return;
 
     const start = async () => {
       try {
-        await invoke("StartTutorial", userId, profile?.name ?? "Player");
+        await invoke("StartTutorial", profile?.id, profile?.name ?? "Player");
       } catch (e) {
         setIsLoading(false);
         console.error("StartTutorial failed", e);
@@ -189,15 +188,7 @@ function TutorialContent() {
       }
     };
     start();
-  }, [
-    isConnected,
-    tutorialStarted,
-    userId,
-    handleTutorialReady,
-    on,
-    off,
-    invoke
-  ]);
+  }, [isConnected, userId, handleTutorialReady, on, off, invoke]);
 
   useEffect(() => {
     if (!userId) return;
@@ -268,7 +259,6 @@ function TutorialContent() {
     setGameState(null);
     prevGameStateRef.current = null;
     lastTurnRef.current = null;
-    setTutorialStarted(false); // trigger useEffect restart
     resetToFreePlay(); // giữ phase FREE_PLAY, Phase 1 đã xong
   }, [resetToFreePlay]);
 
@@ -374,8 +364,6 @@ function TutorialContent() {
           onActionError(r?.message ?? "Lấy gem thất bại");
         } else {
           if (isGuided) {
-            console.log("data da vao ròi nha");
-
             onActionSuccess(
               Object.values(gems).filter(v => v > 0).length === 1 &&
                 Math.max(...Object.values(gems)) === 2
@@ -599,7 +587,6 @@ function TutorialContent() {
             <button
               onClick={() => {
                 setTutorialWon(false);
-                setTutorialStarted(false);
                 setGameState(null);
               }}
               style={{
