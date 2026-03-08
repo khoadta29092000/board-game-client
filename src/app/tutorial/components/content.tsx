@@ -31,6 +31,7 @@ import AnimationLayer from "@/src/components/common/AnimationLayer";
 import { useTutorialSteps } from "@/src/hook/game/useTutorialSteps";
 import TutorialOverlay from "@/src/components/splendor/gameBoard/TutorialOverlay";
 import { LoadingOverlay } from "@/src/components/common/loading";
+import useSkipTurn from "@/src/hook/game/useSkipTurn";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -65,7 +66,11 @@ function TutorialContent() {
     onClose: onCloseNoble,
     onOpen: onOpenNoble
   } = useDisclosure();
-
+  const {
+    isOpen: isOpenSkip,
+    onClose: onCloseSkip,
+    onOpen: onOpenSkip
+  } = useDisclosure();
   const { isDesktop, isTablet, vw, vh, baseH } = useCanvas();
   const screenRatio = vw / vh;
   const isLandscape = isDesktop || (isTablet && screenRatio > 1.0);
@@ -90,7 +95,7 @@ function TutorialContent() {
     isGuided,
     isFreePlay
   } = useTutorialSteps(gameState, userId);
-
+  const { isDeadlocked } = useSkipTurn();
   // Wrap startFreePlay: xóa step trên Redis ngay lập tức thay vì phụ thuộc useEffect
   const startFreePlay = useCallback(() => {
     startFreePlayBase();
@@ -238,7 +243,20 @@ function TutorialContent() {
 
   const handleYourTurn = useCallback(() => {
     setIsBotThinking(false);
-  }, []);
+    const state = prevGameStateRef.current;
+    if (state && isDeadlocked(state, userId)) {
+      onOpenSkip();
+    }
+  }, [isDeadlocked, userId]);
+
+  const handleConfirmPassTurn = useCallback(async () => {
+    try {
+      await invoke("PassTurn", userId);
+      onCloseSkip();
+    } catch (e) {
+      console.error("[Tutorial] PassTurn failed", e);
+    }
+  }, [invoke, userId]);
 
   const handleTutorialCompleted = useCallback(
     (data: { winner: string; message: string }) => {
@@ -495,8 +513,6 @@ function TutorialContent() {
     [isConnected, invoke, userId, onCloseNoble]
   );
 
-  const [showTutorial, setShowTutorial] = useState(false);
-
   // ─── Tutorial Win Screen ──────────────────────────────────────────────────
   if (tutorialWon) {
     return (
@@ -668,6 +684,71 @@ function TutorialContent() {
             onClose={() => {}}
           />
         )}
+        {isOpenSkip && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 11000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(0,0,0,0.7)",
+              backdropFilter: "blur(4px)"
+            }}
+          >
+            <div
+              style={{
+                background: "linear-gradient(135deg, #1e1b4b, #312e81)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 16,
+                padding: "28px 32px",
+                maxWidth: 360,
+                textAlign: "center",
+                boxShadow: "0 25px 50px rgba(0,0,0,0.5)"
+              }}
+            >
+              <div style={{ fontSize: 48, marginBottom: 12 }}>⏭️</div>
+              <h3
+                style={{
+                  color: "#fff",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  marginBottom: 8
+                }}
+              >
+                Không còn nước đi!
+              </h3>
+              <p
+                style={{
+                  color: "rgba(255,255,255,0.7)",
+                  fontSize: 14,
+                  marginBottom: 24,
+                  lineHeight: 1.5
+                }}
+              >
+                Không thể lấy gem, mua card hay reserve lúc này. Bỏ lượt để chờ
+                tình huống thay đổi.
+              </p>
+              <button
+                onClick={handleConfirmPassTurn}
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "12px 28px",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  width: "100%"
+                }}
+              >
+                Bỏ lượt →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Player info */}
         {gameState && (
@@ -682,7 +763,6 @@ function TutorialContent() {
             onPurchase={handlePurchaseCard}
           />
         )}
-
         {/* Board */}
         <div
           style={{
