@@ -31,6 +31,7 @@ import AnimationLayer from "@/src/components/common/AnimationLayer";
 import { useTutorialSteps } from "@/src/hook/game/useTutorialSteps";
 import TutorialOverlay from "@/src/components/splendor/gameBoard/TutorialOverlay";
 import { LoadingOverlay } from "@/src/components/common/loading";
+import useSkipTurn from "@/src/hook/game/useSkipTurn";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -43,6 +44,7 @@ function TutorialContent() {
   const dispatch = useDispatch();
   const profile = useAuth();
   const userId = profile?.id ?? "";
+  console.log("da vao2", profile, userId);
   const { isConnected, invoke, on, off } = useSignalR();
   const [isLoading, setIsLoading] = useState(true);
   const [gameState, setGameState] = useState<SplendorGameState | null>(null);
@@ -50,7 +52,6 @@ function TutorialContent() {
   const lastTurnRef = useRef<string | null>(null);
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [botThinkingMsg, setBotThinkingMsg] = useState("Bot đang suy nghĩ...");
-  const [tutorialStarted, setTutorialStarted] = useState(false);
   const [tutorialWon, setTutorialWon] = useState(false);
   const [showBotWon, setShowBotWon] = useState(false);
 
@@ -65,7 +66,11 @@ function TutorialContent() {
     onClose: onCloseNoble,
     onOpen: onOpenNoble
   } = useDisclosure();
-
+  const {
+    isOpen: isOpenSkip,
+    onClose: onCloseSkip,
+    onOpen: onOpenSkip
+  } = useDisclosure();
   const { isDesktop, isTablet, vw, vh, baseH } = useCanvas();
   const screenRatio = vw / vh;
   const isLandscape = isDesktop || (isTablet && screenRatio > 1.0);
@@ -90,7 +95,7 @@ function TutorialContent() {
     isGuided,
     isFreePlay
   } = useTutorialSteps(gameState, userId);
-
+  const { isDeadlocked } = useSkipTurn();
   // Wrap startFreePlay: xóa step trên Redis ngay lập tức thay vì phụ thuộc useEffect
   const startFreePlay = useCallback(() => {
     startFreePlayBase();
@@ -146,7 +151,6 @@ function TutorialContent() {
   const saveTutorialStep = useCallback(
     (index: number, currentPhase: string) => {
       if (!isConnected) return;
-      console.log("data da vao", index);
       invoke("SaveTutorialStep", userId, index, currentPhase).catch(() => {});
     },
     [isConnected, invoke, userId]
@@ -176,12 +180,12 @@ function TutorialContent() {
   // ─── Start tutorial khi connected ────────────────────────────────────────
   // Đăng ký TutorialReady TRƯỚC khi invoke để không miss event
   useEffect(() => {
-    if (!isConnected || tutorialStarted || !userId) return;
-    setTutorialStarted(true);
+    console.log("da vao", isConnected, userId, profile);
+    if (!isConnected || !userId) return;
 
     const start = async () => {
       try {
-        await invoke("StartTutorial", userId, profile?.name ?? "Player");
+        await invoke("StartTutorial", profile?.id, profile?.name ?? "Player");
       } catch (e) {
         setIsLoading(false);
         console.error("StartTutorial failed", e);
@@ -189,15 +193,7 @@ function TutorialContent() {
       }
     };
     start();
-  }, [
-    isConnected,
-    tutorialStarted,
-    userId,
-    handleTutorialReady,
-    on,
-    off,
-    invoke
-  ]);
+  }, [isConnected, userId, handleTutorialReady, on, off, invoke]);
 
   useEffect(() => {
     if (!userId) return;
@@ -247,7 +243,20 @@ function TutorialContent() {
 
   const handleYourTurn = useCallback(() => {
     setIsBotThinking(false);
-  }, []);
+    const state = prevGameStateRef.current;
+    if (state && isDeadlocked(state, userId)) {
+      onOpenSkip();
+    }
+  }, [isDeadlocked, userId]);
+
+  const handleConfirmPassTurn = useCallback(async () => {
+    try {
+      await invoke("PassTurn", userId);
+      onCloseSkip();
+    } catch (e) {
+      console.error("[Tutorial] PassTurn failed", e);
+    }
+  }, [invoke, userId]);
 
   const handleTutorialCompleted = useCallback(
     (data: { winner: string; message: string }) => {
@@ -268,7 +277,6 @@ function TutorialContent() {
     setGameState(null);
     prevGameStateRef.current = null;
     lastTurnRef.current = null;
-    setTutorialStarted(false); // trigger useEffect restart
     resetToFreePlay(); // giữ phase FREE_PLAY, Phase 1 đã xong
   }, [resetToFreePlay]);
 
@@ -374,8 +382,6 @@ function TutorialContent() {
           onActionError(r?.message ?? "Lấy gem thất bại");
         } else {
           if (isGuided) {
-            console.log("data da vao ròi nha");
-
             onActionSuccess(
               Object.values(gems).filter(v => v > 0).length === 1 &&
                 Math.max(...Object.values(gems)) === 2
@@ -507,8 +513,6 @@ function TutorialContent() {
     [isConnected, invoke, userId, onCloseNoble]
   );
 
-  const [showTutorial, setShowTutorial] = useState(false);
-
   // ─── Tutorial Win Screen ──────────────────────────────────────────────────
   if (tutorialWon) {
     return (
@@ -599,7 +603,6 @@ function TutorialContent() {
             <button
               onClick={() => {
                 setTutorialWon(false);
-                setTutorialStarted(false);
                 setGameState(null);
               }}
               style={{
@@ -681,6 +684,71 @@ function TutorialContent() {
             onClose={() => {}}
           />
         )}
+        {isOpenSkip && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 11000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(0,0,0,0.7)",
+              backdropFilter: "blur(4px)"
+            }}
+          >
+            <div
+              style={{
+                background: "linear-gradient(135deg, #1e1b4b, #312e81)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 16,
+                padding: "28px 32px",
+                maxWidth: 360,
+                textAlign: "center",
+                boxShadow: "0 25px 50px rgba(0,0,0,0.5)"
+              }}
+            >
+              <div style={{ fontSize: 48, marginBottom: 12 }}>⏭️</div>
+              <h3
+                style={{
+                  color: "#fff",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  marginBottom: 8
+                }}
+              >
+                Không còn nước đi!
+              </h3>
+              <p
+                style={{
+                  color: "rgba(255,255,255,0.7)",
+                  fontSize: 14,
+                  marginBottom: 24,
+                  lineHeight: 1.5
+                }}
+              >
+                Không thể lấy gem, mua card hay reserve lúc này. Bỏ lượt để chờ
+                tình huống thay đổi.
+              </p>
+              <button
+                onClick={handleConfirmPassTurn}
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "12px 28px",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  width: "100%"
+                }}
+              >
+                Bỏ lượt →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Player info */}
         {gameState && (
@@ -695,7 +763,6 @@ function TutorialContent() {
             onPurchase={handlePurchaseCard}
           />
         )}
-
         {/* Board */}
         <div
           style={{

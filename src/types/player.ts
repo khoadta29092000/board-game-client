@@ -38,6 +38,16 @@ export type TProfile = {
   isActive: boolean;
 };
 
+export type TJWTProfile = {
+  Email: string;
+  Id: string;
+  Name: string;
+  TokenId: string;
+  nbf: number;
+  exp: number;
+  iat: number;
+};
+
 export type TDataToken = {
   Email: string;
   Id: string;

@@ -4,8 +4,10 @@ import { useDispatch } from "react-redux";
 import useWrapAsync from "./WrapAsync";
 import { jwtDecode } from "jwt-decode";
 import {
+  TJWTProfile,
   TLogin,
   TLoginGoogle,
+  TProfile,
   TRegister,
   TResetPasssword,
   TSendCode,
@@ -54,11 +56,19 @@ const useApi = () => {
       const { statusCode, data: token, code } = res?.data;
       if (statusCode == 200) {
         const userToken = token;
-        const decoded = jwtDecode(userToken);
+        const decoded: TJWTProfile = jwtDecode(userToken);
+
+        const profile: TProfile = {
+          id: decoded.Id,
+          name: decoded.Name,
+          username: decoded.Email,
+          isVerified: true,
+          isActive: true
+        };
         if (decoded) {
           localStorage.setItem("user_token", userToken);
           localStorage.setItem("user_data", JSON.stringify(decoded));
-          dispatch(setAuth(decoded));
+          dispatch(setAuth(profile));
           router.push("/");
         }
         setLoading(false);
@@ -84,11 +94,18 @@ const useApi = () => {
       const { statusCode, data: token } = res?.data;
       if (statusCode == 201 || statusCode == 200) {
         const userToken = token;
-        const decoded = jwtDecode(userToken);
+        const decoded: TJWTProfile = jwtDecode(userToken);
+        const profile: TProfile = {
+          id: decoded.Id,
+          name: decoded.Name,
+          username: decoded.Email,
+          isVerified: true,
+          isActive: true
+        };
         if (decoded) {
           localStorage.setItem("user_token", userToken);
           localStorage.setItem("user_data", JSON.stringify(decoded));
-          dispatch(setAuth(decoded));
+          dispatch(setAuth(profile));
           router.push("/");
         }
         setLoading(false);
@@ -172,11 +189,19 @@ const useApi = () => {
       if (statusCode == 200 && statusCode == 201) {
         if (data.mode === "login") {
           const userToken = token;
-          const decoded = jwtDecode(userToken);
+          const decoded: TJWTProfile = jwtDecode(userToken);
+
+          const profile: TProfile = {
+            id: decoded.Id,
+            name: decoded.Name,
+            username: decoded.Email,
+            isVerified: true,
+            isActive: true
+          };
           if (decoded) {
             localStorage.setItem("user_token", userToken);
             localStorage.setItem("user_data", JSON.stringify(decoded));
-            dispatch(setAuth(decoded));
+            dispatch(setAuth(profile));
             router.push("/");
           }
         } else {

@@ -324,7 +324,6 @@ export function useTutorialSteps(
   // ── getHighlightRects ────────────────────────────────────────────────────────
   const getHighlightRects = useCallback((): DOMRect[] => {
     const step = resolvedStep();
-    console.log("da vao rect", step);
     if (!step || !gameState) return [];
 
     if (step.highlight.type === "GEM_BANK") {

@@ -19,7 +19,7 @@ export default function ContentLobby() {
   const [joiningRoomId, setJoiningRoomId] = useState<string | null>(null);
   const { isConnected, invoke, on, off } = useSignalR();
 
-  useEffect(() => {
+  useEffect(() => { 
     // Setup SignalR event handlers
     const handleActiveRoomsLoaded = (loadedRooms: Room[]) => {
       setRooms(loadedRooms);

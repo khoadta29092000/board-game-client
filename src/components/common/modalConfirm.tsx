@@ -17,6 +17,7 @@ type Props = {
   agree: () => void;
   isLoading: boolean;
   title: string;
+  description?: React.ReactNode;
 };
 
 const ModalConfirmComponent: FC<Props> = ({
@@ -24,7 +25,8 @@ const ModalConfirmComponent: FC<Props> = ({
   onClose,
   agree,
   isLoading,
-  title
+  title,
+  description = ""
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -32,7 +34,13 @@ const ModalConfirmComponent: FC<Props> = ({
         <DialogHeader>
           <DialogTitle className="capitalize">{title}</DialogTitle>
           <DialogDescription>
-            Do you want <strong className="lowercase">{title}</strong>?
+            {description ? (
+              description
+            ) : (
+              <>
+                Do you want <strong className="lowercase">{title}</strong>?
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
 

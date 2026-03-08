@@ -27,6 +27,7 @@ import AnimationLayer from "@/src/components/common/AnimationLayer";
 import { getGemBankRect } from "@/src/redux/animation/Animationrefs";
 import { useTutorialSteps } from "@/src/hook/game/useTutorialSteps";
 import { LoadingOverlay } from "@/src/components/common/loading";
+import useSkipTurn from "@/src/hook/game/useSkipTurn";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -35,7 +36,7 @@ function GameContent() {
   const router = useRouter();
   const dispatch = useDispatch(); // ← Fix 1: cần dispatch để pushEvents vào Redux
   const profile = useAuth();
-  const userId = profile?.id;
+  const userId = profile?.id ?? "";
   const gameId = params.id as string;
   const toastShownRef = useRef(new Set<string>());
   const { isConnected, invoke, on, off } = useSignalR();
@@ -53,6 +54,12 @@ function GameContent() {
     onClose: onCloseNoble,
     onOpen: onOpenNoble
   } = useDisclosure();
+  const {
+    isOpen: isOpenSkip,
+    onClose: onCloseSkip,
+    onOpen: onOpenSkip
+  } = useDisclosure();
+  const { isDeadlocked } = useSkipTurn();
   const lastTurnRef = useRef<string | null>(null);
   const { isMyTurn } = useTurn(gameState?.turn, userId);
   const { isDesktop, isTablet, vw, vh, baseH, scale } = useCanvas();
@@ -114,6 +121,12 @@ function GameContent() {
         setGameState(data);
         return;
       }
+      if (
+        prevGameStateRef.current &&
+        isDeadlocked(prevGameStateRef.current, userId)
+      ) {
+        onOpenSkip();
+      }
 
       // Dedup
       const fp = `${data.turn?.turnNumber ?? ""}-${data.turn?.lastActionTime ?? ""}`;
@@ -152,6 +165,15 @@ function GameContent() {
     },
     [dispatch]
   );
+
+  const handleConfirmPassTurn = useCallback(async () => {
+    try {
+      await invoke("PassTurn", userId);
+      onCloseSkip();
+    } catch (e) {
+      console.error("[Tutorial] PassTurn failed", e);
+    }
+  }, [invoke, userId]);
 
   const handleDiscardGem = useCallback((data: DiscardGemData) => {
     if (!data) return;
@@ -302,6 +324,71 @@ function GameContent() {
           overflow: "hidden"
         }}
       >
+        {isOpenSkip && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 11000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(0,0,0,0.7)",
+              backdropFilter: "blur(4px)"
+            }}
+          >
+            <div
+              style={{
+                background: "linear-gradient(135deg, #1e1b4b, #312e81)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 16,
+                padding: "28px 32px",
+                maxWidth: 360,
+                textAlign: "center",
+                boxShadow: "0 25px 50px rgba(0,0,0,0.5)"
+              }}
+            >
+              <div style={{ fontSize: 48, marginBottom: 12 }}>⏭️</div>
+              <h3
+                style={{
+                  color: "#fff",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  marginBottom: 8
+                }}
+              >
+                Không còn nước đi!
+              </h3>
+              <p
+                style={{
+                  color: "rgba(255,255,255,0.7)",
+                  fontSize: 14,
+                  marginBottom: 24,
+                  lineHeight: 1.5
+                }}
+              >
+                Không thể lấy gem, mua card hay reserve lúc này. Bỏ lượt để chờ
+                tình huống thay đổi.
+              </p>
+              <button
+                onClick={handleConfirmPassTurn}
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "12px 28px",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  width: "100%"
+                }}
+              >
+                Bỏ lượt →
+              </button>
+            </div>
+          </div>
+        )}
         {isGameOver && gameState && (
           <GameOverOverlay
             gameState={gameState}
