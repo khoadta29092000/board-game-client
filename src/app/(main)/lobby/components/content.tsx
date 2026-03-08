@@ -116,7 +116,16 @@ export default function ContentLobby() {
     }
   };
 
-  const token = localStorage.getItem("user_token");
+  const [token, setToken] = useState<string | null>(null);
+  const [checkedToken, setCheckedToken] = useState(false);
+
+  useEffect(() => {
+    const t = localStorage.getItem("user_token");
+    setToken(t);
+    setCheckedToken(true);
+  }, []);
+
+  if (!checkedToken) return null;
 
   if (!token) {
     return (
