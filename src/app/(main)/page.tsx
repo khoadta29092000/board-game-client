@@ -32,8 +32,8 @@ export default function Home() {
                 stunning digital format.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href={"/lobby"}>
-                  <button className="cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-xl flex items-center justify-center space-x-2">
+                <Link href={"/lobby"} className="">
+                  <button className="sm:w-auto w-full cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-xl flex items-center justify-center space-x-2">
                     <Play className="w-6 h-6" />
                     <span>Start Playing</span>
                   </button>
