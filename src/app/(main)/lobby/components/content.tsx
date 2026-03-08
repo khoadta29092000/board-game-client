@@ -116,6 +116,21 @@ export default function ContentLobby() {
     }
   };
 
+  const token = localStorage.getItem("user_token");
+
+  if (!token) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl font-semibold text-red-500">Login Required</p>
+          <p className="text-gray-500 mt-2">
+            Please log in to access the game rooms.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-[calc(80vh)] flex items-center justify-center bg-gray-50 backdrop-blur-sm">
