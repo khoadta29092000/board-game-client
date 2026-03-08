@@ -79,17 +79,25 @@ function TutorialContent() {
     currentStep,
     getHighlightRects,
     nextStep,
-    validateAction,
     onActionSuccess,
     onActionError,
-    startFreePlay,
+    startFreePlay: startFreePlayBase,
     resetToFreePlay,
     completeTutorial,
+    restoreStep,
     shakeMessage,
     hintText,
     isGuided,
     isFreePlay
   } = useTutorialSteps(gameState, userId);
+
+  // Wrap startFreePlay: xóa step trên Redis ngay lập tức thay vì phụ thuộc useEffect
+  const startFreePlay = useCallback(() => {
+    startFreePlayBase();
+    if (isConnected && userId) {
+      saveTutorialStep(10, "FREE_PLAY");
+    }
+  }, [startFreePlayBase, isConnected, userId, invoke]);
   // isMyTurn: trong guided phase luôn cho phép action (validate thủ công)
   // trong free play: check turn bình thường
   const isMyTurn = isFreePlay
@@ -132,14 +140,48 @@ function TutorialContent() {
     return () => window.removeEventListener("click", handle);
   }, []);
 
+  // ─── Tutorial specific events ─────────────────────────────────────────────
+
+  // Helper: lưu step lên server mỗi khi stepIndex / phase thay đổi
+  const saveTutorialStep = useCallback(
+    (index: number, currentPhase: string) => {
+      if (!isConnected) return;
+      console.log("data da vao", index);
+      invoke("SaveTutorialStep", userId, index, currentPhase).catch(() => {});
+    },
+    [isConnected, invoke, userId]
+  );
+
+  // Handler cho TutorialReady — gộp TutorialStarted + TutorialReconnected
+  const handleTutorialReady = useCallback(
+    (data: {
+      stepIndex: number;
+      phase: string;
+      isReconnect: boolean;
+      message: string;
+    }) => {
+      setIsLoading(false);
+      console.log("data connect", data);
+      if (data.isReconnect) {
+        restoreStep(
+          data.stepIndex,
+          data.phase as "GUIDED" | "TRANSITION" | "FREE_PLAY" | "DONE"
+        );
+      }
+      // isReconnect=false → fresh start, useTutorialSteps đã init ở 0:GUIDED
+    },
+    [restoreStep]
+  );
+
   // ─── Start tutorial khi connected ────────────────────────────────────────
+  // Đăng ký TutorialReady TRƯỚC khi invoke để không miss event
   useEffect(() => {
     if (!isConnected || tutorialStarted || !userId) return;
     setTutorialStarted(true);
+
     const start = async () => {
       try {
         await invoke("StartTutorial", userId, profile?.name ?? "Player");
-        setIsLoading(false);
       } catch (e) {
         setIsLoading(false);
         console.error("StartTutorial failed", e);
@@ -147,8 +189,22 @@ function TutorialContent() {
       }
     };
     start();
-  }, [isConnected, tutorialStarted, userId]);
+  }, [
+    isConnected,
+    tutorialStarted,
+    userId,
+    handleTutorialReady,
+    on,
+    off,
+    invoke
+  ]);
 
+  useEffect(() => {
+    if (!userId) return;
+    if (phase === "GUIDED" && stepIndex < totalSteps) {
+      saveTutorialStep(stepIndex, phase);
+    }
+  }, [stepIndex, phase, totalSteps, userId, saveTutorialStep]);
   // ─── Game state handlers ──────────────────────────────────────────────────
 
   const handleGameStateUpdated = useCallback(
@@ -184,7 +240,6 @@ function TutorialContent() {
     [dispatch]
   );
 
-  // ─── Tutorial specific events ─────────────────────────────────────────────
   const handleBotThinking = useCallback((data: { message: string }) => {
     setIsBotThinking(true);
     setBotThinkingMsg(data?.message ?? "🤖 Bot đang suy nghĩ...");
@@ -245,6 +300,7 @@ function TutorialContent() {
     on("TutorialFailed", handleTutorialFailed);
     on("NeedsDiscard", handleNeedDiscard);
     on("NeedSelectNoble", handleNeedSelectNoble);
+    on("TutorialReady", handleTutorialReady);
     return () => {
       off("GameStateUpdated", handleGameStateUpdated);
       off("BotThinking", handleBotThinking);
@@ -253,6 +309,7 @@ function TutorialContent() {
       off("TutorialFailed", handleTutorialFailed);
       off("NeedsDiscard", handleNeedDiscard);
       off("NeedSelectNoble", handleNeedSelectNoble);
+      off("TutorialReady", handleTutorialReady);
     };
   }, [
     isConnected,
@@ -266,6 +323,9 @@ function TutorialContent() {
     handleNeedDiscard,
     handleNeedSelectNoble
   ]);
+
+  // ─── Auto-save step khi stepIndex / phase thay đổi ──────────────────────
+  // Chỉ lưu khi GUIDED + trong range — FREE_PLAY được xóa trực tiếp trong startFreePlay
 
   // ─── Actions ──────────────────────────────────────────────────────────────
   const handleCollectGems = useCallback(
@@ -313,13 +373,16 @@ function TutorialContent() {
         if (!r?.success) {
           onActionError(r?.message ?? "Lấy gem thất bại");
         } else {
-          if (isGuided)
+          if (isGuided) {
+            console.log("data da vao ròi nha");
+
             onActionSuccess(
               Object.values(gems).filter(v => v > 0).length === 1 &&
                 Math.max(...Object.values(gems)) === 2
                 ? "COLLECT_2_SAME"
                 : "COLLECT_3_DIFF"
             );
+          }
         }
       } catch {
         toast.error("Lấy gem thất bại");
@@ -355,7 +418,9 @@ function TutorialContent() {
           onActionError(r?.message ?? "Không đủ gem để mua card này");
           toast.error("Không mua card được", { description: "Không đủ gem!" });
         } else {
-          if (isGuided) onActionSuccess("PURCHASE_CARD");
+          if (isGuided) {
+            onActionSuccess("PURCHASE_CARD");
+          }
         }
       } catch {
         toast.error("Mua card thất bại");
@@ -395,7 +460,9 @@ function TutorialContent() {
               "hiện tại không thể reverse card này vì trên bạn chỉ sỡ hưu được dưới 3"
           });
         } else {
-          if (isGuided) onActionSuccess("RESERVE_CARD");
+          if (isGuided) {
+            onActionSuccess("RESERVE_CARD");
+          }
         }
       } catch {
         toast.error("Reserve card thất bại");
@@ -439,6 +506,8 @@ function TutorialContent() {
     },
     [isConnected, invoke, userId, onCloseNoble]
   );
+
+  const [showTutorial, setShowTutorial] = useState(false);
 
   // ─── Tutorial Win Screen ──────────────────────────────────────────────────
   if (tutorialWon) {
@@ -562,6 +631,7 @@ function TutorialContent() {
 
       {/* Tutorial Overlay */}
       <TutorialOverlay
+        saveTutorialStep={saveTutorialStep}
         step={currentStep}
         phase={phase}
         stepIndex={stepIndex}

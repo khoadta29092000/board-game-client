@@ -81,7 +81,6 @@ const STEPS: TutorialStep[] = [
       const lv1 = state.board?.visibleCards?.level1 ?? [];
       // Ưu tiên card cost 1 màu duy nhất (c17, c9, c25...) — dễ mua nhất
       const simple = lv1.find(c => Object.keys(c.cost ?? {}).length === 4);
-      console.log("simple", simple);
       return simple?.cardId ?? lv1[0]?.cardId ?? null;
     }
   },
@@ -235,6 +234,30 @@ export function useTutorialSteps(
 
   const totalSteps = STEPS.length;
   const currentStep = STEPS[stepIndex] ?? null;
+
+  // ── restoreStep: gọi từ content.tsx khi nhận TutorialReady isReconnect=true ─
+  // Chỉ restore GUIDED phase với stepIndex trong range — ngoài range thì reset
+  const restoreStep = useCallback(
+    (index: number, restoredPhase: TutorialPhase) => {
+      console.log("data retore", index, restoredPhase, STEPS.length);
+      if (index === 10 && restoredPhase == "FREE_PLAY") {
+        setStepIndex(STEPS.length);
+        setPhase("GUIDED");
+        setHintText(null);
+        return;
+      }
+      if (restoredPhase === "GUIDED" && index >= 0 && index < STEPS.length) {
+        setStepIndex(index);
+        setPhase("GUIDED");
+      } else {
+        // index >= totalSteps hoặc phase không phải GUIDED → reset về đầu
+        setStepIndex(0);
+        setPhase("GUIDED");
+      }
+      setHintText(null);
+    },
+    []
+  );
 
   // ── Resolve step với gameState thực tế ──────────────────────────────────────
   const resolvedStep = useCallback((): TutorialStep | null => {
@@ -395,12 +418,11 @@ export function useTutorialSteps(
   );
 
   const startFreePlay = useCallback(() => {
-    console.log("da den giai doan free play");
     setPhase("FREE_PLAY");
     setHintText(null);
     setStepIndex(totalSteps);
   }, [totalSteps]);
-
+  console.log("data currenstep", currentStep, stepIndex, totalSteps);
   const resetToFreePlay = useCallback(() => {
     setPhase("FREE_PLAY");
     setHintText(null);
@@ -423,6 +445,7 @@ export function useTutorialSteps(
     startFreePlay,
     resetToFreePlay,
     completeTutorial,
+    restoreStep,
     shakeMessage,
     hintText,
     isGuided: phase === "GUIDED",

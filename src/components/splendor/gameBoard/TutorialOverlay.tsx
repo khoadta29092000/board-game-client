@@ -19,6 +19,7 @@ type Props = {
   botThinkingMessage: string;
   showBotWon: boolean;
   onRetry: () => void;
+  saveTutorialStep: (index: number, phase: string) => void;
 };
 
 // ─── Spotlight: dùng SVG mask để đục lỗ chính xác theo getBoundingClientRect ─
@@ -128,7 +129,8 @@ function MessageBox({
   onSkip,
   shake,
   hintText,
-  highlightRects
+  highlightRects,
+  saveTutorialStep
 }: {
   step: TutorialStep;
   stepIndex: number;
@@ -138,6 +140,7 @@ function MessageBox({
   shake: boolean;
   hintText: string | null;
   highlightRects: DOMRect[];
+  saveTutorialStep: (index: number, phase: string) => void;
 }) {
   // useMemo: tính lại mỗi khi highlightRects thay đổi (không phải mỗi render)
   // Đặt box SÁT CẠNH glow ring — ưu tiên phải → trái → dưới → trên
@@ -385,7 +388,10 @@ function MessageBox({
 
           {step.allowNext ? (
             <button
-              onClick={onNext}
+              onClick={() => {
+                saveTutorialStep(stepIndex + 1, "Guide");
+                onNext();
+              }}
               style={{
                 width: "100%",
                 padding: "10px 0",
@@ -914,7 +920,8 @@ export default function TutorialOverlay({
   isBotThinking,
   botThinkingMessage,
   showBotWon,
-  onRetry
+  onRetry,
+  saveTutorialStep
 }: Props) {
   const [portalEl, setPortalEl] = useState<Element | null>(null);
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
@@ -1108,6 +1115,7 @@ export default function TutorialOverlay({
           </svg>
           {/* Message box — HTML thuần, zIndex trên SVG */}
           <MessageBox
+            saveTutorialStep={saveTutorialStep}
             step={step}
             stepIndex={stepIndex}
             totalSteps={totalSteps}
