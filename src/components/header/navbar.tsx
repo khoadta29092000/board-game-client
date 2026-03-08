@@ -19,14 +19,15 @@ import { TMenuItem } from "@/src/types/header";
 import { History } from "lucide-react";
 import { useAuth } from "@/src/redux/global/selectors";
 import { useProfile } from "@/src/hook/user/useGetProfile";
+import { setAuth } from "@/src/redux/global/slice";
+import { useDispatch } from "react-redux";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useProfile();
   const reduxProfile = useAuth();
-
-  console.log("profile", profile,reduxProfile);
+  const dispatch = useDispatch();
 
   // derive hasToken/LoggedIn from profile or localStorage (fallback)
   const hasToken = Boolean(
@@ -35,6 +36,7 @@ export default function Navbar() {
     (typeof window !== "undefined" && localStorage.getItem("user_token"))
   );
   const handleLogout = () => {
+    dispatch(setAuth(null));
     localStorage.removeItem("user_token");
     localStorage.removeItem("user_data");
     router.push("/login");

@@ -4,6 +4,7 @@ import { GemColor, SplendorGameState } from "@/src/types/splendor";
 import CardsBoard from "./cards";
 import GemsCard from "./gems";
 import { LastRoundBanner } from "./lastRoundBanner";
+import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
 
 type TProps = {
   gameId?: string;
@@ -16,6 +17,7 @@ type TProps = {
   onReserve?: (cardId?: string, level?: number) => void;
   onReserveFromDeck?: (level: number) => void;
   onCollectGem?: (gems: Record<GemColor, number>) => void;
+  currentStep: TutorialStep | null;
 };
 
 export default function BoardContainer({
@@ -25,7 +27,8 @@ export default function BoardContainer({
   onReserveFromDeck,
   onCollectGem,
   isMyTurn,
-  isLandscape = true
+  isLandscape = true,
+  currentStep
 }: TProps) {
   const bankGemsMemo = useMemo(
     () => gameState?.board?.gemBank ?? null,
@@ -75,6 +78,7 @@ export default function BoardContainer({
           isMyTurn={isMyTurn}
           isLandscape={isLandscape}
           onConfirm={gems => onCollectGem?.(gems)}
+          currentStep={currentStep}
         />
       </div>
 
@@ -88,6 +92,7 @@ export default function BoardContainer({
         }}
       >
         <CardsBoard
+          currentStep={currentStep}
           cardsNobles={cardsNobles}
           dataCards={cardsDataMemo}
           cardDecks={cardsDeck ?? {}}

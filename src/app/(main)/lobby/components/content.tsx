@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
-import { Loader2, Plus, Wifi, WifiOff } from "lucide-react";
+import { Bot, Loader2, Plus, Wifi, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { Room } from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
@@ -219,23 +219,34 @@ export default function ContentLobby() {
                 )}
               </div>
             </div>
-            <Button
-              onClick={handleCreateRoom}
-              disabled={isCreating || !isConnected}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isCreating ? (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => router.push(`/tutorial`)}
+                className="bg-green-600 hover:bg-green-700"
+              >
                 <>
-                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                  Creating...
+                  <Bot className="mr-2 h-4 w-4" />
+                  Tutorial
                 </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Room
-                </>
-              )}
-            </Button>
+              </Button>
+              <Button
+                onClick={handleCreateRoom}
+                disabled={isCreating || !isConnected}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Room
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           {rooms.length === 0 ? (

@@ -12,7 +12,7 @@ export default function GameLayout({
           position: "fixed",
           inset: 0,
           pointerEvents: "none",
-          zIndex: 9999,
+          zIndex: 9999
         }}
       />
     </>

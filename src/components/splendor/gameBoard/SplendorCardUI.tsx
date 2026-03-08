@@ -3,13 +3,20 @@ import { SplendorCard } from "@/src/types/splendor";
 import { cn, gemIconMap } from "@/src/utils";
 import Image from "next/image";
 import { registerCardBoard } from "@/src/redux/animation/Animationrefs"; // ← thêm
+import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
 
-type Props = { card: SplendorCard; isMyTurn?: boolean; onClick?: () => void };
+type Props = {
+  card: SplendorCard;
+  isMyTurn?: boolean;
+  onClick?: () => void;
+  currentStep?: TutorialStep | null;
+};
 
 export default function SplendorCardUI({
   card,
   isMyTurn = false,
-  onClick
+  onClick,
+  currentStep = null
 }: Props) {
   const bg =
     card.bonusColor === "White"
@@ -27,10 +34,17 @@ export default function SplendorCardUI({
   );
   const costCount = costEntries.length;
 
+  const isTutorialLock =
+    currentStep !== null && currentStep?.id !== 5 && currentStep?.id !== 6;
+
   return (
     <button
       ref={el => registerCardBoard(card.cardId, el as HTMLDivElement | null)} // ← thêm
-      onClick={onClick}
+      onClick={() => {
+        if (!isTutorialLock) {
+          onClick && onClick();
+        }
+      }}
       disabled={!isMyTurn}
       className={`
         ${bg} rounded-lg border w-full h-full
@@ -40,7 +54,9 @@ export default function SplendorCardUI({
         transition-all duration-150
         ${
           isMyTurn
-            ? "border-yellow-400 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-400/30 active:scale-95 cursor-pointer"
+            ? isTutorialLock
+              ? "border-yellow-400"
+              : "border-yellow-400 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-400/30 active:scale-95 cursor-pointer"
             : "border-gray-600 opacity-75 cursor-default"
         }
       `}

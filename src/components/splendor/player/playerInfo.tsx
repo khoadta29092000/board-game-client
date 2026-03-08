@@ -12,6 +12,7 @@ import {
   registerNoblePlayer,
   registerCardReserved
 } from "@/src/redux/animation/Animationrefs"; // ← thêm
+import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
 
 const WIN_POINTS = 15;
 
@@ -23,6 +24,7 @@ type TProps = {
   playerCount?: number;
   baseH?: number;
   onPurchase?: (cardId: string) => void;
+  currentStep: TutorialStep | null;
 };
 
 export default function PlayerInfo({
@@ -30,7 +32,8 @@ export default function PlayerInfo({
   myId,
   isMyTurn,
   isLandscape = true,
-  onPurchase
+  onPurchase,
+  currentStep
 }: TProps) {
   const [showReserved, setShowReserved] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<SplendorCard | null>(null);
@@ -447,7 +450,10 @@ export default function PlayerInfo({
                   {player?.totalOwnedCards} cards
                 </span>
                 <button
-                  onClick={() => setShowReserved(player?.playerId)}
+                  onClick={() => {
+                    if (currentStep) return;
+                    setShowReserved(player?.playerId);
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -456,7 +462,7 @@ export default function PlayerInfo({
                     borderRadius: 5,
                     padding: "2px 7px",
                     border: "none",
-                    cursor: "pointer"
+                    cursor: currentStep ? "default" : "pointer"
                   }}
                 >
                   <span style={{ color: "#d1d5db", fontSize: 10 }}>
@@ -528,8 +534,9 @@ export default function PlayerInfo({
                       >
                         <SplendorCardUI
                           card={card}
-                          isMyTurn={isMyTurn}
+                          isMyTurn={isMyTurn && currentStep == null}
                           onClick={() => {
+                            if (currentStep != null) return;
                             if (!isMyTurn || !isMe) return;
                             setSelectedCard(card);
                           }}
@@ -545,6 +552,7 @@ export default function PlayerInfo({
 
       {selectedCard && (
         <ModalCardAction
+          currentStep={currentStep}
           isOpen={!!selectedCard}
           card={selectedCard}
           onClose={() => setSelectedCard(null)}

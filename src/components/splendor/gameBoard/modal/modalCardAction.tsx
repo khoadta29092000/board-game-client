@@ -3,6 +3,7 @@ import { SplendorCard } from "@/src/types/splendor";
 import { ModalCommon } from "@/src/components/common/modal";
 import { Button } from "@/src/components/ui/button";
 import SplendorCardUI from "../SplendorCardUI";
+import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
 
 type Props = {
   isOpen: boolean;
@@ -10,6 +11,7 @@ type Props = {
   onClose: () => void;
   onPurchase?: () => void;
   onReserve?: () => void;
+  currentStep: TutorialStep | null;
 };
 
 export default function ModalCardAction({
@@ -17,8 +19,11 @@ export default function ModalCardAction({
   card,
   onClose,
   onPurchase,
-  onReserve
+  onReserve,
+  currentStep = null
 }: Props) {
+  const isReserve = currentStep !== null && currentStep.id !== 5;
+  const isPurchase = currentStep !== null && currentStep.id !== 6;
   return (
     <ModalCommon
       isOpen={isOpen}
@@ -41,6 +46,7 @@ export default function ModalCardAction({
             <Button
               variant="secondary"
               onClick={onReserve}
+              disabled={isPurchase}
               className="bg-yellow-600 hover:bg-yellow-700 text-white"
             >
               Reserve
@@ -49,6 +55,7 @@ export default function ModalCardAction({
           {onPurchase && (
             <Button
               onClick={onPurchase}
+              disabled={isReserve}
               className="bg-green-600 hover:bg-green-700"
             >
               Purchase

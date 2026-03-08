@@ -7,6 +7,7 @@
 type DivRef = { current: HTMLDivElement | null };
 type RefMap = Record<string, DivRef>;
 type NestedRefMap = Record<string, RefMap>;
+export const TAKE_BUTTON_KEY = "Take";
 
 const refs = {
   gemBank: {} as RefMap,
@@ -67,8 +68,6 @@ export function registerCardSlot(playerId: string, el: HTMLDivElement | null) {
   if (!refs.cardSlot[playerId]) refs.cardSlot[playerId] = { current: null };
   refs.cardSlot[playerId].current = el;
 }
-
-
 
 // ─── Read helpers ──────────────────────────────────────────────────────────────
 

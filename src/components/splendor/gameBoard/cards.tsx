@@ -7,6 +7,7 @@ import {
 import SplendorCardUI from "./SplendorCardUI";
 import NobleCard from "./nobles";
 import ModalCardAction from "./modal/modalCardAction";
+import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
 
 type Props = {
   dataCards: VisibleCards | null;
@@ -16,6 +17,7 @@ type Props = {
   onPurchase?: (cardId: string) => void;
   onReserve?: (cardId: string) => void;
   onReserveFromDeck?: (level: number) => void;
+  currentStep: TutorialStep | null;
 };
 
 export default function CardsBoard({
@@ -25,11 +27,14 @@ export default function CardsBoard({
   onPurchase,
   onReserve,
   onReserveFromDeck,
-  cardsNobles
+  cardsNobles,
+  currentStep
 }: Props) {
   const [selectedCard, setSelectedCard] = useState<SplendorCard | null>(null);
   const levels = dataCards ? Object.entries(dataCards) : [];
-
+  console.log("currentStep", currentStep);
+  const isTutorialLock =
+    currentStep !== null && currentStep?.id !== 5 && currentStep?.id !== 6;
   return (
     <div
       style={{
@@ -84,7 +89,7 @@ export default function CardsBoard({
               {/* Deck button */}
               <div
                 onClick={() => {
-                  if (!isMyTurn) return;
+                  if (!isMyTurn || isTutorialLock) return;
                   onReserveFromDeck?.(Number(levelKey.replace(/\D/g, "")));
                 }}
                 style={{
@@ -98,7 +103,7 @@ export default function CardsBoard({
                   border: "2px solid #4b5563",
                   background: "#1f2937",
                   color: "#9ca3af",
-                  cursor: isMyTurn ? "pointer" : "default",
+                  cursor: isMyTurn && !isTutorialLock ? "pointer" : "default",
                   transition: "border-color 0.15s",
                   minHeight: 0
                 }}
@@ -122,6 +127,7 @@ export default function CardsBoard({
               >
                 {(cards as SplendorCard[]).map(card => (
                   <SplendorCardUI
+                    currentStep={currentStep}
                     key={card.cardId}
                     card={card}
                     isMyTurn={isMyTurn}
@@ -139,6 +145,7 @@ export default function CardsBoard({
 
       {selectedCard && (
         <ModalCardAction
+          currentStep={currentStep}
           isOpen={!!selectedCard}
           card={selectedCard}
           onClose={() => setSelectedCard(null)}

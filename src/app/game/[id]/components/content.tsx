@@ -25,6 +25,8 @@ import { useDispatch } from "react-redux";
 import { preloadSounds } from "@/src/sounds.ts/splendorSounds";
 import AnimationLayer from "@/src/components/common/AnimationLayer";
 import { getGemBankRect } from "@/src/redux/animation/Animationrefs";
+import { useTutorialSteps } from "@/src/hook/game/useTutorialSteps";
+import { LoadingOverlay } from "@/src/components/common/loading";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -39,7 +41,7 @@ function GameContent() {
   const { isConnected, invoke, on, off } = useSignalR();
   const [gameState, setGameState] = useState<SplendorGameState | null>(null);
   const prevGameStateRef = useRef<SplendorGameState | null>(null); // ← lưu state trước để diff
-
+  const [isLoading, setIsLoading] = useState(true);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [dataDiscardGem, setDataDiscardGem] = useState<DiscardGemData | null>(
     null
@@ -61,6 +63,7 @@ function GameContent() {
     : 2;
   const isGameOver = gameState?.info?.state === "Completed";
 
+  const { currentStep } = useTutorialSteps(gameState, userId ?? "");
   // Preload sounds sau lần click đầu (browser autoplay policy)
   useEffect(() => {
     const handle = () => {
@@ -97,6 +100,7 @@ function GameContent() {
     if (!data) return;
     prevGameStateRef.current = data;
     setGameState(data);
+    setIsLoading(false);
   }, []);
 
   // ── Fix 2: GameStateUpdated (mỗi turn) → diff → animate → delay setState ──
@@ -281,6 +285,10 @@ function GameContent() {
     handleLastRound
   ]);
 
+  if (isLoading) {
+    return <LoadingOverlay message="Creating Game..." />;
+  }
+
   return (
     <>
       <AnimationLayer />
@@ -325,6 +333,7 @@ function GameContent() {
 
         {gameState && (
           <PlayerInfo
+            currentStep={currentStep?.id == 0 ? null : currentStep}
             gameState={gameState}
             myId={userId ?? ""}
             isMyTurn={isMyTurn}
@@ -345,6 +354,7 @@ function GameContent() {
           }}
         >
           <BoardContainer
+            currentStep={currentStep?.id == 0 ? null : currentStep}
             isConnected={isConnected}
             gameState={gameState}
             gameId={gameId}
