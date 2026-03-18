@@ -26,7 +26,8 @@ import {
   Copy,
   Check,
   Wifi,
-  WifiOff
+  WifiOff,
+  BotIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { PlayerLeftRoom, Room, RoomPlayer } from "@/src/types/room";
@@ -131,6 +132,23 @@ export default function ContentRoomDetail() {
       toast.error("Failed to leave room");
     }
   }, [isConnected, invoke, router]);
+
+  const handleAddBot = useCallback(async () => {
+    if (!isConnected) {
+      toast.error("Not connected to server");
+      return;
+    }
+    try {
+      const result = await invoke("AddBotToRoom");
+      if (result.success) {
+        setRoom(result.room);
+        return;
+      }
+    } catch (error) {
+      console.error("Change ready error:", error);
+      toast.error("Failed to change ready state");
+    }
+  }, [isConnected, invoke]);
 
   const handleToggleReady = useCallback(
     async (newReady: boolean) => {
@@ -344,21 +362,34 @@ export default function ContentRoomDetail() {
         {/* Room Info */}
         <Card className="mb-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between">
               <CardTitle className="text-2xl">{room.id}</CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyRoomId}
-                className="flex items-center gap-2"
-              >
-                {copied ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyRoomId}
+                  className="flex items-center gap-2"
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                  {copied ? "Copied!" : "Copy Room ID"}
+                </Button>
+                {isOwner && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleAddBot}
+                    className="flex items-center gap-2"
+                  >
+                    <BotIcon className="h-4 w-4" />
+                    Add Bot
+                  </Button>
                 )}
-                {copied ? "Copied!" : "Copy Room ID"}
-              </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -456,11 +487,11 @@ const PlayerCard = React.memo(
           <div className="flex items-center gap-2">
             <span className="font-medium">{player.name}</span>
             {player.isOwner && <Crown className="h-4 w-4 text-yellow-500" />}
-            {isCurrentUser && (
+            {/* {isCurrentUser && (
               <Badge variant="secondary" className="text-xs">
                 You
               </Badge>
-            )}
+            )} */}
           </div>
 
           <div className="flex items-center gap-2">
