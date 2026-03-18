@@ -32,9 +32,11 @@ export default function ContentLogin() {
     onClose: onCloseVerify,
     onOpen: onOpenVerify
   } = useDisclosure();
-
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
   const googleLoginRef = useRef<HTMLDivElement>(null);
   const handleCustomClick = () => {
+    setLoadingGoogle(true);
     const googleBtn =
       googleLoginRef.current?.querySelector<HTMLDivElement>(
         'div[role="button"]'
@@ -60,16 +62,19 @@ export default function ContentLogin() {
   });
   const { login, loginGoogle, refreshToken, loading } = useApi();
   const onSubmit = async (data: TLogin) => {
-    const res: { success: boolean; code: string } = await login(data);
-    if (res.code.toString() == "402") {
-      await refreshToken({
-        username: getValues("email")
-      });
-      onOpenVerify();
-      return;
-    }
-    if (res.code.toString() == "403") {
-      return;
+    setLoadingEmail(true);
+    try {
+      const res: { success: boolean; code: string } = await login(data);
+      if (res.code.toString() == "402") {
+        await refreshToken({ username: getValues("email") });
+        onOpenVerify();
+        return;
+      }
+      if (res.code.toString() == "403") {
+        return;
+      }
+    } finally {
+      setLoadingEmail(false); // chạy dù return hay error đều set false
     }
   };
 
@@ -165,7 +170,7 @@ export default function ContentLogin() {
               type="submit"
               className="flex justify-center items-center mt-2 w-full bg-primary-200 text-white py-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
             >
-              {loading ? (
+              {loadingEmail ? (
                 <Loader2 className="animate-spin " size={20} />
               ) : (
                 "Login"
@@ -185,16 +190,26 @@ export default function ContentLogin() {
               onClick={handleCustomClick}
               className="mt-5 gap-4 flex items-center justify-center w-full bg-primary-400 text-white p-2 rounded transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-2xl hover:opacity-80"
             >
-              <FaGoogle size={20} className="left-12 " />
-              <span>Login with Google</span>
+              {loadingGoogle ? (
+                <Loader2 className="animate-spin " size={20} />
+              ) : (
+                <>
+                  <FaGoogle size={20} className="left-12 " />
+                  <span>Login with Google</span>
+                </>
+              )}
             </button>
 
             <div ref={googleLoginRef} className="hidden">
               <GoogleLogin
                 onSuccess={response => {
                   loginGoogle({ token: response.credential ?? "" });
+                  setLoadingGoogle(false);
                 }}
-                onError={() => console.error("Login Failed")}
+                onError={() => {
+                  setLoadingGoogle(false);
+                  console.error("Login Failed");
+                }}
               />
             </div>
 

@@ -79,15 +79,16 @@ export default function Home() {
                   <Gamepad2 className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Multiple Games
+                  Interactive Tutorials
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Choose from dozens of classic and modern board games. New
-                  games added regularly.
+                  New to the game? Step-by-step tutorials guide you through
+                  rules, strategies, and moves — practice against AI at your own
+                  pace before jumping into real matches.
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl hover:shadow-xl transition-all transform hover:-translate-y-1">
+              {/* <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl hover:shadow-xl transition-all transform hover:-translate-y-1">
                 <div className="bg-green-600 w-12 h-12 rounded-full flex items-center justify-center mb-6">
                   <Trophy className="w-6 h-6 text-white" />
                 </div>
@@ -111,7 +112,7 @@ export default function Home() {
                   Track your progress with our comprehensive ranking and
                   achievement system.
                 </p>
-              </div>
+              </div> */}
 
               <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-8 rounded-2xl hover:shadow-xl transition-all transform hover:-translate-y-1">
                 <div className="bg-pink-600 w-12 h-12 rounded-full flex items-center justify-center mb-6">
@@ -126,7 +127,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-2xl hover:shadow-xl transition-all transform hover:-translate-y-1">
+              {/* <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-2xl hover:shadow-xl transition-all transform hover:-translate-y-1">
                 <div className="bg-indigo-600 w-12 h-12 rounded-full flex items-center justify-center mb-6">
                   <Gamepad2 className="w-6 h-6 text-white" />
                 </div>
@@ -137,7 +138,7 @@ export default function Home() {
                   Our AI-powered matchmaking ensures you&rsquo;re always paired
                   with players of similar skill level.
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </section>

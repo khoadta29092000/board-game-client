@@ -41,14 +41,14 @@ export const Footer = () => {
                   Popular Games
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="#tournaments"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Tournaments
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a
                   href="#leaderboard"
@@ -113,11 +113,11 @@ export const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-400">support@boardgame.com</span>
+                <span className="text-gray-400">khoadta.job@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-400">+84 123 456 789</span>
+                <span className="text-gray-400">+84 335739928</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-gray-400" />
