@@ -7,6 +7,7 @@ import {
   TJWTProfile,
   TLogin,
   TLoginGoogle,
+  TLoginGuess,
   TProfile,
   TRegister,
   TResetPasssword,
@@ -16,6 +17,7 @@ import {
 import {
   callLogin,
   callLoginGoogle,
+  callLoginGuess,
   callLostPassword,
   callRefreshVerificationCode,
   callRegister,
@@ -84,6 +86,48 @@ const useApi = () => {
       console.error(error);
       setLoading(false);
       return { success: false, code };
+    }
+  };
+
+  const loginGuess = async (data: TLoginGuess) => {
+    setLoading(true);
+    try {
+      const res = await wrapAsync(
+        () => callLoginGuess(data),
+        "loginGuess",
+        false
+      );
+
+      const { statusCode, data: token, code } = res?.data;
+      if (statusCode == 200) {
+        const userToken = token;
+        const decoded: TJWTProfile = jwtDecode(userToken);
+
+        const profile: TProfile = {
+          id: decoded.Id,
+          name: decoded.Name,
+          username: decoded.Email,
+          isVerified: true,
+          isActive: true
+        };
+        if (decoded) {
+          localStorage.setItem("user_token", userToken);
+          localStorage.setItem("user_data", JSON.stringify(decoded));
+          dispatch(setAuth(profile));
+        }
+        setLoading(false);
+        return { success: true, code: "Ok", data: userToken };
+      }
+      return { success: false, code: code, data: null };
+    } catch (error: unknown) {
+      let code: number | string = "Unknown";
+      if (error instanceof AxiosError) {
+        // message = error.response?.data?.message || error.message;
+        code = error.response?.data?.status || "Unknown";
+      }
+      console.error(error);
+      setLoading(false);
+      return { success: false, code, data: null };
     }
   };
 
@@ -221,6 +265,7 @@ const useApi = () => {
     loading,
     register,
     login,
+    loginGuess,
     loginGoogle,
     checkMail,
     resetPassword,

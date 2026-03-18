@@ -19,9 +19,9 @@ let _sounds: Sounds | null = null;
 
 function createSounds(): Sounds {
   const gems = new Howl({ src: ["/sounds/gems.wav"], volume: 0.5 });
-  const card = new Howl({ src: ["/sounds/card.wav"], volume: 0.6 });
-  const nobles = new Howl({ src: ["/sounds/nobles.wav"], volume: 0.7 });
-  const endGame = new Howl({ src: ["/sounds/end.wav"], volume: 0.8 });
+  const card = new Howl({ src: ["/sounds/card.wav"], volume: 0.4 });
+  const nobles = new Howl({ src: ["/sounds/nobles.wav"], volume: 0.4 });
+  const endGame = new Howl({ src: ["/sounds/end.wav"], volume: 0.4 });
 
   return {
     gemCollect: gems,

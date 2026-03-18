@@ -1,4 +1,6 @@
 {
+  "loginGuessTitle": "Login Guess",
+  "loginGuessFailed": "Login Guess Failed",
   "loginTitle": "Login",
   "loginFailed": "Login Failed",
   "registerTitle": "Register",

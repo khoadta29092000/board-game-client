@@ -10,6 +10,7 @@ import { Room } from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { LoadingOverlay } from "@/src/components/common/loading";
 import { RoomCard } from "@/src/components/splendor/room/roomCard";
+import { LoginRequired } from "./LoginRequired";
 
 export default function ContentLobby() {
   const router = useRouter();
@@ -128,16 +129,7 @@ export default function ContentLobby() {
   if (!checkedToken) return null;
 
   if (!token) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-xl font-semibold text-red-500">Login Required</p>
-          <p className="text-gray-500 mt-2">
-            Please log in to access the game rooms.
-          </p>
-        </div>
-      </div>
-    );
+    return <LoginRequired onTokenReceived={t => setToken(t)} />;
   }
 
   if (isLoading) {

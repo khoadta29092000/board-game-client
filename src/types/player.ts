@@ -3,6 +3,10 @@ export type TLogin = {
   password: string;
 };
 
+export type TLoginGuess = {
+  name: string;
+};
+
 export type TLoginGoogle = {
   token: string;
 };

@@ -1,6 +1,7 @@
 import {
   TLogin,
   TLoginGoogle,
+  TLoginGuess,
   TRegister,
   TResetPasssword,
   TSendCode,
@@ -15,6 +16,18 @@ export const callLogin = async (body: TLogin) => {
       password: body.password
     };
     const response = await api.post(`/Players/Login`, newData);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const callLoginGuess = async (body: TLoginGuess) => {
+  try {
+    const newData = {
+      name: body.name
+    };
+    const response = await api.post(`/Players/Guest_Token`, newData);
     return response;
   } catch (error) {
     throw error;
