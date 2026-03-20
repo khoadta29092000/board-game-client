@@ -323,7 +323,7 @@ export default function ContentRoomDetail() {
     <div className="min-h-[calc(80vh)] bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-8">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -364,7 +364,7 @@ export default function ContentRoomDetail() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-center justify-between">
               <CardTitle className="text-2xl">{room.id}</CardTitle>
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-4 sm:mt-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -415,7 +415,7 @@ export default function ContentRoomDetail() {
         </Card>
 
         {/* Players List */}
-        <Card className="mb-6">
+        <Card className="mb-2 sm:mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Players in Room</CardTitle>
           </CardHeader>
@@ -427,6 +427,7 @@ export default function ContentRoomDetail() {
                   player={player}
                   isCurrentUser={player.playerId === auth?.Id}
                   onToggleReady={(isReady: boolean) => {
+                    console.log("123", player, auth);
                     if (player.playerId === auth?.Id && player.isOwner) {
                       handleToggleStart();
                       return;
