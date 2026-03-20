@@ -43,7 +43,6 @@ export const SignalRProvider = ({
   const initRef = useRef(false);
 
   const reduxProfile = useAuth();
-  const { profile } = useProfile();
 
   const connect = useCallback(async () => {
     if (connection || !localStorage.getItem("user_token")) return;
@@ -119,7 +118,7 @@ export const SignalRProvider = ({
     const token = localStorage.getItem("user_token");
     if (!token) return;
 
-    const effectiveProfile = reduxProfile ?? profile;
+    const effectiveProfile = reduxProfile;
     if (effectiveProfile) {
       initRef.current = true;
       (async () => {
@@ -131,7 +130,7 @@ export const SignalRProvider = ({
       })();
     }
     // Note: include reduxProfile and profile in deps so effect fires when SWR fills Redux
-  }, [reduxProfile, profile, connect]);
+  }, [reduxProfile, connect]);
 
   return (
     <SignalRContext.Provider

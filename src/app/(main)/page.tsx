@@ -1,6 +1,7 @@
 import { ArrowRight, Gamepad2, Play, Star, Trophy, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import ModalPlayGuest from "./_components/modalPlayGuest";
 
 export default function Home() {
   return (
@@ -226,9 +227,7 @@ export default function Home() {
               >
                 Create Free Account
               </Link>
-              <button className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all transform hover:scale-105">
-                Play as Guest
-              </button>
+              <ModalPlayGuest />
             </div>
           </div>
         </section>

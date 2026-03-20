@@ -11,7 +11,7 @@ type Filter = "all" | "win" | "loss";
 
 export default function ContentHistory() {
   const profile = useAuth();
-  const myId = profile?.id;
+  const myId = profile?.Id;
   const { data = [], isError, isLoading } = useGetMyHistory();
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -39,30 +39,32 @@ export default function ContentHistory() {
         )}
 
         {/* Filter */}
-        <div className="flex gap-1 p-1 mb-4 rounded-lg border bg-white">
-          {(["all", "win", "loss"] as Filter[]).map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={cn(
-                "flex-1 py-1.5 rounded-md text-xs font-bold uppercase transition",
-                filter === f
-                  ? f === "win"
-                    ? "bg-green-500 text-white"
-                    : f === "loss"
-                      ? "bg-red-500 text-white"
-                      : "bg-indigo-500 text-white"
-                  : "text-gray-500 hover:bg-gray-100"
-              )}
-            >
-              {f === "all"
-                ? `All (${data.length})`
-                : f === "win"
-                  ? `Wins (${wins})`
-                  : `Losses (${losses})`}
-            </button>
-          ))}
-        </div>
+        {data.length > 0 && (
+          <div className="flex gap-1 p-1 mb-4 rounded-lg border bg-white">
+            {(["all", "win", "loss"] as Filter[]).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "flex-1 py-1.5 rounded-md text-xs font-bold uppercase transition",
+                  filter === f
+                    ? f === "win"
+                      ? "bg-green-500 text-white"
+                      : f === "loss"
+                        ? "bg-red-500 text-white"
+                        : "bg-indigo-500 text-white"
+                    : "text-gray-500 hover:bg-gray-100"
+                )}
+              >
+                {f === "all"
+                  ? `All (${data.length})`
+                  : f === "win"
+                    ? `Wins (${wins})`
+                    : `Losses (${losses})`}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Error */}
         {isError && (

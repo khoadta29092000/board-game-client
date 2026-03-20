@@ -36,7 +36,7 @@ function GameContent() {
   const router = useRouter();
   const dispatch = useDispatch(); // ← Fix 1: cần dispatch để pushEvents vào Redux
   const profile = useAuth();
-  const userId = profile?.id ?? "";
+  const userId = profile?.Id ?? "";
   const gameId = params.id as string;
   const toastShownRef = useRef(new Set<string>());
   const { isConnected, invoke, on, off } = useSignalR();

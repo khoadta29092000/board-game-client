@@ -1,26 +1,28 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import Menu from "./menu";
 import TextReveal from "../animation/textReveal";
 import { Profile } from "./profile";
 import Navbar from "./navbar";
+import { useAuth } from "@/src/redux/global/selectors";
+import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import { TDataToken } from "@/src/types/player";
+import { setAuth } from "@/src/redux/global/slice";
 
 export default function Header() {
-  const [auth, setAtuh] = useState<TDataToken | null>(null);
+  const profile = useAuth();
+  const dispatch = useDispatch();
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    const userData = localStorage.getItem("user_data");
-    if (userData) {
-      try {
-        setAtuh(JSON.parse(userData));
-      } catch (err) {
-        console.error("Failed to parse user_data", err);
-      }
+    // Chạy 1 lần sau khi mount → không gây hydration mismatch
+    const data = localStorage.getItem("user_data");
+    if (data) {
+      dispatch(setAuth(JSON.parse(data)));
     }
-  }, []);
+    setMounted(true);
+  }, [dispatch]);
   return (
     <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="container max-w-11/12 mx-auto px-4">
@@ -39,8 +41,8 @@ export default function Header() {
           <Menu />
           <div className="flex items-center space-x-4">
             <TextReveal delay={0.5}>
-              {auth?.Email ? (
-                <Profile auth={auth} />
+              {mounted && profile?.Email ? (
+                <Profile auth={profile} />
               ) : (
                 <>
                   <Link

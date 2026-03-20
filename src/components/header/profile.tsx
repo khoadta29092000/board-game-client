@@ -30,7 +30,7 @@ export function Profile({ auth }: TProps) {
         <button className="focus:outline-none">
           <Avatar className="h-10 w-10">
             <AvatarFallback className="bg-blue-500 text-white font-semibold">
-              {auth.Name.charAt(0).toUpperCase()}
+              {auth?.Name?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </button>

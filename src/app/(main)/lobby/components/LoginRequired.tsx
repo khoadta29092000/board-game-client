@@ -22,7 +22,6 @@ export function LoginRequired({ onTokenReceived }: TProps) {
         name: guestName
       });
     if (res?.success && res.data) {
-      localStorage.setItem("user_token", res.data);
       onClose();
       onTokenReceived(res.data);
     }

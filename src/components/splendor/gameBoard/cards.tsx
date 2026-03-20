@@ -32,7 +32,6 @@ export default function CardsBoard({
 }: Props) {
   const [selectedCard, setSelectedCard] = useState<SplendorCard | null>(null);
   const levels = dataCards ? Object.entries(dataCards) : [];
-  console.log("currentStep", currentStep);
   const isTutorialLock =
     currentStep !== null && currentStep?.id !== 5 && currentStep?.id !== 6;
   return (

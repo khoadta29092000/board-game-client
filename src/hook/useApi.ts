@@ -26,7 +26,6 @@ import {
 } from "../service/user";
 import { setAuth } from "../redux/global/slice";
 import { AxiosError } from "axios";
-import { callMyHistoryApi } from "../service/history";
 
 const useApi = () => {
   const dispatch = useDispatch();
@@ -59,18 +58,10 @@ const useApi = () => {
       if (statusCode == 200) {
         const userToken = token;
         const decoded: TJWTProfile = jwtDecode(userToken);
-
-        const profile: TProfile = {
-          id: decoded.Id,
-          name: decoded.Name,
-          username: decoded.Email,
-          isVerified: true,
-          isActive: true
-        };
         if (decoded) {
           localStorage.setItem("user_token", userToken);
           localStorage.setItem("user_data", JSON.stringify(decoded));
-          dispatch(setAuth(profile));
+          dispatch(setAuth(decoded));
           router.push("/");
         }
         setLoading(false);
@@ -103,17 +94,10 @@ const useApi = () => {
         const userToken = token;
         const decoded: TJWTProfile = jwtDecode(userToken);
 
-        const profile: TProfile = {
-          id: decoded.Id,
-          name: decoded.Name,
-          username: decoded.Email,
-          isVerified: true,
-          isActive: true
-        };
         if (decoded) {
           localStorage.setItem("user_token", userToken);
           localStorage.setItem("user_data", JSON.stringify(decoded));
-          dispatch(setAuth(profile));
+          dispatch(setAuth(decoded));
         }
         setLoading(false);
         return { success: true, code: "Ok", data: userToken };
@@ -139,17 +123,11 @@ const useApi = () => {
       if (statusCode == 201 || statusCode == 200) {
         const userToken = token;
         const decoded: TJWTProfile = jwtDecode(userToken);
-        const profile: TProfile = {
-          id: decoded.Id,
-          name: decoded.Name,
-          username: decoded.Email,
-          isVerified: true,
-          isActive: true
-        };
+
         if (decoded) {
           localStorage.setItem("user_token", userToken);
           localStorage.setItem("user_data", JSON.stringify(decoded));
-          dispatch(setAuth(profile));
+          dispatch(setAuth(decoded));
           router.push("/");
         }
         setLoading(false);

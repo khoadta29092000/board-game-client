@@ -1,14 +1,14 @@
-import { TProfile } from "@/src/types/player";
+import { TDataToken, TProfile } from "@/src/types/player";
 import { createSlice } from "@reduxjs/toolkit";
 
 export type GlobalState = {
   isOpen: boolean;
-  auth: TProfile | null;
+  auth: TDataToken | null;
 };
 
 const initialState = {
   isOpen: false,
-  auth: null
+   auth: null
 };
 
 export const userSlice = createSlice({

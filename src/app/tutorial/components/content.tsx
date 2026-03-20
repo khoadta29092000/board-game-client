@@ -43,8 +43,7 @@ function TutorialContent() {
   const router = useRouter();
   const dispatch = useDispatch();
   const profile = useAuth();
-  const userId = profile?.id ?? "";
-  console.log("da vao2", profile, userId);
+  const userId = profile?.Id ?? "";
   const { isConnected, invoke, on, off } = useSignalR();
   const [isLoading, setIsLoading] = useState(true);
   const [gameState, setGameState] = useState<SplendorGameState | null>(null);
@@ -165,7 +164,6 @@ function TutorialContent() {
       message: string;
     }) => {
       setIsLoading(false);
-      console.log("data connect", data);
       if (data.isReconnect) {
         restoreStep(
           data.stepIndex,
@@ -180,12 +178,11 @@ function TutorialContent() {
   // ─── Start tutorial khi connected ────────────────────────────────────────
   // Đăng ký TutorialReady TRƯỚC khi invoke để không miss event
   useEffect(() => {
-    console.log("da vao", isConnected, userId, profile);
     if (!isConnected || !userId) return;
 
     const start = async () => {
       try {
-        await invoke("StartTutorial", profile?.id, profile?.name ?? "Player");
+        await invoke("StartTutorial", profile?.Id, profile?.Name ?? "Player");
       } catch (e) {
         setIsLoading(false);
         console.error("StartTutorial failed", e);
@@ -377,7 +374,6 @@ function TutorialContent() {
 
       try {
         const r = await invoke("CollectGems", userId, gems);
-        console.log("result", r);
         if (!r?.success) {
           onActionError(r?.message ?? "Lấy gem thất bại");
         } else {

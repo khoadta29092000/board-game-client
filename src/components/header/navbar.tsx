@@ -1,11 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { IoIosMenu } from "react-icons/io";
-import { CiShoppingBasket } from "react-icons/ci";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { FiUser, FiClock, FiLogOut, FiLogIn } from "react-icons/fi";
+import { FiUser, FiLogOut, FiLogIn } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import {
   Drawer,
@@ -17,24 +15,16 @@ import {
 import { menuData } from "@/src/utils/contants";
 import { TMenuItem } from "@/src/types/header";
 import { History } from "lucide-react";
-import { useAuth } from "@/src/redux/global/selectors";
-import { useProfile } from "@/src/hook/user/useGetProfile";
 import { setAuth } from "@/src/redux/global/slice";
 import { useDispatch } from "react-redux";
+import { useAuth } from "@/src/redux/global/selectors";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile } = useProfile();
-  const reduxProfile = useAuth();
   const dispatch = useDispatch();
+  const profile = useAuth();
 
-  // derive hasToken/LoggedIn from profile or localStorage (fallback)
-  const hasToken = Boolean(
-    profile ||
-    reduxProfile ||
-    (typeof window !== "undefined" && localStorage.getItem("user_token"))
-  );
   const handleLogout = () => {
     dispatch(setAuth(null));
     localStorage.removeItem("user_token");
@@ -77,7 +67,7 @@ export default function Navbar() {
             })}
           </ul>
 
-          {hasToken && (
+          {profile && (
             <ul className="w-full flex-col mt-1 flex sm:hidden">
               <li className="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
                 <Link href="/profile" passHref>
@@ -90,7 +80,7 @@ export default function Navbar() {
             </ul>
           )}
 
-          {hasToken && (
+          {profile && (
             <ul className="w-full flex-col mt-1 flex sm:hidden">
               <li className="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
                 <Link href="/history" passHref>
@@ -103,7 +93,7 @@ export default function Navbar() {
             </ul>
           )}
 
-          {hasToken ? (
+          {profile ? (
             <ul className="w-full flex-col mt-1 flex sm:hidden">
               <li className="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
                 <button

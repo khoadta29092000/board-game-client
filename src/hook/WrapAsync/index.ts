@@ -29,6 +29,7 @@ const useWrapAsync = () => {
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("user_token");
+        localStorage.removeItem("user_data");
         await router.push("/login");
       }
       const messageTitle =
@@ -36,7 +37,7 @@ const useWrapAsync = () => {
       showToast({
         type: "error",
         title: messageTitle,
-        description: error.response?.data?.message
+        description: error.response?.data?.error
       });
 
       throw error;

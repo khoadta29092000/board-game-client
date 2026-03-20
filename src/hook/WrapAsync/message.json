@@ -12,5 +12,7 @@
   "resetPasswordDes": "Reset Password Success",
   "resetPasswordFailed": "Reset Password Failed",
   "sendCodeTitle": "Send Code",
-  "sendCodeFailed": "Send Code Failed"
+  "sendCodeFailed": "Send Code Failed",
+  "getProfileTitle": "Get Profile",
+  "getProfileFailed": "Get Profile Failed"
 }
