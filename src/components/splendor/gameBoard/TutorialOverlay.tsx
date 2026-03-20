@@ -1,5 +1,6 @@
 "use client";
 import { TutorialPhase, TutorialStep } from "@/src/hook/game/useTutorialSteps";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -626,7 +627,7 @@ function FreePlayModal({ onStart }: { onStart: () => void }) {
 }
 
 // ─── Bot Won Modal ─────────────────────────────────────────────────────────────
-function BotWonModal({ onRetry }: { onRetry: () => void }) {
+function BotWonModal({ onBackToLobby }: { onBackToLobby: () => void }) {
   return (
     <div
       style={{
@@ -644,26 +645,26 @@ function BotWonModal({ onRetry }: { onRetry: () => void }) {
       <div
         style={{
           background: "linear-gradient(135deg, #0f172a, #1a0a2e)",
-          border: "2px solid rgba(239,68,68,0.4)",
+          border: "2px solid rgba(139,92,246,0.4)",
           borderRadius: 24,
           padding: "40px 48px",
           textAlign: "center",
           maxWidth: 400,
           width: "calc(100vw - 48px)",
           boxShadow:
-            "0 0 60px rgba(239,68,68,0.1), 0 24px 64px rgba(0,0,0,0.8)",
+            "0 0 60px rgba(139,92,246,0.1), 0 24px 64px rgba(0,0,0,0.8)",
           animation:
             "tutorialZoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
         }}
       >
-        <div style={{ fontSize: 64, marginBottom: 12, lineHeight: 1 }}>🤖</div>
+        <div style={{ fontSize: 64, marginBottom: 12, lineHeight: 1 }}>🎓</div>
 
         <div
           style={{
             display: "inline-block",
-            background: "rgba(239,68,68,0.15)",
-            border: "1px solid rgba(239,68,68,0.3)",
-            color: "#f87171",
+            background: "rgba(139,92,246,0.15)",
+            border: "1px solid rgba(139,92,246,0.3)",
+            color: "#a78bfa",
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: 2,
@@ -673,7 +674,7 @@ function BotWonModal({ onRetry }: { onRetry: () => void }) {
             marginBottom: 16
           }}
         >
-          Bot đã thắng lần này
+          Hướng dẫn hoàn tất
         </div>
 
         <div
@@ -685,7 +686,7 @@ function BotWonModal({ onRetry }: { onRetry: () => void }) {
             letterSpacing: -0.5
           }}
         >
-          Chưa tệ! Thử lại nào 💪
+          Bạn đã sẵn sàng rồi! 🚀
         </div>
 
         <div
@@ -696,15 +697,16 @@ function BotWonModal({ onRetry }: { onRetry: () => void }) {
             lineHeight: 1.6
           }}
         >
-          Phase 1 hướng dẫn vẫn được giữ nguyên —<br />
-          bạn sẽ bắt đầu lại từ chế độ tự do.
+          Bạn đã nắm được cơ bản của Splendor.
+          <br />
+          Hãy thử sức với người chơi thật ngay thôi!
         </div>
 
-        {/* Tips ngắn */}
+        {/* Những gì đã học */}
         <div
           style={{
-            background: "rgba(250,204,21,0.06)",
-            border: "1px solid rgba(250,204,21,0.15)",
+            background: "rgba(139,92,246,0.06)",
+            border: "1px solid rgba(139,92,246,0.15)",
             borderRadius: 12,
             padding: "14px 16px",
             marginBottom: 24,
@@ -713,20 +715,20 @@ function BotWonModal({ onRetry }: { onRetry: () => void }) {
         >
           <div
             style={{
-              color: "#facc15",
+              color: "#a78bfa",
               fontSize: 11,
               fontWeight: 700,
               marginBottom: 8,
               letterSpacing: 1
             }}
           >
-            💡 GỢI Ý
+            ✅ BẠN ĐÃ HỌC ĐƯỢC
           </div>
           {[
-            "Ưu tiên mua card lv1 để gom bonus sớm",
-            "Reserve card lv2/lv3 để bot không lấy mất",
-            "Để ý Noble requirements — hướng bonus theo đó"
-          ].map((tip, i) => (
+            "Thu thập gem và quản lý tài nguyên",
+            "Mua card để tích lũy điểm & bonus",
+            "Reserve card chiến lược để chặn đối thủ"
+          ].map((item, i) => (
             <div
               key={i}
               style={{
@@ -746,17 +748,17 @@ function BotWonModal({ onRetry }: { onRetry: () => void }) {
                   width: 5,
                   height: 5,
                   borderRadius: "50%",
-                  background: "#facc15",
+                  background: "#a78bfa",
                   display: "block"
                 }}
               />
-              {tip}
+              {item}
             </div>
           ))}
         </div>
 
         <button
-          onClick={onRetry}
+          onClick={onBackToLobby}
           style={{
             width: "100%",
             padding: "14px 0",
@@ -771,7 +773,7 @@ function BotWonModal({ onRetry }: { onRetry: () => void }) {
             letterSpacing: 0.3
           }}
         >
-          🔄 Thử lại ngay!
+          🏠 Về Lobby &amp; Chơi với người thật
         </button>
       </div>
     </div>
@@ -969,11 +971,16 @@ export default function TutorialOverlay({
     if (phase === "TRANSITION") setShowFreePlayBanner(true);
   }, [phase]);
 
+  const router = useRouter();
+
   if (!portalEl) return null;
 
   // Bot won modal — hiện trên tất cả, kể cả FREE_PLAY
   if (showBotWon) {
-    return createPortal(<BotWonModal onRetry={onRetry} />, portalEl);
+    return createPortal(
+      <BotWonModal onBackToLobby={() => router.push("/lobby")} />,
+      portalEl
+    );
   }
 
   // Không hiện gì khi FREE_PLAY bình thường (chỉ hiện bot thinking nếu có)

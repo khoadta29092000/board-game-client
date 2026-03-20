@@ -6,23 +6,15 @@ import TextReveal from "../animation/textReveal";
 import { Profile } from "./profile";
 import Navbar from "./navbar";
 import { useAuth } from "@/src/redux/global/selectors";
-import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import { setAuth } from "@/src/redux/global/slice";
 
 export default function Header() {
   const profile = useAuth();
-  const dispatch = useDispatch();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Chạy 1 lần sau khi mount → không gây hydration mismatch
-    const data = localStorage.getItem("user_data");
-    if (data) {
-      dispatch(setAuth(JSON.parse(data)));
-    }
     setMounted(true);
-  }, [dispatch]);
+  }, []);
   return (
     <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="container max-w-11/12 mx-auto px-4">

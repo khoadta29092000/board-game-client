@@ -31,7 +31,10 @@ export function ModalSelectNoble({
           {eligibleNoblesData.map(noble => (
             <button
               key={noble.nobleId}
-              onClick={() => onConfirm(noble.nobleId)}
+              onClick={() => {
+                onConfirm(noble.nobleId);
+                onClose();
+              }}
               className="rounded-lg border-2 border-gray-600 hover:border-yellow-400 hover:scale-105 transition-all duration-150 p-0 overflow-hidden"
             >
               <div className="rounded-lg border-2 border-purple-400 bg-gray-800 text-white p-2 flex justify-between items-center sm:h-[120px] px-4 gap-3 pointer-events-none">

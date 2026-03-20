@@ -154,7 +154,7 @@ function TutorialContent() {
     },
     [isConnected, invoke, userId]
   );
-
+  const isRestoredRef = useRef(false);
   // Handler cho TutorialReady — gộp TutorialStarted + TutorialReconnected
   const handleTutorialReady = useCallback(
     (data: {
@@ -164,12 +164,14 @@ function TutorialContent() {
       message: string;
     }) => {
       setIsLoading(false);
+      isRestoredRef.current = true;
       if (data.isReconnect) {
         restoreStep(
           data.stepIndex,
           data.phase as "GUIDED" | "TRANSITION" | "FREE_PLAY" | "DONE"
         );
       }
+
       // isReconnect=false → fresh start, useTutorialSteps đã init ở 0:GUIDED
     },
     [restoreStep]
@@ -194,6 +196,7 @@ function TutorialContent() {
 
   useEffect(() => {
     if (!userId) return;
+    if (!isRestoredRef.current) return;
     if (phase === "GUIDED" && stepIndex < totalSteps) {
       saveTutorialStep(stepIndex, phase);
     }

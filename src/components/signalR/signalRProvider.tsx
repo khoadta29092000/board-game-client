@@ -12,7 +12,6 @@ import React, {
 } from "react";
 import * as signalR from "@microsoft/signalr";
 import { useAuth } from "@/src/redux/global/selectors"; // <-- your selector
-import { useProfile } from "@/src/hook/user/useGetProfile";
 
 interface SignalRContextType {
   isConnected: boolean;
@@ -33,9 +32,7 @@ export const SignalRProvider = ({
   children: React.ReactNode;
   hubURL: string;
 }) => {
-  const [connection, setConnection] = useState<signalR.HubConnection | null>(
-    null
-  );
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const handlersRef = useRef<
     { method: string; handler: (...args: any[]) => void }[]
@@ -45,7 +42,7 @@ export const SignalRProvider = ({
   const reduxProfile = useAuth();
 
   const connect = useCallback(async () => {
-    if (connection || !localStorage.getItem("user_token")) return;
+    if (connectionRef.current || !localStorage.getItem("user_token")) return; // ← check ref
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl((process.env.NEXT_PUBLIC_SOCKET_URL ?? "") + hubURL, {
@@ -68,73 +65,74 @@ export const SignalRProvider = ({
       });
       handlersRef.current = [];
 
-      setConnection(newConnection);
+      connectionRef.current = newConnection; // ← ref, không trigger re-render
       setIsConnected(true);
     } catch (err) {
       console.error("❌ Error while starting connection:", err);
     }
-  }, [connection, hubURL]);
+  }, [hubURL]); // ← chỉ hubURL, không có connection
 
   const disconnect = useCallback(async () => {
-    if (connection) {
-      await connection.stop();
-      setConnection(null);
+    if (connectionRef.current) {
+      await connectionRef.current.stop();
+      connectionRef.current = null;
       setIsConnected(false);
     }
-  }, [connection]);
+  }, []);
 
-  const invoke = useCallback(
-    async (method: string, ...args: any[]) => {
-      if (!connection || connection.state !== "Connected") {
-        throw new Error("SignalR not connected");
-      }
-      return connection.invoke(method, ...args);
-    },
-    [connection]
-  );
+  const invoke = useCallback(async (method: string, ...args: any[]) => {
+    if (!connectionRef.current || connectionRef.current.state !== "Connected") {
+      throw new Error("SignalR not connected");
+    }
+    return connectionRef.current.invoke(method, ...args);
+  }, []);
 
   const on = useCallback(
     (method: string, handler: (...args: any[]) => void) => {
-      if (connection) {
-        connection.on(method, handler);
+      if (connectionRef.current) {
+        connectionRef.current.on(method, handler);
       } else {
         handlersRef.current.push({ method, handler });
       }
     },
-    [connection]
+    []
   );
 
   const off = useCallback(
     (method: string, handler?: (...args: any[]) => void) => {
-      connection?.off(method, handler as any);
+      connectionRef.current?.off(method, handler as any);
     },
-    [connection]
+    []
   );
 
-  // Init: prefer reduxProfile (already in store). If not present, wait for SWR profile.
   useEffect(() => {
     if (initRef.current) return;
+    if (!reduxProfile) return;
+    if (!localStorage.getItem("user_token")) return;
 
-    const token = localStorage.getItem("user_token");
-    if (!token) return;
-
-    const effectiveProfile = reduxProfile;
-    if (effectiveProfile) {
-      initRef.current = true;
-      (async () => {
-        try {
-          await connect();
-        } catch (err) {
-          console.error("SignalR connect failed", err);
-        }
-      })();
-    }
-    // Note: include reduxProfile and profile in deps so effect fires when SWR fills Redux
+    initRef.current = true;
+    connect().catch(err => console.error("SignalR connect failed", err));
   }, [reduxProfile, connect]);
+
+  useEffect(() => {
+    return () => {
+      connectionRef.current?.stop();
+      connectionRef.current = null;
+      initRef.current = false;
+    };
+  }, []);
 
   return (
     <SignalRContext.Provider
-      value={{ isConnected, connection, invoke, on, off, connect, disconnect }}
+      value={{
+        isConnected,
+        connection: connectionRef.current,
+        invoke,
+        on,
+        off,
+        connect,
+        disconnect
+      }}
     >
       {children}
     </SignalRContext.Provider>

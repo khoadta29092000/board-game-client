@@ -239,6 +239,7 @@ export function useTutorialSteps(
   // Chỉ restore GUIDED phase với stepIndex trong range — ngoài range thì reset
   const restoreStep = useCallback(
     (index: number, restoredPhase: TutorialPhase) => {
+      console.log(index, restoredPhase);
       if (index === 10 && restoredPhase == "FREE_PLAY") {
         setStepIndex(STEPS.length);
         setPhase("GUIDED");

@@ -79,7 +79,7 @@ export default function ContentRoomDetail() {
   const handlePlayerJoined = useCallback(
     (data: { playerId: string; playerName: string; room: Room }) => {
       // Only update if it's not the current user joining (to avoid duplicate toast)
-      if (data.playerId !== auth?.id) {
+      if (data.playerId !== auth?.Id) {
         setRoom(data.room);
 
         const toastKey = `player-joined-${data.playerId}-${Date.now()}`;
@@ -94,7 +94,7 @@ export default function ContentRoomDetail() {
         }
       }
     },
-    [auth?.id]
+    [auth?.Id]
   );
 
   const handleError = useCallback(
@@ -274,8 +274,8 @@ export default function ContentRoomDetail() {
 
   // Memoized computed values
   const isOwner = useMemo(
-    () => room?.players.find(p => p.playerId === auth?.id)?.isOwner ?? false,
-    [room?.players, auth?.id]
+    () => room?.players.find(p => p.playerId === auth?.Id)?.isOwner ?? false,
+    [room?.players, auth?.Id]
   );
 
   const emptySlots = useMemo(
@@ -425,9 +425,9 @@ export default function ContentRoomDetail() {
                 <PlayerCard
                   key={player.playerId}
                   player={player}
-                  isCurrentUser={player.playerId === auth?.id}
+                  isCurrentUser={player.playerId === auth?.Id}
                   onToggleReady={(isReady: boolean) => {
-                    if (player.playerId === auth?.id && player.isOwner) {
+                    if (player.playerId === auth?.Id && player.isOwner) {
                       handleToggleStart();
                       return;
                     }

@@ -1,9 +1,9 @@
 {
-  "name": "Create Next App",
-  "short_name": "NextApp",
+  "name": "Board Game",
+  "short_name": "KenBoard",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/icon.png",
       "sizes": "192x192",
       "type": "image/png"
     }
