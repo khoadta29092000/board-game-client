@@ -33,6 +33,8 @@ import { toast } from "sonner";
 import { PlayerLeftRoom, Room, RoomPlayer } from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { useAuth } from "@/src/redux/global/selectors";
+import { createPortal } from "react-dom";
+import BotThinkingIndicator from "@/src/components/splendor/common/BotThinkingIndicator";
 
 export default function ContentRoomDetail() {
   const router = useRouter();
@@ -45,7 +47,8 @@ export default function ContentRoomDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
-
+  const [isBotThinking, setIsBotThinking] = useState(false);
+  const [botThinkingMsg, setBotThinkingMsg] = useState("Bot is thinking...");
   // Refs để tránh duplicate events
   const hasJoinedRef = useRef(false);
   const toastShownRef = useRef(new Set<string>());
@@ -140,13 +143,20 @@ export default function ContentRoomDetail() {
     }
     try {
       const result = await invoke("AddBotToRoom");
-      if (result.success) {
-        setRoom(result.room);
+
+      if (!result) {
+        toast.error("No response from server");
         return;
       }
+
+      if (result.success) {
+        setRoom(result.room);
+      } else {
+        toast.error(result.error ?? "Failed to add bot");
+      }
     } catch (error) {
-      console.error("Change ready error:", error);
-      toast.error("Failed to change ready state");
+      console.error("Add bot error:", error);
+      toast.error("Failed to add bot to room");
     }
   }, [isConnected, invoke]);
 
@@ -200,6 +210,12 @@ export default function ContentRoomDetail() {
     }
   }, []);
 
+  const handleBotThinking = useCallback((data: { message: string }) => {
+    console.log("da vao", data);
+    setIsBotThinking(true);
+    setBotThinkingMsg(data?.message ?? "Bot is thinking...");
+  }, []);
+
   // Setup SignalR event handlers with stable references
   useEffect(() => {
     on("JoinedRoom", handleJoinedRoom);
@@ -208,6 +224,7 @@ export default function ContentRoomDetail() {
     on("PlayerLeft", handleRoomUpdated);
     on("PlayerChangeReady", handlePlayerChangeReady);
     on("GameStarted", handleStartGame);
+    on("BotThinking", handleBotThinking);
 
     return () => {
       off("JoinedRoom", handleJoinedRoom);
@@ -215,6 +232,7 @@ export default function ContentRoomDetail() {
       off("Error", handleError);
       off("PlayerLeft", handleRoomUpdated);
       off("PlayerChangeReady", handleStartGame);
+      off("BotThinking", handleBotThinking);
       on("off", handleStartGame);
     };
   }, [on, off, handleJoinedRoom, handlePlayerJoined, handleError]);
@@ -285,6 +303,12 @@ export default function ContentRoomDetail() {
         : [],
     [room?.quantityPlayer, room?.currentPlayers]
   );
+
+  if (isBotThinking) {
+    return (
+      <BotThinkingIndicator visible={isBotThinking} message={botThinkingMsg} />
+    );
+  }
 
   // Loading state
   if (isLoading || isJoining) {
@@ -380,10 +404,10 @@ export default function ContentRoomDetail() {
                 </Button>
                 {isOwner && (
                   <Button
-                    variant="default"
+                    variant="secondary"
                     size="sm"
                     onClick={handleAddBot}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <BotIcon className="h-4 w-4" />
                     Add Bot

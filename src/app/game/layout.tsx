@@ -1,3 +1,5 @@
+import { AuthInit } from "@/src/components/common/AuthInit";
+
 export default function GameLayout({
   children
 }: {
@@ -5,6 +7,7 @@ export default function GameLayout({
 }) {
   return (
     <>
+      <AuthInit />
       {children}
       <div
         id="animation-portal"
@@ -12,7 +15,7 @@ export default function GameLayout({
           position: "fixed",
           inset: 0,
           pointerEvents: "none",
-          zIndex: 9999,
+          zIndex: 9999
         }}
       />
     </>
