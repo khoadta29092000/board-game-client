@@ -1,8 +1,8 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import useSWR from "swr";
 import { useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/src/i18n/navigation";
 import { callProfile } from "@/src/service/user";
 import { useAuth } from "@/src/redux/global/selectors";
 
@@ -28,7 +28,7 @@ export const useProfile = () => {
       revalidateOnReconnect: false,
       dedupingInterval: 6000,
       shouldRetryOnError: false,
-      onError: err => {
+      onError: (err: any) => {
         if (err?.response?.status === 401) {
           localStorage.removeItem("user_token");
           localStorage.removeItem("user_data");

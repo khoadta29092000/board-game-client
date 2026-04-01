@@ -6,6 +6,8 @@ import BotWonModal from "../tutorial/BotWonModal";
 import FreePlayModal from "../tutorial/FreePlayModal";
 import BotThinkingIndicator from "../common/BotThinkingIndicator";
 import SkipConfirmModal from "../tutorial/SkipConfirmModal";
+import { useTranslations } from "next-intl";
+import { useDisclosure } from "@/src/hook/common/useDisclosure";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Props = {
@@ -63,7 +65,7 @@ function MessageBox({
   stepIndex,
   totalSteps,
   onNext,
-  onSkip,
+  onOpenSkipConfirm,
   shake,
   hintText,
   highlightRects,
@@ -73,12 +75,14 @@ function MessageBox({
   stepIndex: number;
   totalSteps: number;
   onNext: () => void;
-  onSkip: () => void;
+  onOpenSkipConfirm: () => void;
   shake: boolean;
   hintText: string | null;
   highlightRects: DOMRect[];
   saveTutorialStep: (index: number, phase: string) => void;
 }) {
+  const t = useTranslations();
+  
   const boxStyle = useMemo((): React.CSSProperties => {
     const vw = document.documentElement.clientWidth;
     const vh = document.documentElement.clientHeight;
@@ -93,11 +97,18 @@ function MessageBox({
       zIndex: 10001,
       pointerEvents: "auto",
       width: boxW,
+      opacity: (step.highlight.type === "NONE" || (highlightRects && highlightRects.length > 0)) ? 1 : 0,
+      visibility: (step.highlight.type === "NONE" || (highlightRects && highlightRects.length > 0)) ? "visible" : "hidden",
+      animation: (step.highlight.type === "NONE" || (highlightRects && highlightRects.length > 0)) ? "tutorialZoomIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "none",
       ...extra
     });
 
-    if (!highlightRects || highlightRects.length === 0)
+    if (!highlightRects || highlightRects.length === 0) {
+      if (step.highlight.type === "NONE") {
+        return base({ left: (vw - boxW) / 2, top: (vh - boxH) / 2 });
+      }
       return base({ left: EDGE, top: EDGE });
+    }
 
     const gL = Math.min(...highlightRects.map(r => r.left)) - pad;
     const gR = Math.max(...highlightRects.map(r => r.right)) + pad;
@@ -137,7 +148,7 @@ function MessageBox({
       tryLeft() ??
       tryBottom() ??
       tryTop() ??
-      (() => {
+      ( (() => {
         const spaceRight = vw - gR;
         const spaceLeft = gL;
         const spaceBottom = vh - gB;
@@ -156,7 +167,7 @@ function MessageBox({
           left: clampLeft(gCX - boxW / 2),
           top: clampTop(gT - GAP - boxH)
         };
-      })();
+      })() );
 
     return base(pos);
   }, [highlightRects]);
@@ -227,7 +238,7 @@ function MessageBox({
               </span>
             </div>
             <button
-              onClick={onSkip}
+              onClick={onOpenSkipConfirm}
               style={{
                 background: "none",
                 border: "none",
@@ -238,7 +249,7 @@ function MessageBox({
                 borderRadius: 4
               }}
             >
-              Bỏ qua
+              {t("tutorial_overlay_skip")}
             </button>
           </div>
 
@@ -324,7 +335,7 @@ function MessageBox({
                 boxShadow: "0 4px 16px rgba(250,204,21,0.3)"
               }}
             >
-              Hiểu rồi → {stepIndex === totalSteps - 1 ? "Bắt đầu!" : ""}
+              {t("tutorial_overlay_gotIt")} {stepIndex === totalSteps - 1 ? t("tutorial_overlay_start") : ""}
             </button>
           ) : (
             <div
@@ -348,7 +359,7 @@ function MessageBox({
                 }}
               />
               <span style={{ color: "#a5b4fc", fontSize: 12 }}>
-                Thực hiện action trên để tiếp tục...
+                {t("tutorial_overlay_actionRequired")}
               </span>
             </div>
           )}
@@ -377,7 +388,7 @@ export default function TutorialOverlay({
   saveTutorialStep
 }: Props) {
   const [portalEl, setPortalEl] = useState<Element | null>(null);
-  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+  const { isOpen: showSkipConfirm, onOpen: onOpenSkipConfirm, onClose: onCloseSkipConfirm } = useDisclosure();
   const [svgKey, setSvgKey] = useState(0);
 
   useEffect(() => {
@@ -507,12 +518,13 @@ export default function TutorialOverlay({
 
           {/* Message box */}
           <MessageBox
+            key={`msg-${stepIndex}`}
             saveTutorialStep={saveTutorialStep}
             step={step}
             stepIndex={stepIndex}
             totalSteps={totalSteps}
             onNext={onNext}
-            onSkip={() => setShowSkipConfirm(true)}
+            onOpenSkipConfirm={onOpenSkipConfirm}
             shake={shakeMessage}
             hintText={hintText}
             highlightRects={highlightRects}
@@ -529,10 +541,10 @@ export default function TutorialOverlay({
       <SkipConfirmModal
         visible={showSkipConfirm}
         onConfirm={() => {
-          setShowSkipConfirm(false);
+          onCloseSkipConfirm();
           onSkip();
         }}
-        onCancel={() => setShowSkipConfirm(false)}
+        onCancel={onCloseSkipConfirm}
       />
     </>,
     portalEl

@@ -6,6 +6,7 @@ import { gemIconMap } from "@/src/utils";
 import Image from "next/image";
 import { useState, useMemo } from "react";
 import { Button } from "@/src/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export type GemSet = Record<GemColor, number>;
 
@@ -27,6 +28,7 @@ export function ModalDiscardGems({
   isLoading = false
 }: TProps) {
   const [discarding, setDiscarding] = useState<GemSet>({} as GemSet);
+  const t = useTranslations();
 
   const totalDiscarding = useMemo(
     () => Object.values(discarding).reduce((a, b) => a + b, 0),
@@ -81,8 +83,8 @@ export function ModalDiscardGems({
         }`}
       >
         {isValid
-          ? "✅ Ready to discard"
-          : `⚠️ Select ${remaining} more gem${remaining > 1 ? "s" : ""} to discard`}
+          ? t("discard_ready")
+          : t("discard_select_more", { count: remaining })}
       </div>
 
       {/* Gem list */}
@@ -142,7 +144,7 @@ export function ModalDiscardGems({
 
                 {/* Remaining after discard */}
                 <div className="text-right w-20">
-                  <span className="text-xs text-gray-400">After</span>
+                  <span className="text-xs text-gray-400">{t("discard_after")}</span>
                   <div
                     className={`font-bold text-sm ${
                       afterDiscard < amount ? "text-red-400" : "text-white"
@@ -186,10 +188,10 @@ export function ModalDiscardGems({
                 d="M4 12a8 8 0 018-8v8z"
               />
             </svg>
-            Discarding...
+            {t("discard_discarding")}
           </span>
         ) : (
-          `Discard ${totalDiscarding}`
+          `${t("discard_button")} ${totalDiscarding}`
         )}
       </Button>
     </div>
@@ -198,8 +200,8 @@ export function ModalDiscardGems({
     <ModalCommon
       isOpen={isOpen}
       handleClose={handleClose}
-      title="Discard Gems"
-      description={`You have too many gems. Please discard ${excessCount} gem${excessCount > 1 ? "s" : ""}.`}
+      title={t("discard_title")}
+      description={t("discard_desc", { count: excessCount })}
       content={ContentModal}
       footer={FooterModal}
       positionTop="100px"

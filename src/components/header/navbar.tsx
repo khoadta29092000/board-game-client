@@ -1,10 +1,8 @@
 "use client";
 
 import { IoIosMenu } from "react-icons/io";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { Link, usePathname, useRouter } from "@/src/i18n/navigation";
 import { FiUser, FiLogOut, FiLogIn } from "react-icons/fi";
-import { useRouter } from "next/navigation";
 import {
   Drawer,
   DrawerTrigger,
@@ -18,8 +16,10 @@ import { History } from "lucide-react";
 import { setAuth } from "@/src/redux/global/slice";
 import { useDispatch } from "react-redux";
 import { useAuth } from "@/src/redux/global/selectors";
+import { useTranslations } from "next-intl";
 
 export default function Navbar() {
+  const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -59,7 +59,7 @@ export default function Navbar() {
                         ${isActive ? "bg-custom-green200 shadow-inner" : ""}`}
                     >
                       <Icon size={24} />
-                      {item.title}
+                      {t(item.title)}
                     </button>
                   </Link>
                 </li>
@@ -73,7 +73,7 @@ export default function Navbar() {
                 <Link href="/profile" passHref>
                   <button className="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-lg bg-cover hover:bg-custom-green200 hover:shadow-inner focus:bg-custom-green200 text-gray-700 transition-all ease-linear focus:shadow-inner shadow-purple-200/50">
                     <FiUser size={24} />
-                    Profile
+                    {t("profile")}
                   </button>
                 </Link>
               </li>
@@ -86,7 +86,7 @@ export default function Navbar() {
                 <Link href="/history" passHref>
                   <button className="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-lg bg-cover hover:bg-custom-green200 hover:shadow-inner focus:bg-custom-green200 text-gray-700 transition-all ease-linear focus:shadow-inner shadow-purple-200/50">
                     <History size={24} />
-                    History
+                    {t("history")}
                   </button>
                 </Link>
               </li>
@@ -101,7 +101,7 @@ export default function Navbar() {
                   className="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-lg bg-cover hover:bg-custom-green200 hover:shadow-inner focus:bg-custom-green200 text-gray-700 transition-all ease-linear focus:shadow-inner shadow-purple-200/50"
                 >
                   <FiLogOut size={24} />
-                  Log out
+                  {t("logOut")}
                 </button>
               </li>
             </ul>
@@ -111,7 +111,7 @@ export default function Navbar() {
                 <Link href="/login" passHref>
                   <button className="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-lg bg-cover hover:bg-custom-green200 hover:shadow-inner focus:bg-custom-green200 text-gray-700 transition-all ease-linear focus:shadow-inner shadow-purple-200/50">
                     <FiLogIn size={24} />
-                    Login
+                    {t("login")}
                   </button>
                 </Link>
               </li>

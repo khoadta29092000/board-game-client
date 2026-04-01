@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 
 type Props = {
   visible: boolean;
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export default function FreePlayModal({ visible, onStart }: Props) {
+  const t = useTranslations();
   const [portalEl, setPortalEl] = useState<Element | null>(null);
 
   useEffect(() => {
@@ -84,7 +86,7 @@ export default function FreePlayModal({ visible, onStart }: Props) {
               marginBottom: 16
             }}
           >
-            Hướng dẫn hoàn thành
+            {t("freeplay_tag")}
           </div>
           <div
             style={{
@@ -96,7 +98,7 @@ export default function FreePlayModal({ visible, onStart }: Props) {
               lineHeight: 1.2
             }}
           >
-            Bạn đã sẵn sàng chiến đấu!
+            {t("freeplay_title")}
           </div>
           <div
             style={{
@@ -106,7 +108,7 @@ export default function FreePlayModal({ visible, onStart }: Props) {
               lineHeight: 1.6
             }}
           >
-            Từ giờ bạn hoàn toàn tự do — không có hướng dẫn nữa.
+            {t("freeplay_desc")}
           </div>
           <div
             style={{
@@ -117,10 +119,10 @@ export default function FreePlayModal({ visible, onStart }: Props) {
             }}
           >
             {[
-              { icon: "💎", label: "Lấy gem", desc: "3 khác / 2 cùng" },
-              { icon: "🃏", label: "Mua card", desc: "Gom bonus" },
-              { icon: "📌", label: "Reserve", desc: "+1 gold" },
-              { icon: "🏛️", label: "Noble", desc: "Tự đến" }
+              { icon: "💎", label: t("freeplay_gem"), desc: t("freeplay_gem_desc") },
+              { icon: "🃏", label: t("freeplay_card"), desc: t("freeplay_card_desc") },
+              { icon: "📌", label: t("freeplay_reserve"), desc: t("freeplay_reserve_desc") },
+              { icon: "🏛️", label: t("freeplay_noble"), desc: t("freeplay_noble_desc") }
             ].map(item => (
               <div
                 key={item.label}
@@ -146,9 +148,9 @@ export default function FreePlayModal({ visible, onStart }: Props) {
             ))}
           </div>
           <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 20 }}>
-            🏆 Đạt{" "}
+            {t("freeplay_goal1")}
             <span style={{ color: "#facc15", fontWeight: 700 }}>15 điểm</span>{" "}
-            trước Bot để chiến thắng
+            {t("freeplay_goal2")}
           </div>
           <button
             onClick={onStart}
@@ -166,7 +168,7 @@ export default function FreePlayModal({ visible, onStart }: Props) {
               letterSpacing: 0.3
             }}
           >
-            ⚔️ Bắt đầu!
+            {t("freeplay_start")}
           </button>
         </div>
       </div>

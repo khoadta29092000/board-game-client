@@ -1,13 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/src/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 type Props = {
   visible: boolean;
 };
 
 export default function BotWonModal({ visible }: Props) {
+  const t = useTranslations();
   const [portalEl, setPortalEl] = useState<Element | null>(null);
   const router = useRouter();
 
@@ -74,7 +76,7 @@ export default function BotWonModal({ visible }: Props) {
             marginBottom: 16
           }}
         >
-          Hướng dẫn hoàn tất
+          {t("botwon_tag")}
         </div>
         <div
           style={{
@@ -85,7 +87,7 @@ export default function BotWonModal({ visible }: Props) {
             letterSpacing: -0.5
           }}
         >
-          Bạn đã sẵn sàng rồi! 🚀
+          {t("botwon_title")}
         </div>
         <div
           style={{
@@ -94,11 +96,8 @@ export default function BotWonModal({ visible }: Props) {
             marginBottom: 24,
             lineHeight: 1.6
           }}
-        >
-          Bạn đã nắm được cơ bản của Splendor.
-          <br />
-          Hãy thử sức với người chơi thật ngay thôi!
-        </div>
+          dangerouslySetInnerHTML={{ __html: t("botwon_desc") }}
+        />
         <div
           style={{
             background: "rgba(139,92,246,0.06)",
@@ -118,12 +117,12 @@ export default function BotWonModal({ visible }: Props) {
               letterSpacing: 1
             }}
           >
-            ✅ BẠN ĐÃ HỌC ĐƯỢC
+            {t("botwon_learned")}
           </div>
           {[
-            "Thu thập gem và quản lý tài nguyên",
-            "Mua card để tích lũy điểm & bonus",
-            "Reserve card chiến lược để chặn đối thủ"
+            t("botwon_learn1"),
+            t("botwon_learn2"),
+            t("botwon_learn3")
           ].map((item, i) => (
             <div
               key={i}
@@ -168,7 +167,7 @@ export default function BotWonModal({ visible }: Props) {
             letterSpacing: 0.3
           }}
         >
-          🏠 Về Lobby &amp; Chơi với người thật
+          {t("botwon_button")}
         </button>
       </div>
     </div>,

@@ -4,6 +4,7 @@ import { ModalCommon } from "@/src/components/common/modal";
 import { Button } from "@/src/components/ui/button";
 import SplendorCardUI from "../SplendorCardUI";
 import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
+import { useTranslations } from "next-intl";
 
 type Props = {
   isOpen: boolean;
@@ -22,14 +23,15 @@ export default function ModalCardAction({
   onReserve,
   currentStep = null
 }: Props) {
+  const t = useTranslations();
   const isReserve = currentStep !== null && currentStep.id !== 5;
   const isPurchase = currentStep !== null && currentStep.id !== 6;
   return (
     <ModalCommon
       isOpen={isOpen}
       handleClose={onClose}
-      title="Card Action"
-      description="What would you like to do with this card?"
+      title={t("card_action_title")}
+      description={t("card_action_desc")}
       content={
         <div className="flex justify-center py-2">
           <div className="w-[120px]">
@@ -40,7 +42,7 @@ export default function ModalCardAction({
       footer={
         <div className="flex gap-3 justify-end">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t("cancel")}
           </Button>
           {onReserve && (
             <Button
@@ -49,7 +51,7 @@ export default function ModalCardAction({
               disabled={isPurchase}
               className="bg-yellow-600 hover:bg-yellow-700 text-white"
             >
-              Reserve
+              {t("card_action_reserve")}
             </Button>
           )}
           {onPurchase && (
@@ -58,7 +60,7 @@ export default function ModalCardAction({
               disabled={isReserve}
               className="bg-green-600 hover:bg-green-700"
             >
-              Purchase
+              {t("card_action_purchase")}
             </Button>
           )}
         </div>

@@ -1,14 +1,17 @@
 "use client";
+import { Link } from "@/src/i18n/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import Menu from "./menu";
 import TextReveal from "../animation/textReveal";
 import { Profile } from "./profile";
 import Navbar from "./navbar";
 import { useAuth } from "@/src/redux/global/selectors";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./languageSwitcher";
 
 export default function Header() {
+  const t = useTranslations();
   const profile = useAuth();
   const [mounted, setMounted] = useState(false);
 
@@ -32,6 +35,8 @@ export default function Header() {
           </Link>
           <Menu />
           <div className="flex items-center space-x-4">
+            {/* Language Switcher Dropdown */}
+            <LanguageSwitcher />
             <TextReveal delay={0.5}>
               {mounted && profile?.Email ? (
                 <Profile auth={profile} />
@@ -41,13 +46,13 @@ export default function Header() {
                     href="/login"
                     className="hidden sm:inline-flex items-center px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
                   >
-                    Sign In
+                    {t("signIn")}
                   </Link>
                   <Link
                     href="/register"
                     className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 font-medium shadow-lg"
                   >
-                    Play Now
+                    {t("playNow")}
                   </Link>
                 </>
               )}

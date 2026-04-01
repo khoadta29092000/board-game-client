@@ -1,10 +1,11 @@
 "use client";
 import * as React from "react";
 import { motion } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { TMenuItem } from "@/src/types/header";
 import { menuData } from "@/src/utils/contants";
 import { Variants } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const itemVariants: Variants = {
   hidden: { x: -20, opacity: 0 },
@@ -24,6 +25,7 @@ const containerVariants = {
 };
 
 export default function Menu() {
+  const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -42,7 +44,7 @@ export default function Menu() {
           onClick={() => router.push(item.href)}
         >
           <p className="font-medium txt-14 text-custom-green100 uppercase relative z-[20]">
-            {item.title}
+            {t(item.title)}
           </p>
           {item.href === pathname && (
             <motion.div

@@ -3,7 +3,7 @@ import { Dices } from "lucide-react";
 
 export const menuData: TMenuItem[] = [
   {
-    title: "Lobby",
+    title: "lobby",
     href: "/lobby",
     icon: Dices
   }

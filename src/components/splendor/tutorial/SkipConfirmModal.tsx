@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 
 type Props = {
   visible: boolean;
@@ -13,6 +14,7 @@ export default function SkipConfirmModal({
   onConfirm,
   onCancel
 }: Props) {
+  const t = useTranslations();
   const [portalEl, setPortalEl] = useState<Element | null>(null);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function SkipConfirmModal({
             marginBottom: 8
           }}
         >
-          Bỏ qua hướng dẫn?
+          {t("skip_title")}
         </div>
         <div
           style={{
@@ -76,7 +78,7 @@ export default function SkipConfirmModal({
             lineHeight: 1.5
           }}
         >
-          Bạn sẽ chuyển thẳng sang chế độ tự chơi với Bot.
+          {t("skip_desc")}
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button
@@ -93,7 +95,7 @@ export default function SkipConfirmModal({
               cursor: "pointer"
             }}
           >
-            Tiếp tục học
+            {t("skip_continue")}
           </button>
           <button
             onClick={onConfirm}
@@ -109,7 +111,7 @@ export default function SkipConfirmModal({
               cursor: "pointer"
             }}
           >
-            Bỏ qua
+            {t("skip_confirm")}
           </button>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
   registerCardReserved
 } from "@/src/redux/animation/Animationrefs"; // ← thêm
 import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
+import { useTranslations } from "next-intl";
 
 const WIN_POINTS = 15;
 
@@ -37,6 +38,7 @@ export default function PlayerInfo({
 }: TProps) {
   const [showReserved, setShowReserved] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<SplendorCard | null>(null);
+  const t = useTranslations();
 
   const players = gameState.players ? Object.values(gameState.players) : [];
 
@@ -96,21 +98,21 @@ export default function PlayerInfo({
               gap: 4
             }}
           >
-            <span style={{ color: "#9ca3af", fontSize: 10 }}>Turn</span>
+            <span style={{ color: "#9ca3af", fontSize: 10 }}>{t("player_info_turn")}</span>
             <span style={{ color: "#facc15", fontWeight: 900, fontSize: 14 }}>
               {Math.floor((turnNumber + 1) / totalPlayers)}
             </span>
           </div>
           <span style={{ color: "#374151", fontSize: 12 }}>|</span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ color: "#9ca3af", fontSize: 10 }}>Move</span>
+            <span style={{ color: "#9ca3af", fontSize: 10 }}>{t("player_info_move")}</span>
             <span style={{ color: "#a78bfa", fontWeight: 700, fontSize: 14 }}>
               {turnPositionInRound}/{totalPlayers}
             </span>
           </div>
           <span style={{ color: "#374151", fontSize: 12 }}>|</span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ color: "#9ca3af", fontSize: 10 }}>Win</span>
+            <span style={{ color: "#9ca3af", fontSize: 10 }}>{t("player_info_win")}</span>
             <span style={{ color: "#4ade80", fontWeight: 700, fontSize: 14 }}>
               {WIN_POINTS}pt
             </span>
@@ -218,7 +220,7 @@ export default function PlayerInfo({
                         marginLeft: 2
                       }}
                     >
-                      (you)
+                      {t("player_info_you")}
                     </span>
                   )}
                 </div>
@@ -297,7 +299,7 @@ export default function PlayerInfo({
                         letterSpacing: 1
                       }}
                     >
-                      Gems
+                      {t("player_info_gems")}
                     </span>
                     <span style={{ fontSize: 9, color: "#6b7280" }}>
                       {totalGems}/10
@@ -384,7 +386,7 @@ export default function PlayerInfo({
                           letterSpacing: 1
                         }}
                       >
-                        Bonuses
+                        {t("player_info_bonuses")}
                       </span>
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
@@ -441,17 +443,18 @@ export default function PlayerInfo({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  borderTop: "1px solid #374151",
+                borderTop: "1px solid #374151",
                   padding: "4px 10px",
                   flexShrink: 0
                 }}
               >
                 <span style={{ color: "#6b7280", fontSize: 10 }}>
-                  {player?.totalOwnedCards} cards
+                  {player?.totalOwnedCards} {t("player_info_cards")}
                 </span>
                 <button
                   onClick={() => {
                     if (currentStep) return;
+                    if (!isMe) return;
                     setShowReserved(player?.playerId);
                   }}
                   style={{
@@ -462,11 +465,11 @@ export default function PlayerInfo({
                     borderRadius: 5,
                     padding: "2px 7px",
                     border: "none",
-                    cursor: currentStep ? "default" : "pointer"
+                    cursor: (currentStep || !isMe) ? "default" : "pointer"
                   }}
                 >
                   <span style={{ color: "#d1d5db", fontSize: 10 }}>
-                    Reserved
+                    {t("player_info_reserved")}
                   </span>
                   <span
                     style={{ color: "#facc15", fontSize: 10, fontWeight: 700 }}
@@ -508,7 +511,7 @@ export default function PlayerInfo({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-white font-bold text-sm">
-                    Reserved Cards
+                    {t("player_info_reserved_title")}
                   </span>
                   <button
                     onClick={() => setShowReserved(null)}
@@ -519,7 +522,7 @@ export default function PlayerInfo({
                 </div>
                 {!p?.reservedCards.length ? (
                   <div className="text-gray-500 text-sm text-center py-4">
-                    No reserved cards
+                    {t("player_info_no_reserved")}
                   </div>
                 ) : (
                   <div

@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/src/i18n/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import useWrapAsync from "./WrapAsync";

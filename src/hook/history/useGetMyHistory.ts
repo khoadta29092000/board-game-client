@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // hooks/useAuthSWR.ts
-"use client";
 
 import { callMyHistoryApi } from "@/src/service/history";
 import { useState } from "react";

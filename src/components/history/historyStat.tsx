@@ -2,10 +2,12 @@
 
 import React from "react";
 import { GameHistory } from "@/src/types/history";
+import { useTranslations } from "next-intl";
 
 type Props = { histories: GameHistory[]; myId: string };
 
 export default function HistoryStats({ histories, myId }: Props) {
+  const t = useTranslations();
   const total = histories.length;
   const wins = histories.filter(h => h.players[myId]?.isWinner).length;
   const losses = total - wins;
@@ -24,17 +26,17 @@ export default function HistoryStats({ histories, myId }: Props) {
     : 0;
 
   const stats = [
-    { label: "Games", value: total, color: "text-purple-500" },
-    { label: "Wins", value: wins, color: "text-green-500" },
-    { label: "Losses", value: losses, color: "text-red-500" },
+    { label: t("history_stats_games"), value: total, color: "text-purple-500" },
+    { label: t("history_stats_wins"), value: wins, color: "text-green-500" },
+    { label: t("history_stats_losses"), value: losses, color: "text-red-500" },
     {
-      label: "Win Rate",
+      label: t("history_stats_winrate"),
       value: `${winRate}%`,
       color: winRate >= 50 ? "text-green-500" : "text-red-500"
     },
-    { label: "Avg Score", value: avgScore, color: "text-yellow-500" },
+    { label: t("history_stats_avg_score"), value: avgScore, color: "text-yellow-500" },
     {
-      label: "Avg Time",
+      label: t("history_stats_avg_time"),
       value: `${Math.floor(avgDuration / 60)}m`,
       color: "text-blue-500"
     }
@@ -51,9 +53,9 @@ export default function HistoryStats({ histories, myId }: Props) {
 
       <div className="col-span-3 rounded-lg border bg-white p-3">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Win / Loss ratio</span>
+          <span>{t("history_stats_win_ratio")}</span>
           <span>
-            {wins}W — {losses}L
+            {wins}{t("history_stats_w")} — {losses}{t("history_stats_l")}
           </span>
         </div>
 

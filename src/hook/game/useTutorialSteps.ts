@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { SplendorGameState, GemColor } from "@/src/types/splendor";
 import {
   getGemBankRect,
@@ -7,6 +7,7 @@ import {
   getNobleRect,
   TAKE_BUTTON_KEY
 } from "@/src/redux/animation/Animationrefs";
+import { useTranslations } from "next-intl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,13 +53,13 @@ export type TutorialPhase = "GUIDED" | "TRANSITION" | "FREE_PLAY" | "DONE";
 //
 // id 4+5 chỉ unlock khi resolveCardId trả về non-null (player đủ gems)
 
-const STEPS: TutorialStep[] = [
+const getSteps = (t: any): TutorialStep[] => [
   // ── id 0: Mục tiêu game ────────────────────────────────────────────────────
   {
     id: 0,
-    title: "Chào mừng đến Splendor!",
-    message: "Mục tiêu: gom đủ 15 điểm trước đối thủ để chiến thắng.",
-    subMessage: "Điểm đến từ card phát triển và Noble tiles.",
+    title: t("tutorial_step0_title"),
+    message: t("tutorial_step0_message"),
+    subMessage: t("tutorial_step0_subMessage"),
     highlight: { type: "NONE" },
     requiredAction: "READ_ONLY",
     allowNext: true,
@@ -68,10 +69,9 @@ const STEPS: TutorialStep[] = [
   // ── id 1: Giới thiệu card — highlight card lv1 rẻ nhất để player nhắm tới ─
   {
     id: 1,
-    title: "Nhắm tới Card này!",
-    message: "hãy để ý phần cost bên dưới cần đủ để có thể mua đc card này",
-    subMessage:
-      "Lưu ý: mỗi lượt chỉ được tối đa 10 gem — cuối lượt phải bỏ bớt nếu vượt quá.",
+    title: t("tutorial_step1_title"),
+    message: t("tutorial_step1_message"),
+    subMessage: t("tutorial_step1_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "READ_ONLY",
     allowNext: true,
@@ -88,11 +88,9 @@ const STEPS: TutorialStep[] = [
   // ── id 2: Lấy 3 gem khác màu — highlight đúng màu cost của card id1 ────────
   {
     id: 2,
-    title: "Lấy 3 gem khác màu",
-    message:
-      "Mỗi lượt bạn có thể lấy tối đa 3 gem khác màu từ ngân hàng, nhưng bạn đang hướng tới Card mua đầu tiên bởi vậy hãy lấy Blue, Red, Purple.",
-    subMessage:
-      "Hãy chọn 3 gem khác màu — ưu tiên màu cost của card vừa xem để tiến gần hơn!",
+    title: t("tutorial_step2_title"),
+    message: t("tutorial_step2_message"),
+    subMessage: t("tutorial_step2_subMessage"),
     highlight: { type: "GEM_BANK", colors: [] },
     requiredAction: "COLLECT_3_DIFF",
     allowNext: false,
@@ -102,11 +100,9 @@ const STEPS: TutorialStep[] = [
   // ── id 3: Lấy 2 gem cùng màu ────────────────────────────────────────────────
   {
     id: 3,
-    title: "Lấy 2 gem cùng màu",
-    message:
-      "Nếu ngân hàng còn ≥4 gem cùng màu, bạn có thể lấy 2 cùng lúc, nhưng bạn đang hướng tới Card mua đầu tiên bởi vậy hãy lấy 2 Green",
-    subMessage:
-      "Hãy chọn 1 màu có số ≥4 và lấy 2 gem! Nhớ: tổng gem không được vượt 10.",
+    title: t("tutorial_step3_title"),
+    message: t("tutorial_step3_message"),
+    subMessage: t("tutorial_step3_subMessage"),
     highlight: { type: "GEM_BANK", colors: [] },
     requiredAction: "COLLECT_2_SAME",
     allowNext: false,
@@ -116,10 +112,9 @@ const STEPS: TutorialStep[] = [
   // ── id 4: Hiểu về card — chỉ mở khi player đủ gems mua ≥1 card ─────────────
   {
     id: 4,
-    title: "Hiểu về Card phát triển",
-    message:
-      "Card có màu bonus (góc phải) và cost (góc dưới) và point nếu có ở góc trên bên trái. Mua card → nhận bonus mãi mãi để có thể thay thế gems khi mua card.",
-    subMessage: "Bonus tính như gem khi mua card tiếp theo!",
+    title: t("tutorial_step4_title"),
+    message: t("tutorial_step4_message"),
+    subMessage: t("tutorial_step4_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "READ_ONLY",
     allowNext: true,
@@ -155,10 +150,9 @@ const STEPS: TutorialStep[] = [
   // ── id 5: Mua card ───────────────────────────────────────────────────────────
   {
     id: 5,
-    title: "Mua card!",
-    message:
-      "Bạn đã có đủ gem để mua card này. Nhấn vào card rồi chọn Purchase!",
-    subMessage: "Trả gem → nhận bonus màu đó vĩnh viễn.",
+    title: t("tutorial_step5_title"),
+    message: t("tutorial_step5_message"),
+    subMessage: t("tutorial_step5_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "PURCHASE_CARD",
     allowNext: false,
@@ -193,10 +187,9 @@ const STEPS: TutorialStep[] = [
   // ── id 6: Reserve card ───────────────────────────────────────────────────────
   {
     id: 6,
-    title: "Reserve card",
-    message:
-      "Reserve để giữ chỗ card xịn — nhận thêm 1 gold gem 🟡(có tác dụng thay thế được tất cả các gems)",
-    subMessage: "Nhấn vào card lv2 đắt tiền rồi chọn Reserve!",
+    title: t("tutorial_step6_title"),
+    message: t("tutorial_step6_message"),
+    subMessage: t("tutorial_step6_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "RESERVE_CARD",
     allowNext: false,
@@ -210,9 +203,9 @@ const STEPS: TutorialStep[] = [
   // ── id 7: Noble tiles ────────────────────────────────────────────────────────
   {
     id: 7,
-    title: "Noble tiles",
-    message: "Gom đủ bonus theo yêu cầu → Noble tự đến, +3 điểm!",
-    subMessage: "Không cần làm gì thêm — Noble tự ghé thăm sau lượt mua card.",
+    title: t("tutorial_step7_title"),
+    message: t("tutorial_step7_message"),
+    subMessage: t("tutorial_step7_subMessage"),
     highlight: { type: "NOBLE", nobleIds: [] },
     requiredAction: "READ_ONLY",
     allowNext: true,
@@ -226,6 +219,9 @@ export function useTutorialSteps(
   gameState: SplendorGameState | null,
   myId: string
 ) {
+  const t = useTranslations();
+  const STEPS = useMemo(() => getSteps(t), [t]);
+
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<TutorialPhase>("GUIDED");
   const [shakeMessage, setShakeMessage] = useState(false);

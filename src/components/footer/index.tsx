@@ -1,8 +1,11 @@
+"use client";
 import { Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
+import { useTranslations } from "next-intl";
 
 export const Footer = () => {
+  const t = useTranslations();
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -18,8 +21,7 @@ export const Footer = () => {
               priority
             />
             <p className="text-gray-400 leading-relaxed">
-              Experience the thrill of multiplayer board games online. Connect
-              with friends and players worldwide.
+              {t("footerDescription")}
             </p>
             <div className="flex space-x-4">
               <FaFacebook className="w-5 h-5 text-gray-400 hover:text-blue-500 cursor-pointer transition-colors" />
@@ -31,30 +33,24 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Quick Links</h3>
+            <h3 className="text-lg font-semibold text-white">
+              {t("footerQuickLinks")}
+            </h3>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#games"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Popular Games
+                  {t("footerPopularGames")}
                 </a>
               </li>
-              {/* <li>
-                <a
-                  href="#tournaments"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Tournaments
-                </a>
-              </li> */}
               <li>
                 <a
                   href="#leaderboard"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Leaderboard
+                  {t("footerLeaderboard")}
                 </a>
               </li>
               <li>
@@ -62,7 +58,7 @@ export const Footer = () => {
                   href="#community"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Community
+                  {t("footerCommunity")}
                 </a>
               </li>
             </ul>
@@ -70,14 +66,16 @@ export const Footer = () => {
 
           {/* Support */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Support</h3>
+            <h3 className="text-lg font-semibold text-white">
+              {t("footerSupport")}
+            </h3>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#help"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Help Center
+                  {t("footerHelpCenter")}
                 </a>
               </li>
               <li>
@@ -85,7 +83,7 @@ export const Footer = () => {
                   href="#rules"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Game Rules
+                  {t("footerGameRules")}
                 </a>
               </li>
               <li>
@@ -93,7 +91,7 @@ export const Footer = () => {
                   href="#faq"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  FAQ
+                  {t("footerFaq")}
                 </a>
               </li>
               <li>
@@ -101,7 +99,7 @@ export const Footer = () => {
                   href="#contact"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Contact Us
+                  {t("footerContactUs")}
                 </a>
               </li>
             </ul>
@@ -109,7 +107,9 @@ export const Footer = () => {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Contact</h3>
+            <h3 className="text-lg font-semibold text-white">
+              {t("footerContact")}
+            </h3>
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-gray-400" />
@@ -129,27 +129,25 @@ export const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © 2025 Board Game Arena. All rights reserved.
-          </p>
+          <p className="text-gray-400 text-sm">{t("footerCopyright")}</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a
               href="#privacy"
               className="text-gray-400 hover:text-white text-sm transition-colors"
             >
-              Privacy Policy
+              {t("footerPrivacyPolicy")}
             </a>
             <a
               href="#terms"
               className="text-gray-400 hover:text-white text-sm transition-colors"
             >
-              Terms of Service
+              {t("footerTermsOfService")}
             </a>
             <a
               href="#cookies"
               className="text-gray-400 hover:text-white text-sm transition-colors"
             >
-              Cookie Policy
+              {t("footerCookiePolicy")}
             </a>
           </div>
         </div>

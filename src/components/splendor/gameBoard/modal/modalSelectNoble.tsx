@@ -2,6 +2,7 @@ import { ModalCommon } from "@/src/components/common/modal";
 import { SplendorNoble } from "@/src/types/splendor";
 import { gemIconMap } from "@/src/utils";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type Props = {
   isOpen: boolean;
@@ -20,12 +21,13 @@ export function ModalSelectNoble({
 }: Props) {
   const eligibleNoblesData =
     gameNobles?.filter(n => nobles.includes(n.nobleId)) ?? [];
+  const t = useTranslations();
   return (
     <ModalCommon
       isOpen={isOpen}
       handleClose={onClose}
-      title="Select a Noble"
-      description="You qualify for multiple nobles. Please select one."
+      title={t("noble_select_title")}
+      description={t("noble_select_desc")}
       content={
         <div className="flex gap-3 justify-center py-2">
           {eligibleNoblesData.map(noble => (

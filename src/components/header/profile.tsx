@@ -3,19 +3,20 @@
 import * as React from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { FiUser, FiLogOut } from "react-icons/fi";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/src/i18n/navigation";
 import { useDispatch } from "react-redux";
 import { TDataToken } from "@/src/types/player";
 import { setAuth } from "@/src/redux/global/slice";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { History } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type TProps = {
   auth: TDataToken;
 };
 
 export function Profile({ auth }: TProps) {
+  const t = useTranslations();
   const router = useRouter();
   const dispatch = useDispatch();
   const handleLogout = () => {
@@ -67,7 +68,7 @@ export function Profile({ auth }: TProps) {
               className="txt-18 px-4 py-2 flex items-center gap-4 text-left hover:bg-custom-hover-bg-200 transition-colors w-full cursor-pointer"
             >
               <FiUser className="w-5 h-5" />
-              Profile
+              {t("profile")}
             </button>
           </Link>
           <Link href={"/history"}>
@@ -76,7 +77,7 @@ export function Profile({ auth }: TProps) {
               className="txt-18 px-4 py-2 flex items-center gap-4 text-left hover:bg-custom-hover-bg-200 transition-colors w-full cursor-pointer"
             >
               <History className="w-5 h-5" />
-              History
+              {t("history")}
             </button>
           </Link>
 
@@ -86,7 +87,7 @@ export function Profile({ auth }: TProps) {
             className="txt-18 px-4 py-2 flex items-center gap-4 text-left text-red-500 hover:bg-custom-hover-bg-200 hover:text-red-600 transition-colors w-full cursor-pointer"
           >
             <FiLogOut className="w-5 h-5" />
-            Log Out
+            {t("logOut")}
           </button>
         </div>
       </PopoverContent>

@@ -8,6 +8,8 @@ import SplendorCardUI from "./SplendorCardUI";
 import NobleCard from "./nobles";
 import ModalCardAction from "./modal/modalCardAction";
 import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
+import ModalConfirmComponent from "@/src/components/common/modalConfirm";
+import { useTranslations } from "next-intl";
 
 type Props = {
   dataCards: VisibleCards | null;
@@ -31,6 +33,8 @@ export default function CardsBoard({
   currentStep
 }: Props) {
   const [selectedCard, setSelectedCard] = useState<SplendorCard | null>(null);
+  const [reserveLevel, setReserveLevel] = useState<number | null>(null);
+  const t = useTranslations();
   const levels = dataCards ? Object.entries(dataCards) : [];
   const isTutorialLock =
     currentStep !== null && currentStep?.id !== 5 && currentStep?.id !== 6;
@@ -89,7 +93,7 @@ export default function CardsBoard({
               <div
                 onClick={() => {
                   if (!isMyTurn || isTutorialLock) return;
-                  onReserveFromDeck?.(Number(levelKey.replace(/\D/g, "")));
+                  setReserveLevel(Number(levelKey.replace(/\D/g, "")));
                 }}
                 style={{
                   flexShrink: 0,
@@ -156,6 +160,20 @@ export default function CardsBoard({
             onReserve?.(selectedCard.cardId);
             setSelectedCard(null);
           }}
+        />
+      )}
+
+      {reserveLevel !== null && (
+        <ModalConfirmComponent
+          isOpen={reserveLevel !== null}
+          onClose={() => setReserveLevel(null)}
+          title={t("reserve_deck_title")}
+          description={t("reserve_deck_desc", { level: reserveLevel })}
+          agree={() => {
+            onReserveFromDeck?.(reserveLevel);
+            setReserveLevel(null);
+          }}
+          isLoading={false}
         />
       )}
     </div>

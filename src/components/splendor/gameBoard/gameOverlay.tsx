@@ -5,7 +5,8 @@ import {
   stopSound
 } from "@/src/sounds.ts/splendorSounds";
 import { SplendorGameState } from "@/src/types/splendor";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export function GameOverOverlay({
   gameState,
@@ -21,6 +22,7 @@ export function GameOverOverlay({
   const winner = players.find(p => p.playerId === winnerId);
   const isIWon = winnerId === myId;
   const sorted = [...players].sort((a, b) => b.points - a.points);
+  const t = useTranslations();
   useEffect(() => {
     playSound("endGame");
 
@@ -64,14 +66,14 @@ export function GameOverOverlay({
             letterSpacing: -1
           }}
         >
-          {isIWon ? "You Win! 🎉" : "Game Over"}
+          {isIWon ? t("game_over_win") : t("game_over_lose")}
         </div>
         {winner && !isIWon && (
           <div style={{ color: "#9ca3af", fontSize: 16, marginTop: 6 }}>
             <span style={{ color: "#facc15", fontWeight: 700 }}>
               {winner.name}
             </span>{" "}
-            wins the game!
+            {t("game_over_wins_suffix")}
           </div>
         )}
       </div>
@@ -96,7 +98,7 @@ export function GameOverOverlay({
             marginBottom: 12
           }}
         >
-          Final Standings
+          {t("game_over_standings")}
         </div>
 
         {sorted.map((player, idx) => {
@@ -154,17 +156,17 @@ export function GameOverOverlay({
                         fontWeight: 400
                       }}
                     >
-                      (you)
+                      {t("player_info_you")}
                     </span>
                   )}
                 </div>
                 <div style={{ color: "#6b7280", fontSize: 11, marginTop: 1 }}>
-                  {player.totalOwnedCards} cards &nbsp;·&nbsp;
+                  {player.totalOwnedCards} {t("game_over_cards")} &nbsp;·&nbsp;
                   {Object.values(player.bonuses ?? {}).reduce(
                     (a: number, b) => a + (b as number),
                     0
                   )}{" "}
-                  bonuses
+                  {t("game_over_bonuses")}
                 </div>
               </div>
 
@@ -183,7 +185,7 @@ export function GameOverOverlay({
                 >
                   {player.points}
                 </span>
-                <span style={{ color: "#6b7280", fontSize: 11 }}>pt</span>
+                <span style={{ color: "#6b7280", fontSize: 11 }}>{t("game_over_pt")}</span>
               </div>
             </div>
           );
@@ -210,7 +212,7 @@ export function GameOverOverlay({
           boxShadow: isIWon ? "0 4px 20px rgba(245,158,11,0.4)" : undefined
         }}
       >
-        Back to Lobby
+        {t("game_over_back")}
       </button>
     </div>
   );
