@@ -28,7 +28,8 @@ import {
   Check,
   Wifi,
   WifiOff,
-  BotIcon
+  BotIcon,
+  WifiOff as DisconnectIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { PlayerLeftRoom, Room, RoomPlayer } from "@/src/types/room";
@@ -51,15 +52,36 @@ export default function ContentRoomDetail() {
   const [isJoining, setIsJoining] = useState(false);
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [botThinkingMsg, setBotThinkingMsg] = useState("Bot is thinking...");
-  // Refs để tránh duplicate events
+  const [disconnectedPlayers, setDisconnectedPlayers] = useState<Set<string>>(new Set());
+
+  // Refs to avoid duplicate events
   const hasJoinedRef = useRef(false);
   const toastShownRef = useRef(new Set<string>());
 
   const { isConnected, invoke, on, off } = useSignalR();
 
-  // Memoized current user check
+  // ─── Computed ────────────────────────────────────────────────────────────────
 
-  // Memoized handlers để tránh re-render
+  const isOwner = useMemo(
+    () => room?.players.find(p => p.playerId === auth?.Id)?.isOwner ?? false,
+    [room?.players, auth?.Id]
+  );
+
+  const emptySlots = useMemo(
+    () =>
+      room
+        ? Array.from({ length: room.quantityPlayer - room.currentPlayers })
+        : [],
+    [room?.quantityPlayer, room?.currentPlayers]
+  );
+
+  const hasDisconnectedPlayers = useMemo(
+    () => disconnectedPlayers.size > 0,
+    [disconnectedPlayers]
+  );
+
+  // ─── SignalR Handlers ─────────────────────────────────────────────────────────
+
   const handleJoinedRoom = useCallback(
     (data: { room: Room; success: boolean }) => {
       if (data.success && !hasJoinedRef.current) {
@@ -77,29 +99,57 @@ export default function ContentRoomDetail() {
     []
   );
 
-  const handleRoomUpdated = (playerLeft: PlayerLeftRoom) => {
+  // Called when BE fires RoomRejoined after grace period reconnect
+  const handleRoomRejoined = useCallback(
+    (data: { success: boolean; room: Room }) => {
+      if (data.success) {
+        setRoom(data.room);
+        hasJoinedRef.current = true; // prevent JoinRoom useEffect from firing again
+        setIsLoading(false);
+        setIsJoining(false);
+        toast.success("Reconnected to room!");
+      }
+    },
+    []
+  );
+
+  const handleRoomUpdated = useCallback((playerLeft: PlayerLeftRoom) => {
     setRoom(playerLeft.room);
-  };
+  }, []);
 
   const handlePlayerJoined = useCallback(
     (data: { playerId: string; playerName: string; room: Room }) => {
-      // Only update if it's not the current user joining (to avoid duplicate toast)
       if (data.playerId !== auth?.Id) {
         setRoom(data.room);
-
         const toastKey = `player-joined-${data.playerId}-${Date.now()}`;
         if (!toastShownRef.current.has(toastKey)) {
           toast.success(`${data.playerName} joined the room`);
           toastShownRef.current.add(toastKey);
-
-          // Clean up old toast keys to prevent memory leak
-          setTimeout(() => {
-            toastShownRef.current.delete(toastKey);
-          }, 5000);
+          setTimeout(() => toastShownRef.current.delete(toastKey), 5000);
         }
       }
     },
     [auth?.Id]
+  );
+
+  const handlePlayerDisconnected = useCallback(
+    (data: { playerId: string; message: string }) => {
+      setDisconnectedPlayers(prev => new Set(prev).add(data.playerId));
+      toast.warning("A player lost connection, waiting 30s...");
+    },
+    []
+  );
+
+  const handlePlayerReconnected = useCallback(
+    (data: { playerId: string }) => {
+      setDisconnectedPlayers(prev => {
+        const next = new Set(prev);
+        next.delete(data.playerId);
+        return next;
+      });
+      toast.success("Player reconnected!");
+    },
+    []
   );
 
   const handleError = useCallback(
@@ -109,11 +159,8 @@ export default function ContentRoomDetail() {
         toast.error(error);
         toastShownRef.current.add(toastKey);
       }
-
       setIsLoading(false);
       setIsJoining(false);
-
-      // Handle specific errors
       if (error.includes("not found") || error.includes("Room not found")) {
         setTimeout(() => router.push("/lobby"), 2000);
       }
@@ -121,17 +168,133 @@ export default function ContentRoomDetail() {
     [router]
   );
 
+  const handlePlayerChangeReady = useCallback(
+    (data: { updatedRoom: Room }) => {
+      if (data) setRoom(data.updatedRoom);
+    },
+    []
+  );
+
+  const handleStartGame = useCallback(() => {
+    router.push(`/game/${roomId}`);
+  }, [roomId]);
+
+  const handleBotThinking = useCallback((data: { message: string }) => {
+    setIsBotThinking(true);
+    setBotThinkingMsg(data?.message ?? "Bot is thinking...");
+  }, []);
+
+const handlePlayerKicked = useCallback(
+  (data: { playerId: string; playerName: string; room: Room }) => {
+    setDisconnectedPlayers(prev => {
+      const next = new Set(prev);
+      next.delete(data.playerId);
+      return next;
+    });
+
+    // Update room state
+    if (data.room) {
+      setRoom(data.room);
+    }
+
+    if (data.playerId === auth?.Id) {
+      toast.error("You were removed from the room due to connection timeout");
+      router.push("/lobby");
+      return;
+    }
+
+    toast.error(`${data.playerName} left due to connection timeout`);
+  },
+  [auth?.Id, router]
+);
+
+  // ─── Setup SignalR Events ─────────────────────────────────────────────────────
+
+  useEffect(() => {
+    on("JoinedRoom", handleJoinedRoom);
+    on("RoomRejoined", handleRoomRejoined);
+    on("PlayerJoined", handlePlayerJoined);
+    on("PlayerLeft", handleRoomUpdated);
+    on("PlayerChangeReady", handlePlayerChangeReady);
+    on("GameStarted", handleStartGame);
+    on("BotThinking", handleBotThinking);
+    on("Error", handleError);
+    on("PlayerDisconnected", handlePlayerDisconnected);
+    on("PlayerReconnected", handlePlayerReconnected);
+    on("PlayerKicked", handlePlayerKicked);
+    
+    return () => {
+      off("JoinedRoom", handleJoinedRoom);
+      off("RoomRejoined", handleRoomRejoined);
+      off("PlayerJoined", handlePlayerJoined);
+      off("PlayerLeft", handleRoomUpdated);
+      off("PlayerChangeReady", handlePlayerChangeReady);
+      off("GameStarted", handleStartGame);
+      off("BotThinking", handleBotThinking);
+      off("Error", handleError);
+      off("PlayerDisconnected", handlePlayerDisconnected);
+      off("PlayerReconnected", handlePlayerReconnected);
+      off("PlayerKicked", handlePlayerKicked);
+    };
+  }, [
+    on, off,
+    handleJoinedRoom, handleRoomRejoined,
+    handlePlayerJoined, handleRoomUpdated,
+    handlePlayerChangeReady, handleStartGame,
+    handleBotThinking, handleError,
+    handlePlayerDisconnected, handlePlayerReconnected
+  ]);
+
+  // ─── Join Room Effect ─────────────────────────────────────────────────────────
+  // Grace period: khi F5, BE sẽ tự fire RoomRejoined qua OnConnectedAsync
+  // và set hasJoinedRef = true → effect này sẽ không chạy nữa.
+  // Nếu grace period hết hoặc vào lần đầu → chạy JoinRoom bình thường.
+  useEffect(() => {
+    if (!isConnected || !roomId || hasJoinedRef.current) return;
+
+    const joinRoom = async () => {
+      if (roomId === "new") {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsJoining(true);
+        const result = await invoke("JoinRoom", { roomId });
+
+        if (result?.success && result?.room) {
+          setRoom(result.room);
+          hasJoinedRef.current = true;
+          setIsLoading(false);
+          setIsJoining(false);
+        } else if (!result?.success) {
+          const toastKey = `joined-room-err`;
+          if (!toastShownRef.current.has(toastKey)) {
+            toast.error(result?.error ?? "Failed to join room");
+            toastShownRef.current.add(toastKey);
+          }
+          router.push("/lobby");
+        }
+      } catch (error) {
+        console.error("Failed to join room:", error);
+        setIsLoading(false);
+        setIsJoining(false);
+      }
+    };
+
+    joinRoom();
+  }, [isConnected, roomId, invoke]);
+
+  // ─── Actions ─────────────────────────────────────────────────────────────────
+
   const handleLeaveRoom = useCallback(async () => {
     if (!isConnected) {
       toast.error("Not connected to server");
       return;
     }
     try {
-      const room = await invoke("leaveRoom");
-      if (room.success) {
-        router.push("/lobby");
-        return;
-      }
+      await invoke("LeaveRoom");
+      router.push("/lobby");
     } catch (error) {
       console.error("Leave room error:", error);
       toast.error("Failed to leave room");
@@ -145,12 +308,10 @@ export default function ContentRoomDetail() {
     }
     try {
       const result = await invoke("AddBotToRoom");
-
       if (!result) {
         toast.error("No response from server");
         return;
       }
-
       if (result.success) {
         setRoom(result.room);
       } else {
@@ -169,11 +330,8 @@ export default function ContentRoomDetail() {
         return;
       }
       try {
-        const room = await invoke("PlayerChangeReady", newReady);
-        if (room.success) {
-          setRoom(room.room);
-          return;
-        }
+        const result = await invoke("PlayerChangeReady", newReady);
+        if (result?.success) setRoom(result.room);
       } catch (error) {
         console.error("Change ready error:", error);
         toast.error("Failed to change ready state");
@@ -187,132 +345,42 @@ export default function ContentRoomDetail() {
       toast.error("Not connected to server");
       return;
     }
-    try {
-      const room = await invoke("StartGame");
-      if (room.success) {
-        router.push(`/game/${roomId}`);
-        return;
-      } else {
-        toast.error(room.error);
-      }
-    } catch (error) {
-      console.error("Change ready error:", error);
-      toast.error("Failed to change ready state");
-    }
-  }, [isConnected, invoke]);
-
-  const handleStartGame = useCallback(() => {
-    router.push(`/game/${roomId}`);
-  }, []);
-
-  const handlePlayerChangeReady = useCallback((data: { updatedRoom: Room }) => {
-    // Only update if it's not the current user joining (to avoid duplicate toast)
-    if (data) {
-      setRoom(data.updatedRoom);
-    }
-  }, []);
-
-  const handleBotThinking = useCallback((data: { message: string }) => {
-    console.log("da vao", data);
-    setIsBotThinking(true);
-    setBotThinkingMsg(data?.message ?? "Bot is thinking...");
-  }, []);
-
-  // Setup SignalR event handlers with stable references
-  useEffect(() => {
-    on("JoinedRoom", handleJoinedRoom);
-    on("PlayerJoined", handlePlayerJoined);
-    on("Error", handleError);
-    on("PlayerLeft", handleRoomUpdated);
-    on("PlayerChangeReady", handlePlayerChangeReady);
-    on("GameStarted", handleStartGame);
-    on("BotThinking", handleBotThinking);
-
-    return () => {
-      off("JoinedRoom", handleJoinedRoom);
-      off("PlayerJoined", handlePlayerJoined);
-      off("Error", handleError);
-      off("PlayerLeft", handleRoomUpdated);
-      off("PlayerChangeReady", handleStartGame);
-      off("BotThinking", handleBotThinking);
-      on("off", handleStartGame);
-    };
-  }, [on, off, handleJoinedRoom, handlePlayerJoined, handleError]);
-
-  // Join room effect với dependency optimization
-  useEffect(() => {
-    if (!isConnected || !roomId || hasJoinedRef.current) {
+    if (hasDisconnectedPlayers) {
+      toast.warning("Cannot start game while a player is disconnected");
       return;
     }
-
-    const joinRoom = async () => {
-      if (roomId === "new") {
-        setIsLoading(false);
-        return;
+    try {
+      const result = await invoke("StartGame");
+      if (result?.success) {
+        router.push(`/game/${roomId}`);
+      } else {
+        toast.error(result?.error ?? "Failed to start game");
       }
-
-      try {
-        setIsJoining(true);
-        const room = await invoke("JoinRoom", roomId);
-        if (room?.room) {
-          setIsJoining(false);
-          setIsLoading(false);
-          setRoom(room.room);
-        }
-        if (!room?.success) {
-          const toastKey = `joined-room-err`;
-          if (!toastShownRef.current.has(toastKey)) {
-            toast.error(room.error);
-            toastShownRef.current.add(toastKey);
-          }
-          router.push("/lobby");
-        }
-      } catch (error) {
-        console.error("Failed to join room:", error);
-        setIsLoading(false);
-        setIsJoining(false);
-      }
-    };
-
-    joinRoom();
-  }, [isConnected, roomId, invoke]);
+    } catch (error) {
+      console.error("Start game error:", error);
+      toast.error("Failed to start game");
+    }
+  }, [isConnected, invoke, hasDisconnectedPlayers, roomId]);
 
   const handleCopyRoomId = useCallback(async () => {
     if (!room) return;
-
     try {
       const url = `${window.location.origin}/room/${room.id}`;
       await navigator.clipboard.writeText(url);
-
       setCopied(true);
       toast.success("Room link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy room link");
     }
   }, [room]);
 
-  // Memoized computed values
-  const isOwner = useMemo(
-    () => room?.players.find(p => p.playerId === auth?.Id)?.isOwner ?? false,
-    [room?.players, auth?.Id]
-  );
-
-  const emptySlots = useMemo(
-    () =>
-      room
-        ? Array.from({ length: room.quantityPlayer - room.currentPlayers })
-        : [],
-    [room?.quantityPlayer, room?.currentPlayers]
-  );
+  // ─── Render ───────────────────────────────────────────────────────────────────
 
   if (isBotThinking) {
-    return (
-      <BotThinkingIndicator visible={isBotThinking} message={botThinkingMsg} />
-    );
+    return <BotThinkingIndicator visible={isBotThinking} message={botThinkingMsg} />;
   }
 
-  // Loading state
   if (isLoading || isJoining) {
     return (
       <div className="min-h-[calc(80vh)] flex items-center justify-center">
@@ -324,7 +392,6 @@ export default function ContentRoomDetail() {
     );
   }
 
-  // Room not found state
   if (!room) {
     return (
       <div className="min-h-[calc(80vh)] flex items-center justify-center">
@@ -332,9 +399,7 @@ export default function ContentRoomDetail() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             {t("room_detail_not_found")}
           </h2>
-          <p className="text-gray-600 mb-6">
-            {t("room_detail_not_found_desc")}
-          </p>
+          <p className="text-gray-600 mb-6">{t("room_detail_not_found_desc")}</p>
           <Button onClick={handleLeaveRoom}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t("room_detail_back")}
@@ -350,11 +415,7 @@ export default function ContentRoomDetail() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={handleLeaveRoom}
-              className="flex items-center"
-            >
+            <Button variant="ghost" onClick={handleLeaveRoom} className="flex items-center">
               <ArrowLeft className="mr-2 h-4 w-4" />
               {t("room_detail_back")}
             </Button>
@@ -373,16 +434,20 @@ export default function ContentRoomDetail() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge
-              className={`${
-                room.status === "Waiting" ? "bg-green-500" : "bg-yellow-500"
-              } text-white`}
-            >
+            <Badge className={`${room.status === "Waiting" ? "bg-green-500" : "bg-yellow-500"} text-white`}>
               {room.status}
             </Badge>
             <Badge variant="outline">{room.roomType}</Badge>
           </div>
         </div>
+
+        {/* Disconnected warning banner */}
+        {hasDisconnectedPlayers && (
+          <div className="mb-4 flex items-center gap-2 px-4 py-3 rounded-lg bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm">
+            <DisconnectIcon className="h-4 w-4 shrink-0" />
+            <span>A player lost connection. Waiting for them to reconnect (30s)...</span>
+          </div>
+        )}
 
         {/* Room Info */}
         <Card className="mb-6">
@@ -396,11 +461,7 @@ export default function ContentRoomDetail() {
                   onClick={handleCopyRoomId}
                   className="flex items-center gap-2"
                 >
-                  {copied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   {copied ? t("room_detail_copied") : t("room_detail_copy")}
                 </Button>
                 {isOwner && (
@@ -428,11 +489,7 @@ export default function ContentRoomDetail() {
               <div className="h-2 flex-1 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-500 transition-all duration-300"
-                  style={{
-                    width: `${
-                      (room.currentPlayers / room.quantityPlayer) * 100
-                    }%`
-                  }}
+                  style={{ width: `${(room.currentPlayers / room.quantityPlayer) * 100}%` }}
                 />
               </div>
             </div>
@@ -451,8 +508,9 @@ export default function ContentRoomDetail() {
                   key={player.playerId}
                   player={player}
                   isCurrentUser={player.playerId === auth?.Id}
+                  isDisconnected={disconnectedPlayers.has(player.playerId)}
+                  canStart={!hasDisconnectedPlayers}
                   onToggleReady={(isReady: boolean) => {
-                    console.log("123", player, auth);
                     if (player.playerId === auth?.Id && player.isOwner) {
                       handleToggleStart();
                       return;
@@ -461,50 +519,52 @@ export default function ContentRoomDetail() {
                   }}
                 />
               ))}
-
-              {/* Empty Slots */}
               {emptySlots.map((_, index) => (
                 <EmptySlot key={`empty-${index}`} />
               ))}
             </div>
           </CardContent>
         </Card>
-
-        {/* Game Actions */}
       </div>
     </div>
   );
 }
 
-// Memoized sub-components để tránh re-render
+// ─── Sub Components ───────────────────────────────────────────────────────────
+
 const PlayerCard = React.memo(
   ({
     player,
     isCurrentUser,
+    isDisconnected = false,
+    canStart = true,
     onToggleReady
   }: {
     player: RoomPlayer;
     isCurrentUser: boolean;
+    isDisconnected?: boolean;
+    canStart?: boolean;
     onToggleReady?: (isReady: boolean) => void;
   }) => {
     const t = useTranslations();
-    const handleToggle = (isReady: boolean) => {
-      if (onToggleReady) {
-        onToggleReady(isReady);
-      }
-    };
 
     return (
       <div
-        className={`flex items-center gap-3 p-3 rounded-lg border ${
-          isCurrentUser
+        className={`flex items-center gap-3 p-3 rounded-lg border transition-colors duration-300 ${
+          isDisconnected
+            ? "bg-yellow-50 border-yellow-400"
+            : isCurrentUser
             ? "bg-blue-50 border-blue-200"
             : "bg-gray-50 border-gray-200"
         }`}
       >
         {/* Avatar */}
         <Avatar className="h-10 w-10">
-          <AvatarFallback className="bg-blue-500 text-white font-semibold">
+          <AvatarFallback
+            className={`font-semibold text-white transition-colors duration-300 ${
+              isDisconnected ? "bg-yellow-500" : "bg-blue-500"
+            }`}
+          >
             {player.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
@@ -514,48 +574,48 @@ const PlayerCard = React.memo(
           <div className="flex items-center gap-2">
             <span className="font-medium">{player.name}</span>
             {player.isOwner && <Crown className="h-4 w-4 text-yellow-500" />}
-            {/* {isCurrentUser && (
-              <Badge variant="secondary" className="text-xs">
-                You
+            {isDisconnected && (
+              <Badge className="bg-yellow-500 text-white text-xs animate-pulse">
+                Reconnecting...
               </Badge>
-            )} */}
+            )}
           </div>
-
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">
               {player.isOwner ? t("room_detail_owner") : t("room_detail_player")}
             </span>
-
-            {/* Trạng thái Ready */}
-            {player.isOwner ? (
-              <></>
-            ) : player.isReady ? (
-              <Badge className="bg-green-500 text-white text-xs">{t("room_detail_ready")}</Badge>
-            ) : (
-              <Badge className="bg-gray-400 text-white text-xs">
-                {t("room_detail_not_ready")}
-              </Badge>
+            {/* Ready badge - ẩn khi disconnect hoặc là owner */}
+            {!player.isOwner && !isDisconnected && (
+              player.isReady
+                ? <Badge className="bg-green-500 text-white text-xs">{t("room_detail_ready")}</Badge>
+                : <Badge className="bg-gray-400 text-white text-xs">{t("room_detail_not_ready")}</Badge>
             )}
           </div>
         </div>
 
-        {/* Actions */}
-        {isCurrentUser && !player.isOwner && (
+        {/* Ready button - chỉ hiện khi không disconnect */}
+        {isCurrentUser && !player.isOwner && !isDisconnected && (
           <Button
             size="sm"
             variant={player.isReady ? "destructive" : "default"}
-            onClick={() => handleToggle(!player.isReady)}
+            onClick={() => onToggleReady?.(!player.isReady)}
           >
             {player.isReady ? t("room_detail_unready") : t("room_detail_ready")}
           </Button>
         )}
 
-        {/* Nếu là Owner + CurrentUser thì có thể Start Game */}
+        {/* Start button cho owner */}
         {isCurrentUser && player.isOwner && (
           <Button
-            onClick={() => handleToggle(!player.isReady)}
+            onClick={() => onToggleReady?.(!player.isReady)}
             size="sm"
-            className="bg-green-600 text-white"
+            disabled={!canStart}
+            title={!canStart ? "Cannot start while a player is disconnected" : undefined}
+            className={`text-white transition-colors ${
+              !canStart
+                ? "bg-gray-400 cursor-not-allowed opacity-60"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
           >
             {t("room_detail_start")}
           </Button>
@@ -568,14 +628,14 @@ const PlayerCard = React.memo(
 const EmptySlot = React.memo(() => {
   const t = useTranslations();
   return (
-  <div className="flex items-center gap-3 p-3 rounded-lg border border-dashed border-gray-300 bg-gray-50">
-    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-      <Users className="h-5 w-5 text-gray-400" />
+    <div className="flex items-center gap-3 p-3 rounded-lg border border-dashed border-gray-300 bg-gray-50">
+      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+        <Users className="h-5 w-5 text-gray-400" />
+      </div>
+      <div className="flex-1">
+        <span className="text-gray-500">{t("room_detail_waiting")}</span>
+      </div>
     </div>
-    <div className="flex-1">
-      <span className="text-gray-500">{t("room_detail_waiting")}</span>
-    </div>
-  </div>
   );
 });
 

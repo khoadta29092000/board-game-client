@@ -1,5 +1,5 @@
-import { Room } from "@/src/types/room";
-import { Crown, Loader2, Play, Swords, Users } from "lucide-react";
+import { Room, RoomType } from "@/src/types/room";
+import { Crown, Lock, Play, Swords, Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -8,6 +8,7 @@ import {
 } from "@/src/components/ui/card";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
+
 export function RoomCard({
   room,
   onJoin,
@@ -15,15 +16,12 @@ export function RoomCard({
   isConnected
 }: {
   room: Room;
-  onJoin: (id: string) => void;
+  onJoin: (id: string, type: string) => void;
   joiningRoomId: string | null;
   isConnected: boolean;
 }) {
   const isFull = room.currentPlayers >= room.quantityPlayer;
-  // const isWaiting = room.status === "Waiting";
-  // const isPlaying = room.status === "Playing";
-  // const isJoining = joiningRoomId === room.id;
-  // const canJoin = isWaiting && !isFull && isConnected && !joiningRoomId;
+  const isPrivate = room.roomType === RoomType.Private;
 
   const statusConfig = {
     Waiting: { color: "#4ade80", label: "Waiting", dot: "bg-green-400" },
@@ -38,11 +36,22 @@ export function RoomCard({
     <Card key={room.id} className="hover:shadow-lg transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
-          <CardTitle className="capitalize text-lg">{room.roomId}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="capitalize text-lg">{room.roomId}</CardTitle>
+            {/* ✅ RoomType badge */}
+            {isPrivate ? (
+              <Badge className="flex items-center gap-1 hover:bg-yellow-200 bg-yellow-100 text-yellow-700 border border-yellow-300 text-xs">
+                <Lock className="w-3 h-3" />
+                Private
+              </Badge>
+            ) : (
+              <Badge className="hover:bg-green-200 bg-green-100 text-green-700 border border-green-300 text-xs">
+                Public
+              </Badge>
+            )}
+          </div>
           <div className="flex items-center gap-1.5 mt-1">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`}
-            />
+            <span className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`} />
             <span className="text-xs text-gray-400">{status.label}</span>
           </div>
         </div>
@@ -62,7 +71,6 @@ export function RoomCard({
                 {room.currentPlayers}/{room.quantityPlayer}
               </span>
             </div>
-            {/* Progress bar */}
             <div className="w-full h-1.5 rounded-full bg-gray-400 mb-3">
               <div
                 className="h-full rounded-full transition-all duration-500"
@@ -82,10 +90,7 @@ export function RoomCard({
                 <div key={player.playerId} className="flex items-center gap-2">
                   <div
                     className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    style={{
-                      background: "rgba(167,139,250,0.2)",
-                      color: "#a78bfa"
-                    }}
+                    style={{ background: "rgba(167,139,250,0.2)", color: "#a78bfa" }}
                   >
                     {player.name.charAt(0).toUpperCase()}
                   </div>
@@ -97,13 +102,8 @@ export function RoomCard({
                   )}
                 </div>
               ))}
-              {Array.from({
-                length: room.quantityPlayer - room.currentPlayers
-              }).map((_, i) => (
-                <div
-                  key={`empty-${i}`}
-                  className="flex items-center gap-2 opacity-30"
-                >
+              {Array.from({ length: room.quantityPlayer - room.currentPlayers }).map((_, i) => (
+                <div key={`empty-${i}`} className="flex items-center gap-2 opacity-30">
                   <div className="w-5 h-5 rounded-full border border-dashed border-gray-600" />
                   <span className="text-sm text-gray-600">Waiting...</span>
                 </div>
@@ -112,10 +112,10 @@ export function RoomCard({
           </div>
 
           <Button
-            onClick={() => onJoin(room.id)}
+            onClick={() => onJoin(room.id, room.roomType)}
             disabled={
               room.status !== "Waiting" ||
-              room.currentPlayers >= room.quantityPlayer ||
+              isFull ||
               !isConnected
             }
             className="w-full"
@@ -126,11 +126,16 @@ export function RoomCard({
                 <Play className="mr-2 h-4 w-4" />
                 Game in Progress
               </>
-            ) : room.currentPlayers >= room.quantityPlayer ? (
+            ) : isFull ? (
               "Room Full"
+            ) : isPrivate ? (
+              <>
+                <Lock className="w-4 h-4 mr-2" />
+                Join Private Room
+              </>
             ) : (
               <>
-                <Swords className="w-4 h-4" />
+                <Swords className="w-4 h-4 mr-2" />
                 Join Room
               </>
             )}

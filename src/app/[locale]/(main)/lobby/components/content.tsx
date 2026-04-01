@@ -2,16 +2,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useDisclosure } from "@/src/hook/common/useDisclosure";
 import { useRouter } from "@/src/i18n/navigation";
 import { Button } from "@/src/components/ui/button";
 import { Bot, Loader2, Plus, Wifi, WifiOff } from "lucide-react";
 import { toast } from "sonner";
-import { Room } from "@/src/types/room";
+import { Room, RoomType } from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { LoadingOverlay } from "@/src/components/common/loading";
 import { RoomCard } from "@/src/components/splendor/room/roomCard";
 import { LoginRequired } from "./LoginRequired";
 import { useTranslations } from "next-intl";
+import { CreateRoomModal } from "./modal/CreateRoomModal";
+import { JoinPrivateRoomModal } from "./modal/joinPrivateRoomModal";
 
 export default function ContentLobby() {
   const router = useRouter();
@@ -21,6 +24,17 @@ export default function ContentLobby() {
   const [joiningRoomId, setJoiningRoomId] = useState<string | null>(null);
   const { isConnected, invoke, on, off } = useSignalR();
   const t = useTranslations();
+  const [privateRoomId, setPrivateRoomId] = useState<string | null>(null);
+  const {
+  isOpen: isJoinPrivateOpen,
+  onOpen: onOpenJoinPrivate,
+  onClose: onCloseJoinPrivate
+  }  = useDisclosure();  
+  const {
+    isOpen: isCreateModalOpen,
+    onOpen: onOpenCreateModal,
+    onClose: onCloseCreateModal
+  } = useDisclosure();
 
   useEffect(() => {
     // Setup SignalR event handlers
@@ -86,38 +100,29 @@ export default function ContentLobby() {
     }
   }, [isConnected, invoke]);
 
-  const handleCreateRoom = async () => {
-    if (!isConnected) {
-      toast.error("Not connected to server");
-      return;
-    }
-
-    try {
-      setIsCreating(true);
-      off("RoomUpdated");
-      const roomId = await invoke("createRoom");
-      if (roomId.room) {
-        router.push(`/lobby/${roomId.room.id}`);
-      }
-    } catch (error) {
-      console.error("Create room error:", error);
-      toast.error("Failed to create room");
-      setIsCreating(false);
-    }
+  const handleCreateRoom = () => {
+    onOpenCreateModal();
   };
 
-  const handleJoinRoom = async (roomId: string) => {
-    if (!isConnected) return toast.error("Not connected");
-    // Set loading NGAY LẬP TỨC trước khi làm gì khác
-    setJoiningRoomId(roomId);
-    try {
-      off("RoomUpdated");
-      await router.push(`/lobby/${roomId}`);
-    } catch {
-      toast.error("Failed to join room");
-      setJoiningRoomId(null);
-    }
-  };
+const handleJoinRoom = async (roomId: string, roomType: string) => {
+  if (!isConnected) return toast.error("Not connected");
+
+  if (roomType === RoomType.Private) {
+    setPrivateRoomId(roomId);
+    onOpenJoinPrivate();
+    return;
+  }
+
+  // Public → join thẳng
+  setJoiningRoomId(roomId);
+  try {
+    off("RoomUpdated");
+    await router.push(`/lobby/${roomId}`);
+  } catch {
+    toast.error("Failed to join room");
+    setJoiningRoomId(null);
+  }
+};
 
   const [token, setToken] = useState<string | null>(null);
   const [checkedToken, setCheckedToken] = useState(false);
@@ -213,6 +218,14 @@ export default function ContentLobby() {
 
   return (
     <>
+       {isJoinPrivateOpen && privateRoomId && (
+          <JoinPrivateRoomModal
+            isOpen={isJoinPrivateOpen}
+            onClose={() => { onCloseJoinPrivate(); setPrivateRoomId(null); }}
+            roomId={privateRoomId}
+          />
+        )}  
+      {isCreateModalOpen &&  <CreateRoomModal isOpen={isCreateModalOpen} onClose={onCloseCreateModal} /> }
       {joiningRoomId && <LoadingOverlay message={t("lobby_joining_overlay")} />}
       {isCreating && <LoadingOverlay message={t("lobby_creating_overlay")} />}
       <div className="sm:min-h-[calc(80vh)] bg-gray-50 py-8">
