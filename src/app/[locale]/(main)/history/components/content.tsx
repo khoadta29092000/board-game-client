@@ -7,6 +7,7 @@ import HistoryCard from "@/src/components/history/historyCard";
 import { useGetMyHistory } from "@/src/hook/history/useGetMyHistory";
 import { cn } from "@/src/utils";
 import { useTranslations } from "next-intl";
+import { UpdateInfoTab } from "../../profile/components/content";
 
 type Filter = "all" | "win" | "loss";
 
@@ -36,7 +37,9 @@ export default function ContentHistory() {
             <h1 className="text-2xl font-black text-gray-900">{t("history_title")}</h1>
             <p className="text-sm text-gray-500">{t("history_desc")}</p>
           </div>
-
+          <div className="mb-4 rounded-lg border bg-white p-3">
+          <UpdateInfoTab isChange={false} />
+          </div>
           {/* Stats */}
           {!isLoading && data.length > 0 && myId && (
             <HistoryStats histories={data} myId={myId} />

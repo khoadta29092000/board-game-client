@@ -5,6 +5,8 @@ import { useCallback } from "react";
 import { useRouter } from "@/src/i18n/navigation";
 import { callProfile } from "@/src/service/user";
 import { useAuth } from "@/src/redux/global/selectors";
+import { setAuth } from "@/src/redux/global/slice";
+import { useDispatch } from "react-redux";
 
 async function verifyToken(): Promise<void> {
   const token =
@@ -15,6 +17,7 @@ async function verifyToken(): Promise<void> {
 
 export const useProfile = () => {
   const reduxProfile = useAuth();
+  const dispatch = useDispatch();
   const router = useRouter();
 
   const shouldFetch =
@@ -32,6 +35,7 @@ export const useProfile = () => {
         if (err?.response?.status === 401) {
           localStorage.removeItem("user_token");
           localStorage.removeItem("user_data");
+          dispatch(setAuth(null));
           router.push("/login");
         }
       }

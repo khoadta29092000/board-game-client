@@ -8,6 +8,7 @@ import {
 } from "@/src/components/ui/card";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
+import { useTranslations } from "next-intl";
 
 export function RoomCard({
   room,
@@ -20,14 +21,16 @@ export function RoomCard({
   joiningRoomId: string | null;
   isConnected: boolean;
 }) {
+  const t = useTranslations();
   const isFull = room.currentPlayers >= room.quantityPlayer;
   const isPrivate = room.roomType === RoomType.Private;
 
   const statusConfig = {
-    Waiting: { color: "#4ade80", label: "Waiting", dot: "bg-green-400" },
-    Playing: { color: "#facc15", label: "In Progress", dot: "bg-yellow-400" },
-    Finished: { color: "#6b7280", label: "Finished", dot: "bg-gray-500" }
+    Waiting: { color: "#4ade80", label: t("room_card_waiting"), dot: "bg-green-400" },
+    Playing: { color: "#facc15", label: t("room_card_playing"), dot: "bg-yellow-400" },
+    Finished: { color: "#6b7280", label: t("room_card_finished"), dot: "bg-gray-500" }
   };
+
   const status =
     statusConfig[room.status as keyof typeof statusConfig] ??
     statusConfig.Finished;
@@ -38,22 +41,23 @@ export function RoomCard({
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
             <CardTitle className="capitalize text-lg">{room.roomId}</CardTitle>
-            {/* ✅ RoomType badge */}
+          </div>
+          <div>
             {isPrivate ? (
               <Badge className="flex items-center gap-1 hover:bg-yellow-200 bg-yellow-100 text-yellow-700 border border-yellow-300 text-xs">
                 <Lock className="w-3 h-3" />
-                Private
+                {t("room_card_private")}
               </Badge>
             ) : (
               <Badge className="hover:bg-green-200 bg-green-100 text-green-700 border border-green-300 text-xs">
-                Public
+                {t("room_card_public")}
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`} />
-            <span className="text-xs text-gray-400">{status.label}</span>
-          </div>
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`} />
+          <span className="text-xs text-gray-400">{status.label}</span>
         </div>
       </CardHeader>
       <CardContent>
@@ -62,7 +66,7 @@ export function RoomCard({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-gray-500" />
-                <span className="text-sm text-gray-500">Players</span>
+                <span className="text-sm text-gray-500">{t("room_card_players")}</span>
               </div>
               <span
                 className="text-xs font-bold"
@@ -105,7 +109,7 @@ export function RoomCard({
               {Array.from({ length: room.quantityPlayer - room.currentPlayers }).map((_, i) => (
                 <div key={`empty-${i}`} className="flex items-center gap-2 opacity-30">
                   <div className="w-5 h-5 rounded-full border border-dashed border-gray-600" />
-                  <span className="text-sm text-gray-600">Waiting...</span>
+                  <span className="text-sm text-gray-600">{t("room_card_slot_waiting")}</span>
                 </div>
               ))}
             </div>
@@ -113,30 +117,26 @@ export function RoomCard({
 
           <Button
             onClick={() => onJoin(room.id, room.roomType)}
-            disabled={
-              room.status !== "Waiting" ||
-              isFull ||
-              !isConnected
-            }
+            disabled={room.status !== "Waiting" || isFull || !isConnected}
             className="w-full"
             variant={room.status === "Waiting" ? "default" : "secondary"}
           >
             {room.status === "Playing" ? (
               <>
                 <Play className="mr-2 h-4 w-4" />
-                Game in Progress
+                {t("room_card_in_progress")}
               </>
             ) : isFull ? (
-              "Room Full"
+              t("room_card_full")
             ) : isPrivate ? (
               <>
                 <Lock className="w-4 h-4 mr-2" />
-                Join Private Room
+                {t("room_card_join_private")}
               </>
             ) : (
               <>
                 <Swords className="w-4 h-4 mr-2" />
-                Join Room
+                {t("room_card_join")}
               </>
             )}
           </Button>

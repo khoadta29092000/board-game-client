@@ -36,7 +36,9 @@ export default function Header() {
           <Menu />
           <div className="flex items-center space-x-4">
             {/* Language Switcher Dropdown */}
-            <LanguageSwitcher />
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
             <TextReveal delay={0.5}>
               {mounted && profile?.Email ? (
                 <Profile auth={profile} />

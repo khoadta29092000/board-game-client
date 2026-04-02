@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import useWrapAsync from "./WrapAsync";
 import { jwtDecode } from "jwt-decode";
 import {
+  TChangePassword,
   TJWTProfile,
   TLogin,
   TLoginGoogle,
@@ -15,6 +16,7 @@ import {
   TVerify
 } from "../types/player";
 import {
+  callChangePassword,
   callLogin,
   callLoginGoogle,
   callLoginGuess,
@@ -160,6 +162,25 @@ const useApi = () => {
     }
   };
 
+   const changePassword = async (data: TChangePassword) => {
+    setLoading(true);
+    try {
+      const res = await wrapAsync(
+        () => callChangePassword(data),
+        "changePassword",
+      );
+      const { statusCode } = res?.data;
+      if (statusCode == 200) {
+        setLoading(false);
+        return true;
+      }
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      return false;
+    }
+  };
+
   const resetPassword = async (data: TResetPasssword) => {
     setLoading(true);
     try {
@@ -248,7 +269,8 @@ const useApi = () => {
     checkMail,
     resetPassword,
     refreshToken,
-    verifyCode
+    verifyCode,
+    changePassword
   };
 };
 

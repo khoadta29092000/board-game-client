@@ -61,6 +61,7 @@ export function JoinPrivateRoomModal({ isOpen, onClose, roomId }: TProps) {
 
       if (result?.success) {
         handleClose();
+        sessionStorage.setItem(`room_pwd_${roomId}`, data.password);
         router.push(`/lobby/${roomId}`);
       } else {
         toast.error(result?.error ?? "Failed to join room");

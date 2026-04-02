@@ -1,11 +1,12 @@
 "use client";
-import * as React from "react";
+
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { TMenuItem } from "@/src/types/header";
 import { menuData } from "@/src/utils/contants";
 import { Variants } from "framer-motion";
 import { useTranslations } from "next-intl";
+
 
 const itemVariants: Variants = {
   hidden: { x: -20, opacity: 0 },
@@ -36,6 +37,7 @@ export default function Menu() {
       initial="hidden"
       animate="show"
     >
+      
       {menuData.map((item: TMenuItem) => (
         <motion.div
           key={item.title}
@@ -54,6 +56,7 @@ export default function Menu() {
           )}
         </motion.div>
       ))}
+      
     </motion.div>
   );
 }

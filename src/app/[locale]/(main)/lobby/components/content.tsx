@@ -117,6 +117,7 @@ const handleJoinRoom = async (roomId: string, roomType: string) => {
   setJoiningRoomId(roomId);
   try {
     off("RoomUpdated");
+    //sessionStorage.setItem(`room_pwd_${roomId}`, password);
     await router.push(`/lobby/${roomId}`);
   } catch {
     toast.error("Failed to join room");

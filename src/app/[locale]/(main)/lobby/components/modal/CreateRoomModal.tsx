@@ -106,6 +106,7 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
       const roomId = await invoke("CreateSettingRoom", payload);
       if (roomId && roomId.room) {
         onClose();
+        sessionStorage.setItem(`room_pwd_${roomId.room.id}`, data.password);
         router.push(`/lobby/${roomId.room.id}`);
       } else {
         setIsCreating(false);

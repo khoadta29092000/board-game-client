@@ -17,6 +17,7 @@ import { setAuth } from "@/src/redux/global/slice";
 import { useDispatch } from "react-redux";
 import { useAuth } from "@/src/redux/global/selectors";
 import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./languageSwitcher";
 
 export default function Navbar() {
   const t = useTranslations();
@@ -41,6 +42,7 @@ export default function Navbar() {
         <DrawerTitle></DrawerTitle>
         <div className="card w-full bg-white p-5 rounded-md">
           <ul className="w-full flex flex-col gap-1">
+           
             {menuData.map((item: TMenuItem) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -117,6 +119,12 @@ export default function Navbar() {
               </li>
             </ul>
           )}
+          <ul className="w-full flex-col mt-1 flex sm:hidden">
+            <li className="cursor-pointer p-16-semibold p-4 w-full whitespace-nowrap">
+              <LanguageSwitcher />
+            </li>
+          </ul>
+
         </div>
       </DrawerContent>
     </Drawer>

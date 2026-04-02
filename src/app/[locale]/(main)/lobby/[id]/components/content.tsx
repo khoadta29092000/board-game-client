@@ -37,6 +37,7 @@ import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { useAuth } from "@/src/redux/global/selectors";
 import BotThinkingIndicator from "@/src/components/splendor/common/BotThinkingIndicator";
 import { useTranslations } from "next-intl";
+import { PasswordModal } from "./PasswordModal ";
 
 export default function ContentRoomDetail() {
   const router = useRouter();
@@ -53,6 +54,9 @@ export default function ContentRoomDetail() {
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [botThinkingMsg, setBotThinkingMsg] = useState("Bot is thinking...");
   const [disconnectedPlayers, setDisconnectedPlayers] = useState<Set<string>>(new Set());
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [pendingPassword, setPendingPassword] = useState("");
+  const [roomType, setRoomType] = useState<string | null>(null);
 
   // Refs to avoid duplicate events
   const hasJoinedRef = useRef(false);
@@ -249,41 +253,86 @@ const handlePlayerKicked = useCallback(
   // Grace period: khi F5, BE sẽ tự fire RoomRejoined qua OnConnectedAsync
   // và set hasJoinedRef = true → effect này sẽ không chạy nữa.
   // Nếu grace period hết hoặc vào lần đầu → chạy JoinRoom bình thường.
-  useEffect(() => {
-    if (!isConnected || !roomId || hasJoinedRef.current) return;
+useEffect(() => {
+  if (!isConnected || !roomId || hasJoinedRef.current) return;
 
-    const joinRoom = async () => {
-      if (roomId === "new") {
-        setIsLoading(false);
+  const initRoom = async () => {
+    if (roomId === "new") {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsJoining(true);
+
+      // ✅ Check room type trước
+      const roomInfo = await invoke("GetRoomInfo", roomId);
+
+      console.log("roomInfo",roomInfo)
+      if (!roomInfo?.success) {
+        toast.error(roomInfo?.error ?? "Room not found");
+        router.push("/lobby");
         return;
       }
+      setRoom(roomInfo.room)
 
-      try {
-        setIsJoining(true);
-        const result = await invoke("JoinRoom", { roomId });
+     if (roomInfo.room?.roomType === "Private") {
+      setRoomType("Private");
 
-        if (result?.success && result?.room) {
-          setRoom(result.room);
-          hasJoinedRef.current = true;
-          setIsLoading(false);
-          setIsJoining(false);
-        } else if (!result?.success) {
-          const toastKey = `joined-room-err`;
-          if (!toastShownRef.current.has(toastKey)) {
-            toast.error(result?.error ?? "Failed to join room");
-            toastShownRef.current.add(toastKey);
-          }
-          router.push("/lobby");
-        }
-      } catch (error) {
-        console.error("Failed to join room:", error);
-        setIsLoading(false);
+      const savedPassword = sessionStorage.getItem(`room_pwd_${roomId}`);
+
+      if (savedPassword) {
+        await doJoinRoom(savedPassword);
+      } else {
         setIsJoining(false);
+        setIsLoading(false);
+        setShowPasswordModal(true);
       }
-    };
+      return;
+    }
 
-    joinRoom();
-  }, [isConnected, roomId, invoke]);
+      await doJoinRoom();
+    } catch (error) {
+      console.error("Failed to init room:", error);
+      setIsLoading(false);
+      setIsJoining(false);
+    }
+  };
+
+  initRoom();
+}, [isConnected, roomId, invoke]);
+
+const doJoinRoom = useCallback(async (password?: string) => {
+  try {
+    setIsJoining(true);
+    const result = await invoke("JoinRoom", { roomId, password: password ?? null });
+    console.log("123", result)
+    if (result?.success && result?.room) {
+      setRoom(result.room);
+      hasJoinedRef.current = true;
+      setIsLoading(false);
+      setIsJoining(false);
+      setShowPasswordModal(false);
+      sessionStorage.removeItem(`room_pwd_${roomId}`);
+    } else if (!result?.success) {
+      sessionStorage.removeItem(`room_pwd_${roomId}`);
+      const toastKey = `joined-room-err`;
+      if (!toastShownRef.current.has(toastKey)) {
+        toast.error(result?.error ?? "Failed to join room");
+        toastShownRef.current.add(toastKey);
+      }
+      if (result?.error === "Incorrect password") {
+        setIsJoining(false);
+        return;
+      }
+      router.push("/lobby");
+    }
+  } catch (error) {
+    console.error("Failed to join room:", error);
+    setIsLoading(false);
+    setIsJoining(false);
+  }
+}, [roomId, invoke, router]);
 
   // ─── Actions ─────────────────────────────────────────────────────────────────
 
@@ -409,8 +458,24 @@ const handlePlayerKicked = useCallback(
     );
   }
 
+  // if(room.roomType === "Private"){
+  //   return (
+  //     <PasswordModal
+  //       isOpen={showPasswordModal}
+  //       isJoining={isJoining}
+  //       onClose={() => router.push("/lobby")}
+  //       onSubmit={(password) => doJoinRoom(password)}
+  //     />)
+  // }
+
   return (
     <div className="min-h-[calc(80vh)] bg-gray-50 py-8">
+       <PasswordModal
+        isOpen={showPasswordModal}
+        isJoining={isJoining}
+        onClose={() => router.push("/lobby")}
+        onSubmit={(password) => doJoinRoom(password)}
+      />
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-8">

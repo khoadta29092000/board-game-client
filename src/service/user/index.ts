@@ -1,4 +1,5 @@
 import {
+  TChangePassword,
   TLogin,
   TLoginGoogle,
   TLoginGuess,
@@ -85,6 +86,15 @@ export const callLostPassword = async (email: string) => {
     const response = await api.post(`/Players/Lost_Password`, {
       username: email
     });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const callChangePassword = async (data: TChangePassword) => {
+  try {
+    const response = await api.put(`/Players/Change_Password`, data);
     return response;
   } catch (error) {
     throw error;

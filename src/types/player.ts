@@ -61,3 +61,8 @@ export type TDataToken = {
   exp: number;
   iat: number;
 };
+
+export type TChangePassword = {
+  oldPassword: string;
+  newPassword: string;
+}

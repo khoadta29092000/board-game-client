@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { cn } from "@/src/utils";
 
 const containerVariant: Variants = {
   hidden: { y: "-100%", opacity: 0 },
@@ -17,8 +18,11 @@ const containerVariant: Variants = {
     }
   }
 };
+type props = {
+  w?: string
+}
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({w="22px"}:props) {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
@@ -53,7 +57,9 @@ export default function LanguageSwitcher() {
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white/70 shadow-sm hover:bg-gray-50 transition-colors"
         title={t("switch_language")}
       >
-        <div className="relative w-[22px] h-[22px] rounded-full overflow-hidden border border-gray-100 shadow-sm flex-shrink-0">
+        <div className={cn("relative  h-[22px] rounded-full overflow-hidden border border-gray-100 shadow-sm flex-shrink-0",
+             `w-[${w}]`
+        )}>
           <Image src={currentFlag.src} alt={currentFlag.alt} fill className="object-cover" />
         </div>
         <span className="text-sm font-semibold text-gray-700">
