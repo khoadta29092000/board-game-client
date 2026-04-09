@@ -53,10 +53,10 @@ export default function GemsCard({
         style={{
           display: "flex",
           flexDirection: isLandscape ? "column" : "row",
-          gap: isLandscape ? 8 : 6,
+          gap: isLandscape ? 12 : 6,
           flex: 1,
           alignItems: "center",
-          justifyContent: isLandscape ? "flex-start" : "center",
+          justifyContent: isLandscape ? "center" : "center",
           overflowX: isLandscape ? "hidden" : "auto",
           overflowY: isLandscape ? "auto" : "hidden",
           paddingBottom: isLandscape ? 0 : 2,
@@ -68,8 +68,7 @@ export default function GemsCard({
             const numAmount = +amount;
             const selectedCount = selectedGems[color] || 0;
 
-            const selectable =
-              isMyTurn && isGemSelectable(color, numAmount) && color !== "Gold";
+            const selectable = isMyTurn && isGemSelectable(color, numAmount);
 
             return (
               <div
@@ -86,6 +85,7 @@ export default function GemsCard({
                   ref={el => registerGemBank(color, el)}
                   data-gem={color}
                   onClick={() => {
+                    if (color == "Gold") return;
                     if (!selectable || isTutorialLock) return;
                     if (
                       (currentStep?.id == 2 && color == "White") ||

@@ -59,11 +59,11 @@ export default function BoardContainer({
         display: "flex",
         flexDirection: isLandscape ? "row" : "column",
         gap: 8,
-        background: "linear-gradient(135deg, #4a1d96, #0f172a)",
-        borderRadius: 12,
         padding: 8,
-        overflow: allowScroll ? "auto" : "hidden"
+        overflow: allowScroll ? "auto" : "hidden",
+        background: "#13131B"
       }}
+      className="md:border-r-3"
     >
       {/* Gems panel */}
       <div
@@ -81,6 +81,17 @@ export default function BoardContainer({
           currentStep={currentStep}
         />
       </div>
+
+      {/* ✅ Divider */}
+      <div
+        style={{
+          background: "#1C1C26",
+          borderRadius: 999,
+          width: isLandscape ? 2 : "100%",
+          height: isLandscape ? "100%" : 2,
+          flexShrink: 0
+        }}
+      />
 
       {/* Cards */}
       <div

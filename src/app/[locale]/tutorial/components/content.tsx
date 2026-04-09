@@ -52,7 +52,11 @@ function TutorialContent() {
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [botThinkingMsg, setBotThinkingMsg] = useState("Bot đang suy nghĩ...");
   const [tutorialWon, setTutorialWon] = useState(false);
-  const { isOpen: showBotWon, onOpen: onOpenBotWon, onClose: onCloseBotWon } = useDisclosure();
+  const {
+    isOpen: showBotWon,
+    onOpen: onOpenBotWon,
+    onClose: onCloseBotWon
+  } = useDisclosure();
 
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [dataDiscardGem, setDataDiscardGem] = useState<DiscardGemData | null>(
@@ -267,10 +271,13 @@ function TutorialContent() {
     [completeTutorial]
   );
 
-  const handleTutorialFailed = useCallback((_data: { message: string }) => {
-    setIsBotThinking(false);
-    onOpenBotWon(); // hiện modal overlay Bot Won
-  }, [onOpenBotWon]);
+  const handleTutorialFailed = useCallback(
+    (_data: { message: string }) => {
+      setIsBotThinking(false);
+      onOpenBotWon(); // hiện modal overlay Bot Won
+    },
+    [onOpenBotWon]
+  );
 
   const handleRetry = useCallback(async () => {
     onCloseBotWon();
@@ -657,7 +664,7 @@ function TutorialContent() {
           height: "100%",
           display: "flex",
           flexDirection: isLandscape ? "row" : "column",
-          background: "linear-gradient(180deg, #2e1065 0%, #111827 100%)",
+          background: "#0D0D15",
           overflow: "hidden"
         }}
       >

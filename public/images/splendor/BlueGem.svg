@@ -1,89 +1,12 @@
-<svg
-  width="120"
-  height="120"
-  viewBox="0 0 120 120"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <!-- Outer facets -->
-  <g>
-    <!-- Top facet -->
-    <path
-      d="M60 25 L75 35 L60 45 L45 35 Z"
-      fill="#5ba8d8"
-    />
-    <!-- Right facet -->
-    <path
-      d="M75 35 L95 60 L75 85 L60 60 Z"
-      fill="#7bb8e0"
-    />
-    <!-- Bottom facet -->
-    <path
-      d="M60 95 L45 85 L60 75 L75 85 Z"
-      fill="#4590c0"
-    />
-    <!-- Left facet -->
-    <path
-      d="M45 35 L25 60 L45 85 L60 60 Z"
-      fill="#6bb0dc"
-    />
-    
-    <!-- Corner facets -->
-    <path
-      d="M60 25 L75 35 L70 25 Z"
-      fill="#8dc8e8"
-    />
-    <path
-      d="M75 35 L95 60 L85 40 Z"
-      fill="#9dd5f0"
-    />
-    <path
-      d="M75 85 L95 60 L85 80 Z"
-      fill="#6ba8d0"
-    />
-    <path
-      d="M60 95 L75 85 L70 95 Z"
-      fill="#4080b0"
-    />
-    <path
-      d="M45 85 L60 95 L50 95 Z"
-      fill="#3878a8"
-    />
-    <path
-      d="M25 60 L45 85 L35 80 Z"
-      fill="#5098c8"
-    />
-    <path
-      d="M25 60 L45 35 L35 40 Z"
-      fill="#85c0e0"
-    />
-    <path
-      d="M45 35 L60 25 L50 25 Z"
-      fill="#a5d8f0"
-    />
-  </g>
-  
-  <!-- Center circle -->
-  <circle cx="60" cy="60" r="20" fill="url(#blueGradient)" />
-  
-  <!-- Light reflection on center -->
-  <ellipse cx="60" cy="55" rx="12" ry="8" fill="#ffffff" opacity="0.3" />
-  <ellipse cx="58" cy="52" rx="6" ry="4" fill="#ffffff" opacity="0.5" />
-  
-  <!-- Gradient definitions -->
-  <defs>
-    <radialGradient id="blueGradient" cx="0.5" cy="0.4">
-      <stop offset="0%" stop-color="#5ba8e8" />
-      <stop offset="50%" stop-color="#2878c0" />
-      <stop offset="100%" stop-color="#1850a0" />
-    </radialGradient>
-  </defs>
-  
-  <!-- Sparkle -->
-  <g>
-    <path
-      d="M90 28 L91 23 L92 28 L97 29 L92 30 L91 35 L90 30 L85 29 Z"
-      fill="#ffffff"
-    />
-  </g>
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M32 48L80 16L128 48V112L80 144L32 112V48Z" fill="url(#paint0_linear_1_1052)"/>
+<path d="M80 16L128 48L80 80L32 48L80 16Z" fill="white" fill-opacity="0.3"/>
+<path d="M80 144L128 112L80 80L32 112L80 144Z" fill="black" fill-opacity="0.2"/>
+<rect x="32" y="48" width="96" height="64" stroke="white" stroke-opacity="0.5" stroke-width="0.32"/>
+<defs>
+<linearGradient id="paint0_linear_1_1052" x1="32" y1="16" x2="154.88" y2="108.16" gradientUnits="userSpaceOnUse">
+<stop stop-color="#60A5FA"/>
+<stop offset="1" stop-color="#1E40AF"/>
+</linearGradient>
+</defs>
 </svg>

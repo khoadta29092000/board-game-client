@@ -23,6 +23,7 @@ export interface SplendorCard {
   points: number;
   bonusColor: Exclude<GemColor, "Gold">;
   cost: Partial<Record<Exclude<GemColor, "Gold">, number>>;
+  imageUrl?: string;
 }
 
 /* ---------------- Nobles ---------------- */
@@ -30,6 +31,7 @@ export interface SplendorNoble {
   nobleId: string;
   points: number;
   requirements: Partial<Record<Exclude<GemColor, "Gold">, number>>;
+  imageUrl?: string;
 }
 
 /* ---------------- Player ---------------- */
@@ -233,4 +235,3 @@ export type DiscardGemData = {
 export type SelectNobleData = {
   eligibleNobles: string[]; // list Guid
 };
-

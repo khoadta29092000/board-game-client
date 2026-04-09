@@ -65,10 +65,10 @@ export default function PlayerInfo({
           display: "flex",
           flexDirection: isLandscape ? "column" : "row",
           gap: 6,
-          padding: isLandscape ? "8px 10px" : "6px 8px",
-          background: "rgba(17,24,39,0.85)",
+          // padding: isLandscape ? "0px 10px" : "0px 8px",
+          background: "#13131B",
           backdropFilter: "blur(4px)",
-          width: isLandscape ? 240 : "100%",
+          width: isLandscape ? 264 : "auto",
           height: isLandscape ? "100%" : "auto",
           flexShrink: 0,
           overflowX: isLandscape ? "hidden" : "auto",
@@ -82,12 +82,11 @@ export default function PlayerInfo({
             display: isLandscape ? "flex" : "none",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: isLandscape ? "6px 4px" : "4px 8px",
-            borderRadius: 8,
-            background: "rgba(250,204,21,0.08)",
-            border: "1px solid rgba(250,204,21,0.2)",
-            gap: 6,
-            minWidth: isLandscape ? 0 : "max-content"
+            padding: isLandscape ? "12px 16px" : "4px 8px",
+            background: "#1C1C26",
+            color: "#64748B",
+            fontWeight: 700,
+            fontSize: "16px"
           }}
         >
           <div
@@ -98,286 +97,205 @@ export default function PlayerInfo({
               gap: 4
             }}
           >
-            <span style={{ color: "#9ca3af", fontSize: 10 }}>{t("player_info_turn")}</span>
-            <span style={{ color: "#facc15", fontWeight: 900, fontSize: 14 }}>
+            <span style={{ fontSize: 12 }}>{t("player_info_turn")}</span>
+            <span style={{ color: "#a78bfa", fontWeight: 900, fontSize: 14 }}>
               {Math.floor((turnNumber + 1) / totalPlayers)}
             </span>
           </div>
           <span style={{ color: "#374151", fontSize: 12 }}>|</span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ color: "#9ca3af", fontSize: 10 }}>{t("player_info_move")}</span>
+            <span style={{ fontSize: 12 }}>{t("player_info_move")}</span>
             <span style={{ color: "#a78bfa", fontWeight: 700, fontSize: 14 }}>
               {turnPositionInRound}/{totalPlayers}
             </span>
           </div>
           <span style={{ color: "#374151", fontSize: 12 }}>|</span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ color: "#9ca3af", fontSize: 10 }}>{t("player_info_win")}</span>
-            <span style={{ color: "#4ade80", fontWeight: 700, fontSize: 14 }}>
+            <span style={{ fontSize: 12 }}>{t("player_info_win")}</span>
+            <span style={{ color: "#facc15", fontWeight: 700, fontSize: 14 }}>
               {WIN_POINTS}pt
             </span>
           </div>
         </div>
+        <div className="p-2 gap-2 flex  lg:flex-col w-full">
+          {/* Players */}
+          {[...sortedPlayers]?.map((player, idx) => {
+            const isMe = player.playerId === myId;
+            const isCurrentTurn = currentPlayerId === player.playerId;
+            const totalGems = Object.values(player.gems ?? {}).reduce(
+              (a, b) => a + b,
+              0
+            );
+            const playerTurnOrder =
+              (sortPlayers.findIndex(id => id === player.playerId) %
+                totalPlayers) +
+              1;
 
-        {/* Players */}
-        {sortedPlayers?.map((player, idx) => {
-          const isMe = player.playerId === myId;
-          const isCurrentTurn = currentPlayerId === player.playerId;
-          const totalGems = Object.values(player.gems ?? {}).reduce(
-            (a, b) => a + b,
-            0
-          );
-          const playerTurnOrder =
-            (sortPlayers.findIndex(id => id === player.playerId) %
-              totalPlayers) +
-            1;
-
-          return (
-            <div
-              key={player.playerId}
-              style={{
-                flexShrink: 0,
-                width: isLandscape
-                  ? "100%"
-                  : `calc(${100 / sortedPlayers.length}% - ${
-                      ((sortedPlayers.length - 1) * 6) / sortedPlayers.length
-                    }px)`,
-                height: isLandscape ? "auto" : "100%",
-                borderRadius: 10,
-                border: `2px solid ${isCurrentTurn ? "#facc15" : "#374151"}`,
-                outline: isMe ? "2px solid #3b82f6" : "none",
-                outlineOffset: 1,
-                background: "#1f2937",
-                boxShadow: isCurrentTurn
-                  ? "0 0 16px rgba(250,204,21,0.25)"
-                  : undefined,
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                minWidth: 0,
-                position: "relative" // ← cần cho noble slot ẩn
-              }}
-            >
-              {/* Header */}
+            return (
               <div
+                key={player.playerId}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "6px 10px",
                   flexShrink: 0,
-                  background: isCurrentTurn
-                    ? "rgba(250,204,21,0.12)"
-                    : "rgba(55,65,81,0.5)"
+                  width: isLandscape
+                    ? "100%"
+                    : `calc(${100 / totalPlayers}% - ${((totalPlayers - 1) * 6) / totalPlayers}px)`,
+                  height: isLandscape ? "auto" : "100%",
+                  borderRadius: 10,
+                  border: `2px solid ${isCurrentTurn ? "#facc15" : "#374151"}`,
+                  outline: isMe ? "2px solid #3b82f6" : "none",
+                  outlineOffset: 1,
+                  background: "#1f2937",
+                  boxShadow: isCurrentTurn
+                    ? "0 0 16px rgba(250,204,21,0.25)"
+                    : undefined,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  minWidth: 0,
+                  position: "relative"
                 }}
               >
+                {/* Header */}
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 4,
-                    minWidth: 0
-                  }}
-                >
-                  <span
-                    style={{
-                      background: isCurrentTurn ? "#facc15" : "#374151",
-                      color: isCurrentTurn ? "#111" : "#9ca3af",
-                      fontSize: 10,
-                      fontWeight: 900,
-                      borderRadius: 4,
-                      padding: "1px 5px",
-                      flexShrink: 0
-                    }}
-                  >
-                    #{playerTurnOrder}
-                  </span>
-                  {isCurrentTurn && (
-                    <span
-                      style={{ color: "#facc15", fontSize: 11, flexShrink: 0 }}
-                    >
-                      ▶
-                    </span>
-                  )}
-                  <span
-                    style={{
-                      color: "white",
-                      fontWeight: 700,
-                      fontSize: 13,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap"
-                    }}
-                  >
-                    {player.name}
-                  </span>
-                  {isMe && (
-                    <span
-                      style={{
-                        color: "#60a5fa",
-                        fontSize: 10,
-                        flexShrink: 0,
-                        marginLeft: 2
-                      }}
-                    >
-                      {t("player_info_you")}
-                    </span>
-                  )}
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                    flexShrink: 0
+                    justifyContent: "space-between",
+                    padding: "6px 10px",
+                    flexShrink: 0,
+                    background: isCurrentTurn
+                      ? "rgba(250,204,21,0.12)"
+                      : "rgba(55,65,81,0.5)"
                   }}
                 >
                   <div
-                    style={{ display: "flex", alignItems: "baseline", gap: 2 }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      minWidth: 0
+                    }}
                   >
                     <span
                       style={{
-                        color: "#facc15",
+                        background: isCurrentTurn ? "#facc15" : "#374151",
+                        color: isCurrentTurn ? "#111" : "#9ca3af",
+                        fontSize: 10,
                         fontWeight: 900,
-                        fontSize: 18
+                        borderRadius: 4,
+                        padding: "1px 5px",
+                        flexShrink: 0
                       }}
                     >
-                      {player.points}
+                      #{playerTurnOrder}
                     </span>
-                    <span style={{ color: "#ca8a04", fontSize: 10 }}>
-                      /{WIN_POINTS}
+                    {isCurrentTurn && (
+                      <span
+                        style={{
+                          color: "#facc15",
+                          fontSize: 11,
+                          flexShrink: 0
+                        }}
+                      >
+                        ▶
+                      </span>
+                    )}
+                    <span
+                      style={{
+                        color: "white",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap"
+                      }}
+                    >
+                      {player.name}
                     </span>
+                    {isMe && (
+                      <span
+                        style={{
+                          color: "#60a5fa",
+                          fontSize: 10,
+                          flexShrink: 0,
+                          marginLeft: 2
+                        }}
+                      >
+                        {t("player_info_you")}
+                      </span>
+                    )}
                   </div>
                   <div
                     style={{
-                      width: 40,
-                      height: 3,
-                      background: "#374151",
-                      borderRadius: 2,
-                      overflow: "hidden"
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      flexShrink: 0
                     }}
                   >
                     <div
                       style={{
-                        width: `${Math.min((player.points / WIN_POINTS) * 100, 100)}%`,
-                        height: "100%",
-                        background:
-                          player.points >= WIN_POINTS ? "#4ade80" : "#facc15",
-                        transition: "width 0.3s"
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div
-                style={{
-                  padding: "6px 10px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 5,
-                  flex: 1,
-                  overflowY: "auto",
-                  minHeight: 0
-                }}
-              >
-                {/* Gems */}
-                <div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: 3
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 9,
-                        color: "#9ca3af",
-                        textTransform: "uppercase",
-                        letterSpacing: 1
+                        display: "flex",
+                        alignItems: "baseline",
+                        gap: 2
                       }}
                     >
-                      {t("player_info_gems")}
-                    </span>
-                    <span style={{ fontSize: 9, color: "#6b7280" }}>
-                      {totalGems}/10
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-                    {Object.entries(player?.gems ?? {})
-                      .filter(([, v]) => v > 0)
-                      .map(([color, amount]) => (
-                        <div
-                          key={color}
-                          ref={el =>
-                            registerGemPlayer(player.playerId, color, el)
-                          } // ← thêm
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 3,
-                            background: "#374151",
-                            borderRadius: 5,
-                            padding: "2px 6px"
-                          }}
-                        >
-                          <div
-                            style={{
-                              position: "relative",
-                              width: 14,
-                              height: 14
-                            }}
-                          >
-                            <Image
-                              src={gemIconMap[color as keyof typeof gemIconMap]}
-                              alt={color}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                          <span
-                            style={{
-                              color: "white",
-                              fontSize: 12,
-                              fontWeight: 700
-                            }}
-                          >
-                            {amount}
-                          </span>
-                        </div>
-                      ))}
-
-                    {/* Slot ẩn cho gem = 0: vẫn register để animation biết điểm đích dù chưa có gem */}
-                    {Object.entries(player?.gems ?? {})
-                      .filter(([, v]) => v === 0)
-                      .map(([color]) => (
-                        <div
-                          key={`slot-${color}`}
-                          ref={el =>
-                            registerGemPlayer(player.playerId, color, el)
-                          } // ← thêm
-                          style={{
-                            position: "absolute",
-                            opacity: 0,
-                            pointerEvents: "none",
-                            width: 1,
-                            height: 1
-                          }}
-                        />
-                      ))}
-
-                    {totalGems === 0 && (
-                      <span style={{ color: "#6b7280", fontSize: 12 }}>—</span>
-                    )}
+                      <span
+                        style={{
+                          color: "#facc15",
+                          fontWeight: 900,
+                          fontSize: 18
+                        }}
+                      >
+                        {player.points}
+                      </span>
+                      <span style={{ color: "#ca8a04", fontSize: 10 }}>
+                        /{WIN_POINTS}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        width: 40,
+                        height: 3,
+                        background: "#374151",
+                        borderRadius: 2,
+                        overflow: "hidden"
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${Math.min((player.points / WIN_POINTS) * 100, 100)}%`,
+                          height: "100%",
+                          background:
+                            player.points >= WIN_POINTS ? "#4ade80" : "#facc15",
+                          transition: "width 0.3s"
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Bonuses */}
-                {Object.values(player?.bonuses ?? {}).some(v => v > 0) && (
+                {/* Body */}
+                <div
+                  style={{
+                    padding: "6px 10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 5,
+                    flex: 1,
+                    overflowY: "auto",
+                    minHeight: 0
+                  }}
+                >
+                  {/* Gems */}
                   <div>
-                    <div style={{ marginBottom: 3 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: 3
+                      }}
+                    >
                       <span
                         style={{
                           fontSize: 9,
@@ -386,20 +304,26 @@ export default function PlayerInfo({
                           letterSpacing: 1
                         }}
                       >
-                        {t("player_info_bonuses")}
+                        {t("player_info_gems")}
+                      </span>
+                      <span style={{ fontSize: 9, color: "#6b7280" }}>
+                        {totalGems}/10
                       </span>
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-                      {Object.entries(player?.bonuses ?? {})
+                      {Object.entries(player?.gems ?? {})
                         .filter(([, v]) => v > 0)
                         .map(([color, amount]) => (
                           <div
                             key={color}
+                            ref={el =>
+                              registerGemPlayer(player.playerId, color, el)
+                            } // ← thêm
                             style={{
                               display: "flex",
                               alignItems: "center",
                               gap: 3,
-                              background: "#111827",
+                              background: "#374151",
                               borderRadius: 5,
                               padding: "2px 6px"
                             }}
@@ -422,77 +346,169 @@ export default function PlayerInfo({
                             </div>
                             <span
                               style={{
-                                color: "#4ade80",
+                                color: "white",
                                 fontSize: 12,
                                 fontWeight: 700
                               }}
                             >
-                              +{amount}
+                              {amount}
                             </span>
                           </div>
                         ))}
+
+                      {/* Slot ẩn cho gem = 0: vẫn register để animation biết điểm đích dù chưa có gem */}
+                      {Object.entries(player?.gems ?? {})
+                        .filter(([, v]) => v === 0)
+                        .map(([color]) => (
+                          <div
+                            key={`slot-${color}`}
+                            ref={el =>
+                              registerGemPlayer(player.playerId, color, el)
+                            } // ← thêm
+                            style={{
+                              position: "absolute",
+                              opacity: 0,
+                              pointerEvents: "none",
+                              width: 1,
+                              height: 1
+                            }}
+                          />
+                        ))}
+
+                      {totalGems === 0 && (
+                        <span style={{ color: "#6b7280", fontSize: 12 }}>
+                          —
+                        </span>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Footer — registerCardSlot: điểm đích card bay về khi purchase/reserve */}
-              <div
-                ref={el => registerCardSlot(player.playerId, el)} // ← thêm
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                borderTop: "1px solid #374151",
-                  padding: "4px 10px",
-                  flexShrink: 0
-                }}
-              >
-                <span style={{ color: "#6b7280", fontSize: 10 }}>
-                  {player?.totalOwnedCards} {t("player_info_cards")}
-                </span>
-                <button
-                  onClick={() => {
-                    if (currentStep) return;
-                    if (!isMe) return;
-                    setShowReserved(player?.playerId);
-                  }}
+                  {/* Bonuses */}
+                  {Object.values(player?.bonuses ?? {}).some(v => v > 0) && (
+                    <div>
+                      <div style={{ marginBottom: 3 }}>
+                        <span
+                          style={{
+                            fontSize: 9,
+                            color: "#9ca3af",
+                            textTransform: "uppercase",
+                            letterSpacing: 1
+                          }}
+                        >
+                          {t("player_info_bonuses")}
+                        </span>
+                      </div>
+                      <div
+                        style={{ display: "flex", flexWrap: "wrap", gap: 3 }}
+                      >
+                        {Object.entries(player?.bonuses ?? {})
+                          .filter(([, v]) => v > 0)
+                          .map(([color, amount]) => (
+                            <div
+                              key={color}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 3,
+                                background: "#111827",
+                                borderRadius: 5,
+                                padding: "2px 6px"
+                              }}
+                            >
+                              <div
+                                style={{
+                                  position: "relative",
+                                  width: 14,
+                                  height: 14
+                                }}
+                              >
+                                <Image
+                                  src={
+                                    gemIconMap[color as keyof typeof gemIconMap]
+                                  }
+                                  alt={color}
+                                  fill
+                                  className="object-contain"
+                                />
+                              </div>
+                              <span
+                                style={{
+                                  color: "#4ade80",
+                                  fontSize: 12,
+                                  fontWeight: 700
+                                }}
+                              >
+                                +{amount}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer — registerCardSlot: điểm đích card bay về khi purchase/reserve */}
+                <div
+                  ref={el => registerCardSlot(player.playerId, el)} // ← thêm
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 4,
-                    background: "#374151",
-                    borderRadius: 5,
-                    padding: "2px 7px",
-                    border: "none",
-                    cursor: (currentStep || !isMe) ? "default" : "pointer"
+                    justifyContent: "space-between",
+                    borderTop: "1px solid #374151",
+                    padding: "4px 10px",
+                    flexShrink: 0
                   }}
                 >
-                  <span style={{ color: "#d1d5db", fontSize: 10 }}>
-                    {t("player_info_reserved")}
+                  <span style={{ color: "#6b7280", fontSize: 10 }}>
+                    {player?.totalOwnedCards} {t("player_info_cards")}
                   </span>
-                  <span
-                    style={{ color: "#facc15", fontSize: 10, fontWeight: 700 }}
+                  <button
+                    onClick={() => {
+                      if (currentStep) return;
+                      if (!isMe) return;
+                      setShowReserved(player?.playerId);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      background: "#374151",
+                      borderRadius: 5,
+                      padding: "2px 7px",
+                      border: "none",
+                      cursor: currentStep || !isMe ? "default" : "pointer"
+                    }}
                   >
-                    {player?.reservedCards?.length}/3
-                  </span>
-                </button>
-              </div>
-              <div
-                ref={el => registerNoblePlayer(player.playerId, el)}
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 3,
-                  minHeight: 2,
-                  minWidth: 0
-                }}
-              />
+                    <span style={{ color: "#d1d5db", fontSize: 10 }}>
+                      {t("player_info_reserved")}
+                    </span>
+                    <span
+                      style={{
+                        color: "#facc15",
+                        fontSize: 10,
+                        fontWeight: 700
+                      }}
+                    >
+                      {player?.reservedCards?.length}/3
+                    </span>
+                  </button>
+                </div>
+                <div
+                  ref={el => registerNoblePlayer(player.playerId, el)}
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 3,
+                    minHeight: 2,
+                    minWidth: 0
+                  }}
+                />
 
-              {/* Noble slot ẩn — registerNoblePlayer: điểm đích noble bay về */}
-            </div>
-          );
-        })}
+                {/* Noble slot ẩn — registerNoblePlayer: điểm đích noble bay về */}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Reserved modal */}

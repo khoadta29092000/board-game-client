@@ -64,7 +64,7 @@ function GameContent() {
   const { isDeadlocked } = useSkipTurn();
   const lastTurnRef = useRef<string | null>(null);
   const { isMyTurn } = useTurn(gameState?.turn, userId);
-  const { isDesktop, isTablet, vw, vh, baseH, scale } = useCanvas();
+  const { isDesktop, isTablet, vw, vh, baseH } = useCanvas();
   const screenRatio = vw / vh;
   const isLandscape = isDesktop || (isTablet && screenRatio > 1.0);
   const playerCount = gameState?.players
@@ -191,18 +191,21 @@ function GameContent() {
 
   const handleGameOver = useCallback((_data: { winner: string }) => {}, []);
 
-  const handleLastRound = useCallback((data: { triggeredBy: string }) => {
-    if (!data) return;
-    toast.warning("LAST ROUND!", {
-      description: (
-        <>
-          &nbsp;
-          <span style={{ color: "#fca5a5" }}>{data.triggeredBy}</span>
-          &nbsp;{t("game_last_round")}
-        </>
-      )
-    });
-  }, [t]);
+  const handleLastRound = useCallback(
+    (data: { triggeredBy: string }) => {
+      if (!data) return;
+      toast.warning("LAST ROUND!", {
+        description: (
+          <>
+            &nbsp;
+            <span style={{ color: "#fca5a5" }}>{data.triggeredBy}</span>
+            &nbsp;{t("game_last_round")}
+          </>
+        )
+      });
+    },
+    [t]
+  );
 
   const submitDiscardGem = useCallback(
     async (toDiscard: GemSet) => {
@@ -322,7 +325,7 @@ function GameContent() {
           height: "100%",
           display: "flex",
           flexDirection: isLandscape ? "row" : "column",
-          background: "linear-gradient(180deg, #2e1065 0%, #111827 100%)",
+          background: "#0D0D15",
           overflow: "hidden"
         }}
       >
@@ -437,9 +440,9 @@ function GameContent() {
             flex: 1,
             minHeight: 0,
             minWidth: 0,
-            overflow: "hidden",
-            padding: 8
+            overflow: "hidden"
           }}
+          className="md:p-2"
         >
           <BoardContainer
             currentStep={currentStep?.id == 0 ? null : currentStep}

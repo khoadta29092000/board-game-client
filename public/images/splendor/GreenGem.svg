@@ -1,70 +1,13 @@
-<svg
-  width="120"
-  height="120"
-  viewBox="0 0 120 120"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <!-- Cube rotated 45 degrees -->
-  <g>
-    <!-- Top face -->
-    <path
-      d="M60 25 L85 40 L60 55 L35 40 Z"
-      fill="#a8d875"
-    />
-    
-    <!-- Left face -->
-    <path
-      d="M35 40 L35 80 L60 95 L60 55 Z"
-      fill="#65b548"
-    />
-    
-    <!-- Right face -->
-    <path
-      d="M60 55 L60 95 L85 80 L85 40 Z"
-      fill="#88c860"
-    />
-    
-    <!-- Inner highlight on top -->
-    <path
-      d="M60 35 L73 43 L60 50 L47 43 Z"
-      fill="#c8e890"
-    />
-    
-    <!-- Light reflection on right face -->
-    <path
-      d="M65 60 L80 70 L80 75 L65 85 Z"
-      fill="#98d870"
-      opacity="0.6"
-    />
-    
-    <!-- Shadow on left face -->
-    <path
-      d="M40 60 L40 75 L55 83 L55 68 Z"
-      fill="#58a840"
-    />
-    
-    <!-- Highlight stripe on top face -->
-    <ellipse
-      cx="60"
-      cy="40"
-      rx="15"
-      ry="5"
-      fill="#d0f0a0"
-      opacity="0.4"
-    />
-  </g>
-  
-  <!-- Sparkles -->
-  <g>
-    <path
-      d="M95 30 L96 25 L97 30 L102 31 L97 32 L96 37 L95 32 L90 31 Z"
-      fill="#ffffff"
-    />
-    <path
-      d="M25 55 L25.5 52 L26 55 L29 55.5 L26 56 L25.5 59 L25 56 L22 55.5 Z"
-      fill="#ffffff"
-      opacity="0.8"
-    />
-  </g>
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M46.4 24H113.6C117.132 24 120 26.8677 120 30.4V129.6C120 133.132 117.132 136 113.6 136H46.4C42.8677 136 40 133.132 40 129.6V30.4C40 26.8677 42.8677 24 46.4 24Z" fill="url(#paint0_linear_1_1072)"/>
+<path d="M40 24H120L104 40H56L40 24Z" fill="white" fill-opacity="0.3"/>
+<path d="M40 136H120L104 120H56L40 136Z" fill="black" fill-opacity="0.2"/>
+<path d="M56 40H104V120H56V40Z" fill="white" fill-opacity="0.1"/>
+<path d="M56 40H104V40V120V120H56V120V40V40V40" stroke="white" stroke-width="0.32"/>
+<defs>
+<linearGradient id="paint0_linear_1_1072" x1="40" y1="24" x2="145.946" y2="99.6757" gradientUnits="userSpaceOnUse">
+<stop stop-color="#34D399"/>
+<stop offset="1" stop-color="#064E3B"/>
+</linearGradient>
+</defs>
 </svg>

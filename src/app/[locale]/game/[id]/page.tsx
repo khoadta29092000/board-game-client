@@ -4,8 +4,10 @@ import { SignalRProvider } from "@/src/components/signalR/signalRProvider";
 
 export default function Game() {
   return (
-    <SignalRProvider hubURL="/gameHub">
-      <ContentGameDetail />
-    </SignalRProvider>
+    <div>
+      <SignalRProvider hubURL="/gameHub">
+        <ContentGameDetail />
+      </SignalRProvider>
+    </div>
   );
 }

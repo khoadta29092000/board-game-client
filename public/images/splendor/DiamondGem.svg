@@ -1,69 +1,13 @@
-<svg
-  width="120"
-  height="120"
-  viewBox="0 0 120 120"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <!-- Main diamond shape -->
-  <g>
-    <!-- Bottom half - darker facets -->
-    <path
-      d="M60 95 L25 45 L60 45 Z"
-      fill="#a8d5e2"
-    />
-    <path
-      d="M60 95 L60 45 L95 45 Z"
-      fill="#c8e5f0"
-    />
-    
-    <!-- Top half facets -->
-    <path
-      d="M60 25 L35 45 L60 45 Z"
-      fill="#d5f0f5"
-    />
-    <path
-      d="M60 25 L60 45 L85 45 Z"
-      fill="#e8f7fa"
-    />
-    <path
-      d="M35 45 L25 45 L45 25 L60 25 Z"
-      fill="#b8e0ea"
-    />
-    <path
-      d="M85 45 L95 45 L75 25 L60 25 Z"
-      fill="#f0fafc"
-    />
-    
-    <!-- Side facets -->
-    <path
-      d="M25 45 L20 35 L45 25 Z"
-      fill="#90c8d8"
-    />
-    <path
-      d="M95 45 L100 35 L75 25 Z"
-      fill="#ffffff"
-    />
-    
-    <!-- Highlight on top -->
-    <path
-      d="M60 25 L50 30 L70 30 Z"
-      fill="#ffffff"
-      opacity="0.7"
-    />
-  </g>
-  
-  <!-- Sparkle effect -->
-  <g>
-    <path
-      d="M85 20 L86 15 L87 20 L92 21 L87 22 L86 27 L85 22 L80 21 Z"
-      fill="#ffffff"
-    />
-    <path
-      d="M30 35 L30.5 32 L31 35 L34 35.5 L31 36 L30.5 39 L30 36 L27 35.5 Z"
-      fill="#ffffff"
-      opacity="0.8"
-    />
-  </g>
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M80 8L144 56L80 152L16 56L80 8Z" fill="url(#paint0_linear_1_1032)"/>
+<path d="M80 8L120 56L80 88L40 56L80 8Z" fill="white" fill-opacity="0.5"/>
+<path d="M80 88L144 56L80 152L16 56L80 88Z" fill="black" fill-opacity="0.1"/>
+<path d="M80 8L144 56M80 152L16 56M80 8L16 56" stroke="white" stroke-width="0.8"/>
+<defs>
+<linearGradient id="paint0_linear_1_1032" x1="16" y1="8" x2="159.007" y2="135.117" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="0.5" stop-color="#E2E8F0"/>
+<stop offset="1" stop-color="#94A3B8"/>
+</linearGradient>
+</defs>
 </svg>
-

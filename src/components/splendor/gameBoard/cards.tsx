@@ -90,11 +90,18 @@ export default function CardsBoard({
 
             <div style={{ display: "flex", gap: 6, flex: 1, minHeight: 0 }}>
               {/* Deck button */}
-              <div
+              <button
                 onClick={() => {
                   if (!isMyTurn || isTutorialLock) return;
                   setReserveLevel(Number(levelKey.replace(/\D/g, "")));
                 }}
+                disabled={!isMyTurn}
+                className={`
+    relative overflow-hidden
+    sm:max-h-[200px] max-h-[160px]
+    border border-gray-600 bg-[#575a59]
+    ${!isMyTurn ? "opacity-75" : ""}
+  `}
                 style={{
                   flexShrink: 0,
                   width: 52,
@@ -103,20 +110,22 @@ export default function CardsBoard({
                   alignItems: "center",
                   justifyContent: "center",
                   borderRadius: 8,
-                  border: "2px solid #4b5563",
-                  background: "#1f2937",
-                  color: "#9ca3af",
+                  color: "white",
                   cursor: isMyTurn && !isTutorialLock ? "pointer" : "default",
-                  transition: "border-color 0.15s",
                   minHeight: 0
                 }}
-                className=" sm:max-h-[200px] max-h-[160px]"
               >
-                <span style={{ fontSize: 24 }}>≡</span>
-                <span style={{ fontSize: 20, color: "#6b7280", marginTop: 2 }}>
-                  x{cardDecks[levelKey] ?? 0}
-                </span>
-              </div>
+                {/* 👇 overlay giống card */}
+                <div className="absolute inset-0 bg-black/40 z-0" />
+
+                {/* 👇 content */}
+                <div className="relative z-10 flex flex-col items-center justify-center">
+                  <span style={{ fontSize: 24 }}>≡</span>
+                  <span style={{ fontSize: 20, marginTop: 2 }}>
+                    x{cardDecks[levelKey] ?? 0}
+                  </span>
+                </div>
+              </button>
 
               {/* 4 cards */}
               <div

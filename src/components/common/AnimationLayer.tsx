@@ -94,7 +94,7 @@ function FlyingGem({
         // width: size,
         // height: size,
         borderRadius: "50%",
-        border: "2px solid #ef4444", // border đỏ như khi selected
+        border: "2px solid #facc15", // border đỏ như khi selected
         background: "#1f2937",
         boxShadow: "0 0 16px rgba(239,68,68,0.6)",
         pointerEvents: "none",
@@ -162,13 +162,13 @@ function FlyingCard({
     <div
       ref={ref}
       style={{
-        position: "absolute",
+        position: "relative",
         left: fromRect.left,
         top: fromRect.top,
         width: fromRect.width,
         height: fromRect.height,
         borderRadius: 8,
-        background: CARD_BG[bonusColor] ?? "#1f2937",
+        background: "#575a59",
         border: "2px solid #facc15",
         boxShadow: "0 0 20px rgba(250,204,21,0.5), 0 4px 20px rgba(0,0,0,0.4)",
         pointerEvents: "none",
@@ -178,15 +178,16 @@ function FlyingCard({
         padding: 8
       }}
     >
+      <div className="absolute inset-0 bg-black/40 z-0" />
       {/* Gem bonus icon góc phải trên — giống SplendorCardUI */}
-      <div style={{ position: "relative", width: 36, height: 36 }}>
+      {/* <div style={{ position: "relative", width: 36, height: 36 }}>
         <Image
           src={gemIconMap[bonusColor as keyof typeof gemIconMap]}
           alt={bonusColor}
           fill
           className="object-contain"
         />
-      </div>
+      </div> */}
     </div>
   );
 }

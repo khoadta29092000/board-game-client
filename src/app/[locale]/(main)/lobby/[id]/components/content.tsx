@@ -53,7 +53,9 @@ export default function ContentRoomDetail() {
   const [isJoining, setIsJoining] = useState(false);
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [botThinkingMsg, setBotThinkingMsg] = useState("Bot is thinking...");
-  const [disconnectedPlayers, setDisconnectedPlayers] = useState<Set<string>>(new Set());
+  const [disconnectedPlayers, setDisconnectedPlayers] = useState<Set<string>>(
+    new Set()
+  );
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [pendingPassword, setPendingPassword] = useState("");
   const [roomType, setRoomType] = useState<string | null>(null);
@@ -144,17 +146,14 @@ export default function ContentRoomDetail() {
     []
   );
 
-  const handlePlayerReconnected = useCallback(
-    (data: { playerId: string }) => {
-      setDisconnectedPlayers(prev => {
-        const next = new Set(prev);
-        next.delete(data.playerId);
-        return next;
-      });
-      toast.success("Player reconnected!");
-    },
-    []
-  );
+  const handlePlayerReconnected = useCallback((data: { playerId: string }) => {
+    setDisconnectedPlayers(prev => {
+      const next = new Set(prev);
+      next.delete(data.playerId);
+      return next;
+    });
+    toast.success("Player reconnected!");
+  }, []);
 
   const handleError = useCallback(
     (error: string) => {
@@ -172,12 +171,9 @@ export default function ContentRoomDetail() {
     [router]
   );
 
-  const handlePlayerChangeReady = useCallback(
-    (data: { updatedRoom: Room }) => {
-      if (data) setRoom(data.updatedRoom);
-    },
-    []
-  );
+  const handlePlayerChangeReady = useCallback((data: { updatedRoom: Room }) => {
+    if (data) setRoom(data.updatedRoom);
+  }, []);
 
   const handleStartGame = useCallback(() => {
     router.push(`/game/${roomId}`);
@@ -188,29 +184,29 @@ export default function ContentRoomDetail() {
     setBotThinkingMsg(data?.message ?? "Bot is thinking...");
   }, []);
 
-const handlePlayerKicked = useCallback(
-  (data: { playerId: string; playerName: string; room: Room }) => {
-    setDisconnectedPlayers(prev => {
-      const next = new Set(prev);
-      next.delete(data.playerId);
-      return next;
-    });
+  const handlePlayerKicked = useCallback(
+    (data: { playerId: string; playerName: string; room: Room }) => {
+      setDisconnectedPlayers(prev => {
+        const next = new Set(prev);
+        next.delete(data.playerId);
+        return next;
+      });
 
-    // Update room state
-    if (data.room) {
-      setRoom(data.room);
-    }
+      // Update room state
+      if (data.room) {
+        setRoom(data.room);
+      }
 
-    if (data.playerId === auth?.Id) {
-      toast.error("You were removed from the room due to connection timeout");
-      router.push("/lobby");
-      return;
-    }
+      if (data.playerId === auth?.Id) {
+        toast.error("You were removed from the room due to connection timeout");
+        router.push("/lobby");
+        return;
+      }
 
-    toast.error(`${data.playerName} left due to connection timeout`);
-  },
-  [auth?.Id, router]
-);
+      toast.error(`${data.playerName} left due to connection timeout`);
+    },
+    [auth?.Id, router]
+  );
 
   // ─── Setup SignalR Events ─────────────────────────────────────────────────────
 
@@ -226,7 +222,7 @@ const handlePlayerKicked = useCallback(
     on("PlayerDisconnected", handlePlayerDisconnected);
     on("PlayerReconnected", handlePlayerReconnected);
     on("PlayerKicked", handlePlayerKicked);
-    
+
     return () => {
       off("JoinedRoom", handleJoinedRoom);
       off("RoomRejoined", handleRoomRejoined);
@@ -241,98 +237,110 @@ const handlePlayerKicked = useCallback(
       off("PlayerKicked", handlePlayerKicked);
     };
   }, [
-    on, off,
-    handleJoinedRoom, handleRoomRejoined,
-    handlePlayerJoined, handleRoomUpdated,
-    handlePlayerChangeReady, handleStartGame,
-    handleBotThinking, handleError,
-    handlePlayerDisconnected, handlePlayerReconnected
+    on,
+    off,
+    handleJoinedRoom,
+    handleRoomRejoined,
+    handlePlayerJoined,
+    handleRoomUpdated,
+    handlePlayerChangeReady,
+    handleStartGame,
+    handleBotThinking,
+    handleError,
+    handlePlayerDisconnected,
+    handlePlayerReconnected
   ]);
 
   // ─── Join Room Effect ─────────────────────────────────────────────────────────
   // Grace period: khi F5, BE sẽ tự fire RoomRejoined qua OnConnectedAsync
   // và set hasJoinedRef = true → effect này sẽ không chạy nữa.
   // Nếu grace period hết hoặc vào lần đầu → chạy JoinRoom bình thường.
-useEffect(() => {
-  if (!isConnected || !roomId || hasJoinedRef.current) return;
+  useEffect(() => {
+    if (!isConnected || !roomId || hasJoinedRef.current) return;
 
-  const initRoom = async () => {
-    if (roomId === "new") {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsJoining(true);
-
-      // ✅ Check room type trước
-      const roomInfo = await invoke("GetRoomInfo", roomId);
-
-      console.log("roomInfo",roomInfo)
-      if (!roomInfo?.success) {
-        toast.error(roomInfo?.error ?? "Room not found");
-        router.push("/lobby");
-        return;
-      }
-      setRoom(roomInfo.room)
-
-     if (roomInfo.room?.roomType === "Private") {
-      setRoomType("Private");
-
-      const savedPassword = sessionStorage.getItem(`room_pwd_${roomId}`);
-
-      if (savedPassword) {
-        await doJoinRoom(savedPassword);
-      } else {
-        setIsJoining(false);
+    const initRoom = async () => {
+      if (roomId === "new") {
         setIsLoading(false);
-        setShowPasswordModal(true);
-      }
-      return;
-    }
-
-      await doJoinRoom();
-    } catch (error) {
-      console.error("Failed to init room:", error);
-      setIsLoading(false);
-      setIsJoining(false);
-    }
-  };
-
-  initRoom();
-}, [isConnected, roomId, invoke]);
-
-const doJoinRoom = useCallback(async (password?: string) => {
-  try {
-    setIsJoining(true);
-    const result = await invoke("JoinRoom", { roomId, password: password ?? null });
-    console.log("123", result)
-    if (result?.success && result?.room) {
-      setRoom(result.room);
-      hasJoinedRef.current = true;
-      setIsLoading(false);
-      setIsJoining(false);
-      setShowPasswordModal(false);
-      sessionStorage.removeItem(`room_pwd_${roomId}`);
-    } else if (!result?.success) {
-      sessionStorage.removeItem(`room_pwd_${roomId}`);
-      const toastKey = `joined-room-err`;
-      if (!toastShownRef.current.has(toastKey)) {
-        toast.error(result?.error ?? "Failed to join room");
-        toastShownRef.current.add(toastKey);
-      }
-      if (result?.error === "Incorrect password") {
-        setIsJoining(false);
         return;
       }
-      router.push("/lobby");
-    }
-  } catch (error) {
-    console.error("Failed to join room:", error);
-    setIsLoading(false);
-    setIsJoining(false);
-  }
-}, [roomId, invoke, router]);
+
+      try {
+        setIsJoining(true);
+
+        // ✅ Check room type trước
+        const roomInfo = await invoke("GetRoomInfo", roomId);
+
+        console.log("roomInfo", roomInfo);
+        if (!roomInfo?.success) {
+          toast.error(roomInfo?.error ?? "Room not found");
+          router.push("/lobby");
+          return;
+        }
+        setRoom(roomInfo.room);
+
+        if (roomInfo.room?.roomType === "Private") {
+          setRoomType("Private");
+
+          const savedPassword = sessionStorage.getItem(`room_pwd_${roomId}`);
+
+          if (savedPassword) {
+            await doJoinRoom(savedPassword);
+          } else {
+            setIsJoining(false);
+            setIsLoading(false);
+            setShowPasswordModal(true);
+          }
+          return;
+        }
+
+        await doJoinRoom();
+      } catch (error) {
+        console.error("Failed to init room:", error);
+        setIsLoading(false);
+        setIsJoining(false);
+      }
+    };
+
+    initRoom();
+  }, [isConnected, roomId, invoke]);
+
+  const doJoinRoom = useCallback(
+    async (password?: string) => {
+      try {
+        setIsJoining(true);
+        const result = await invoke("JoinRoom", {
+          roomId,
+          password: password ?? null
+        });
+        console.log("123", result);
+        if (result?.success && result?.room) {
+          setRoom(result.room);
+          hasJoinedRef.current = true;
+          setIsLoading(false);
+          setIsJoining(false);
+          setShowPasswordModal(false);
+          sessionStorage.removeItem(`room_pwd_${roomId}`);
+        } else if (!result?.success) {
+          sessionStorage.removeItem(`room_pwd_${roomId}`);
+          const toastKey = `joined-room-err`;
+          if (!toastShownRef.current.has(toastKey)) {
+            toast.error(result?.error ?? "Failed to join room");
+            toastShownRef.current.add(toastKey);
+          }
+          if (result?.error === "Incorrect password") {
+            setIsJoining(false);
+            return;
+          }
+          router.push("/lobby");
+        }
+      } catch (error) {
+        console.error("Failed to join room:", error);
+        setIsLoading(false);
+        setIsJoining(false);
+      }
+    },
+    [roomId, invoke, router]
+  );
 
   // ─── Actions ─────────────────────────────────────────────────────────────────
 
@@ -427,7 +435,9 @@ const doJoinRoom = useCallback(async (password?: string) => {
   // ─── Render ───────────────────────────────────────────────────────────────────
 
   if (isBotThinking) {
-    return <BotThinkingIndicator visible={isBotThinking} message={botThinkingMsg} />;
+    return (
+      <BotThinkingIndicator visible={isBotThinking} message={botThinkingMsg} />
+    );
   }
 
   if (isLoading || isJoining) {
@@ -435,7 +445,9 @@ const doJoinRoom = useCallback(async (password?: string) => {
       <div className="min-h-[calc(80vh)] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4" />
-          <p>{isJoining ? t("room_detail_joining") : t("room_detail_loading")}</p>
+          <p>
+            {isJoining ? t("room_detail_joining") : t("room_detail_loading")}
+          </p>
         </div>
       </div>
     );
@@ -448,7 +460,9 @@ const doJoinRoom = useCallback(async (password?: string) => {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             {t("room_detail_not_found")}
           </h2>
-          <p className="text-gray-600 mb-6">{t("room_detail_not_found_desc")}</p>
+          <p className="text-gray-600 mb-6">
+            {t("room_detail_not_found_desc")}
+          </p>
           <Button onClick={handleLeaveRoom}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t("room_detail_back")}
@@ -470,17 +484,21 @@ const doJoinRoom = useCallback(async (password?: string) => {
 
   return (
     <div className="min-h-[calc(80vh)] bg-gray-50 py-8">
-       <PasswordModal
+      <PasswordModal
         isOpen={showPasswordModal}
         isJoining={isJoining}
         onClose={() => router.push("/lobby")}
-        onSubmit={(password) => doJoinRoom(password)}
+        onSubmit={password => doJoinRoom(password)}
       />
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-8">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={handleLeaveRoom} className="flex items-center">
+            <Button
+              variant="ghost"
+              onClick={handleLeaveRoom}
+              className="flex items-center"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               {t("room_detail_back")}
             </Button>
@@ -488,18 +506,24 @@ const doJoinRoom = useCallback(async (password?: string) => {
               {isConnected ? (
                 <>
                   <Wifi className="h-4 w-4 text-green-500" />
-                  <span className="text-sm text-green-600">{t("lobby_connected")}</span>
+                  <span className="text-sm text-green-600">
+                    {t("lobby_connected")}
+                  </span>
                 </>
               ) : (
                 <>
                   <WifiOff className="h-4 w-4 text-red-500" />
-                  <span className="text-sm text-red-600">{t("lobby_disconnected")}</span>
+                  <span className="text-sm text-red-600">
+                    {t("lobby_disconnected")}
+                  </span>
                 </>
               )}
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={`${room.status === "Waiting" ? "bg-green-500" : "bg-yellow-500"} text-white`}>
+            <Badge
+              className={`${room.status === "Waiting" ? "bg-green-500" : "bg-yellow-500"} text-white`}
+            >
               {room.status}
             </Badge>
             <Badge variant="outline">{room.roomType}</Badge>
@@ -510,7 +534,9 @@ const doJoinRoom = useCallback(async (password?: string) => {
         {hasDisconnectedPlayers && (
           <div className="mb-4 flex items-center gap-2 px-4 py-3 rounded-lg bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm">
             <DisconnectIcon className="h-4 w-4 shrink-0" />
-            <span>A player lost connection. Waiting for them to reconnect (30s)...</span>
+            <span>
+              A player lost connection. Waiting for them to reconnect (30s)...
+            </span>
           </div>
         )}
 
@@ -526,7 +552,11 @@ const doJoinRoom = useCallback(async (password?: string) => {
                   onClick={handleCopyRoomId}
                   className="flex items-center gap-2"
                 >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                   {copied ? t("room_detail_copied") : t("room_detail_copy")}
                 </Button>
                 {isOwner && (
@@ -548,13 +578,16 @@ const doJoinRoom = useCallback(async (password?: string) => {
               <div className="flex items-center text-gray-600">
                 <Users className="mr-2 h-5 w-5" />
                 <span className="text-lg font-semibold">
-                  {room.currentPlayers}/{room.quantityPlayer} {t("room_detail_players")}
+                  {room.currentPlayers}/{room.quantityPlayer}{" "}
+                  {t("room_detail_players")}
                 </span>
               </div>
               <div className="h-2 flex-1 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-500 transition-all duration-300"
-                  style={{ width: `${(room.currentPlayers / room.quantityPlayer) * 100}%` }}
+                  style={{
+                    width: `${(room.currentPlayers / room.quantityPlayer) * 100}%`
+                  }}
                 />
               </div>
             </div>
@@ -619,8 +652,8 @@ const PlayerCard = React.memo(
           isDisconnected
             ? "bg-yellow-50 border-yellow-400"
             : isCurrentUser
-            ? "bg-blue-50 border-blue-200"
-            : "bg-gray-50 border-gray-200"
+              ? "bg-blue-50 border-blue-200"
+              : "bg-gray-50 border-gray-200"
         }`}
       >
         {/* Avatar */}
@@ -647,14 +680,23 @@ const PlayerCard = React.memo(
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">
-              {player.isOwner ? t("room_detail_owner") : t("room_detail_player")}
+              {player.isOwner
+                ? t("room_detail_owner")
+                : t("room_detail_player")}
             </span>
             {/* Ready badge - ẩn khi disconnect hoặc là owner */}
-            {!player.isOwner && !isDisconnected && (
-              player.isReady
-                ? <Badge className="bg-green-500 text-white text-xs">{t("room_detail_ready")}</Badge>
-                : <Badge className="bg-gray-400 text-white text-xs">{t("room_detail_not_ready")}</Badge>
-            )}
+            {!player.isOwner &&
+              !isDisconnected &&
+              !isCurrentUser &&
+              (player.isReady ? (
+                <Badge className="bg-green-500 text-white text-xs">
+                  {t("room_detail_ready")}
+                </Badge>
+              ) : (
+                <Badge className="bg-gray-400 text-white text-xs">
+                  {t("room_detail_not_ready")}
+                </Badge>
+              ))}
           </div>
         </div>
 
@@ -675,7 +717,11 @@ const PlayerCard = React.memo(
             onClick={() => onToggleReady?.(!player.isReady)}
             size="sm"
             disabled={!canStart}
-            title={!canStart ? "Cannot start while a player is disconnected" : undefined}
+            title={
+              !canStart
+                ? "Cannot start while a player is disconnected"
+                : undefined
+            }
             className={`text-white transition-colors ${
               !canStart
                 ? "bg-gray-400 cursor-not-allowed opacity-60"

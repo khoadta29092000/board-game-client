@@ -14,7 +14,9 @@ const config: Config = {
         xs: "480px"
       },
       fontFamily: {
-        "geist-sans": "var(--font-geist-sans)"
+        "geist-sans": "var(--font-geist-sans)",
+        mono: "var(--font-geist-mono)",
+        manrope: ["var(--font-manrope)", "sans-serif"]
       }
     }
   },

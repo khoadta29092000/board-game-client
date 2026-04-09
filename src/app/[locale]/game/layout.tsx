@@ -6,7 +6,7 @@ export default function GameLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="font-manrope">
       <AuthInit />
       {children}
       <div
@@ -18,6 +18,6 @@ export default function GameLayout({
           zIndex: 9999
         }}
       />
-    </>
+    </div>
   );
 }

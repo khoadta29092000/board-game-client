@@ -1,51 +1,17 @@
-<svg
-  width="120"
-  height="120"
-  viewBox="0 0 120 120"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <!-- Outer facets forming a circular pattern -->
-  <g>
-    <!-- Top facet -->
-    <path d="M60 30 L72 40 L60 50 L48 40 Z" fill="#e88095" />
-    <!-- Top-right facet -->
-    <path d="M72 40 L85 48 L75 60 L60 50 Z" fill="#f090a5" />
-    <!-- Right facet -->
-    <path d="M85 48 L90 60 L80 72 L75 60 Z" fill="#e87590" />
-    <!-- Bottom-right facet -->
-    <path d="M80 72 L72 85 L60 75 L75 60 Z" fill="#d86580" />
-    <!-- Bottom facet -->
-    <path d="M60 90 L48 80 L60 70 L72 80 Z" fill="#c85575" />
-    <!-- Bottom-left facet -->
-    <path d="M48 80 L35 72 L45 60 L60 70 Z" fill="#d06080" />
-    <!-- Left facet -->
-    <path d="M30 60 L35 48 L45 60 L40 72 Z" fill="#e07088" />
-    <!-- Top-left facet -->
-    <path d="M48 40 L35 48 L45 60 L60 50 Z" fill="#f08598" />
-  </g>
-
-  <!-- Center circle -->
-  <circle cx="60" cy="60" r="18" fill="url(#redGradient)" />
-
-  <!-- Light reflection -->
-  <ellipse cx="60" cy="55" rx="10" ry="7" fill="#ffffff" opacity="0.25" />
-  <ellipse cx="58" cy="53" rx="5" ry="3" fill="#ffffff" opacity="0.4" />
-
-  <!-- Gradient definitions -->
-  <defs>
-    <radialGradient id="redGradient" cx="0.5" cy="0.4">
-      <stop offset="0%" stop-color="#e85580" />
-      <stop offset="50%" stop-color="#c83060" />
-      <stop offset="100%" stop-color="#a82050" />
-    </radialGradient>
-  </defs>
-
-  <!-- Sparkle -->
-  <g>
-    <path
-      d="M25 45 L26 40 L27 45 L32 46 L27 47 L26 52 L25 47 L20 46 Z"
-      fill="#ffffff"
-    />
-  </g>
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1_1091)">
+<path d="M80 24C32 24 16 64 80 136C144 64 128 24 80 24Z" fill="url(#paint0_linear_1_1091)"/>
+<path d="M80 40C56 40 48 56 80 88C112 56 104 40 80 40Z" fill="white" fill-opacity="0.2"/>
+<path d="M80 24V136V24Z" fill="black"/>
+<path d="M80 24V136V24" stroke="white" stroke-opacity="0.3" stroke-width="0.8"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_1_1091" x1="37.7879" y1="24" x2="145.458" y2="105.161" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FB7185"/>
+<stop offset="1" stop-color="#9F1239"/>
+</linearGradient>
+<clipPath id="clip0_1_1091">
+<rect width="160" height="160" fill="white"/>
+</clipPath>
+</defs>
 </svg>

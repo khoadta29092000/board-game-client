@@ -8,6 +8,8 @@
   --breakpoint-dl: 960px;
   --breakpoint-2xl: 1635px;
   --tracking-step: -5%;
+  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope);
 }
 
 @theme inline {
@@ -188,56 +190,84 @@
   .txt-8 {
     @apply text-[6px] sm:text-[7px] lg:text-[8px];
   }
-  .font-lato {
-    font-family: var(--font-lato-no-fallback);
-    font-weight: 400;
-  }
-  .font-inter {
-    font-family: var(--font-only-inter);
-    font-weight: 400;
-  }
-  .font-inter-medium {
-    font-family: var(--font-only-inter);
-    font-weight: 500;
-  }
-  .font-inter-semibold {
-    font-family: var(--font-only-inter);
-    font-weight: 600;
-  }
-  .font-inter-bold {
-    font-family: var(--font-only-inter);
-    font-weight: 700;
-  }
-  .font-helveticaneue-light {
-    font-family:
-      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
-    font-weight: 300;
-  }
-  .font-helveticaneue {
-    font-family:
-      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
-    font-weight: 400;
-  }
-  .font-helveticaneue-medium {
-    font-family:
-      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
-    font-weight: 500;
-  }
-  .font-helveticaneue-semibold {
-    font-family:
-      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
-    font-weight: 600;
-  }
-  .font-helveticaneue-bold {
-    font-family:
-      var(--font-helveticaneue), "Helvetica Neue", "Helvetica", sans-serif;
-    font-weight: 700;
-  }
   .btn-primary {
     @apply bg-primary-200 flex items-center justify-center px-[8px] py-[10px] sm:py-[8px] sm:px-[20px] lg:py-[12px] lg:px-[24px];
   }
   .input {
     @apply text-[10px] sm:text-sm lg:text-base bg-white rounded-[4px] border border-border-gray-200 h-[50px] text-sm px-[9px] text-[#757575] w-full outline-none focus:border-[2px] focus:border-black;
+  }
+  .PointButton {
+    @apply bg-[#34343D]/80 border border-[#F2CA50]/20 rounded-[4px];
+  }
+  .GreenButton {
+    @apply bg-[#2D5A27]/40 border border-[#4ADE80]/30 rounded-[12px];
+  }
+  .BlueButton {
+    @apply bg-[#1E3A8A]/40 border border-[#60A5FA]/30 rounded-[12px];
+  }
+  .DiamondButton {
+    @apply bg-[#1E1E2D]/60 border border-[#E4E1ED]/30 rounded-[12px];
+  }
+  .GoldButton {
+    @apply bg-[#F2CA50]/20 border border-[#F2CA50]/40 rounded-[4px];
+  }
+  .PurpleButton {
+    @apply bg-[#4C1D95]/40 border border-[#A78BFA]/30 rounded-[12px];
+  }
+  .RubyButton {
+    @apply bg-[#7C2D12]/40 border border-[#FB923C]/30 rounded-[12px];
+  }
+  .CostPurpleButton {
+    @apply bg-[#3B0764] border border-[#FFFFFF]/10 rounded-[4px] w-[52px];
+  }
+  .CostGreenButton {
+    @apply bg-[#064E3B] border border-[#FFFFFF]/10 rounded-[4px] w-[52px];
+  }
+  .CostBlueButton {
+    @apply bg-[#0C4A6E] border border-[#FFFFFF]/10 rounded-[4px] w-[52px];
+  }
+  .CostDiamondButton {
+    @apply bg-[#1E1E2D] border border-[#FFFFFF]/10 rounded-[4px] w-[52px];
+  }
+  .CostRubyButton {
+    @apply bg-[#7F1D1D] border border-[#FFFFFF]/10 rounded-[4px] w-[52px];
+  }
+  .cardButton {
+    @apply bg-[#575a59]
+  border border-gray-600
+  rounded-lg
+  sm:max-h-[200px] max-h-[160px]
+  text-white
+  transition-all duration-150;
+  }
+  .font-manrope {
+    font-family: var(--font-manrope), sans-serif;
+    font-weight: 400;
+  }
+
+  .font-manrope-light {
+    font-family: var(--font-manrope), sans-serif;
+    font-weight: 300;
+  }
+
+  .font-manrope-medium {
+    font-family: var(--font-manrope), sans-serif;
+    font-weight: 500;
+  }
+
+  .font-manrope-semibold {
+    font-family: var(--font-manrope), sans-serif;
+    font-weight: 600;
+  }
+
+  .font-manrope-bold {
+    font-family: var(--font-manrope), sans-serif;
+    font-weight: 700;
+  }
+
+  .font-manrope-extrabold {
+    font-family: var(--font-manrope), sans-serif;
+    font-weight: 800;
   }
 }
 
@@ -330,4 +360,3 @@ body {
   overflow: visible;
   position: relative;
 }
-/* Thêm vào globals.css hoặc layout.tsx của game route */
