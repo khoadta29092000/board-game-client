@@ -79,13 +79,12 @@ export default function SplendorCardUI({
             fill
             className="object-contain"
             sizes="(max-width: 840px) 100vw, 200px"
+            loading="lazy"
+            placeholder="blur"
+            blurDataURL="/images/placeholder.png"
           />
 
-          {/* overlay giúp đọc text */}
           <div className="absolute inset-0 bg-black/40" />
-
-          {/* optional blur */}
-          {/* <div className="absolute inset-0 backdrop-blur-[2px]" /> */}
         </div>
       )}
 

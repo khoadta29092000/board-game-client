@@ -34,7 +34,7 @@ export default function ModalCardAction({
       description={t("card_action_desc")}
       content={
         <div className="flex justify-center py-2">
-          <div className="w-[120px]">
+          <div className="w-48 h-48">
             <SplendorCardUI card={card} />
           </div>
         </div>
