@@ -26,10 +26,10 @@ export default function ContentLobby() {
   const t = useTranslations();
   const [privateRoomId, setPrivateRoomId] = useState<string | null>(null);
   const {
-  isOpen: isJoinPrivateOpen,
-  onOpen: onOpenJoinPrivate,
-  onClose: onCloseJoinPrivate
-  }  = useDisclosure();  
+    isOpen: isJoinPrivateOpen,
+    onOpen: onOpenJoinPrivate,
+    onClose: onCloseJoinPrivate
+  } = useDisclosure();
   const {
     isOpen: isCreateModalOpen,
     onOpen: onOpenCreateModal,
@@ -48,12 +48,13 @@ export default function ContentLobby() {
         const existingRoomIndex = prevRooms.findIndex(
           r => r.id === updatedRoom.id
         );
+
         if (existingRoomIndex >= 0) {
           const newRooms = [...prevRooms];
           newRooms[existingRoomIndex] = updatedRoom;
           return newRooms;
         } else {
-          return [...prevRooms, updatedRoom];
+          return [updatedRoom, ...prevRooms];
         }
       });
     };
@@ -104,26 +105,26 @@ export default function ContentLobby() {
     onOpenCreateModal();
   };
 
-const handleJoinRoom = async (roomId: string, roomType: string) => {
-  if (!isConnected) return toast.error("Not connected");
+  const handleJoinRoom = async (roomId: string, roomType: string) => {
+    if (!isConnected) return toast.error("Not connected");
 
-  if (roomType === RoomType.Private) {
-    setPrivateRoomId(roomId);
-    onOpenJoinPrivate();
-    return;
-  }
+    if (roomType === RoomType.Private) {
+      setPrivateRoomId(roomId);
+      onOpenJoinPrivate();
+      return;
+    }
 
-  // Public → join thẳng
-  setJoiningRoomId(roomId);
-  try {
-    off("RoomUpdated");
-    //sessionStorage.setItem(`room_pwd_${roomId}`, password);
-    await router.push(`/lobby/${roomId}`);
-  } catch {
-    toast.error("Failed to join room");
-    setJoiningRoomId(null);
-  }
-};
+    // Public → join thẳng
+    setJoiningRoomId(roomId);
+    try {
+      off("RoomUpdated");
+      //sessionStorage.setItem(`room_pwd_${roomId}`, password);
+      await router.push(`/lobby/${roomId}`);
+    } catch {
+      toast.error("Failed to join room");
+      setJoiningRoomId(null);
+    }
+  };
 
   const [token, setToken] = useState<string | null>(null);
   const [checkedToken, setCheckedToken] = useState(false);
@@ -192,7 +193,9 @@ const handleJoinRoom = async (roomId: string, roomType: string) => {
           </div>
 
           <div className="text-center">
-            <p className="text-black font-semibold text-lg">{t("lobby_loading_title")}</p>
+            <p className="text-black font-semibold text-lg">
+              {t("lobby_loading_title")}
+            </p>
             <p className="text-gray-500 text-sm mt-1">
               {t("lobby_loading_desc")}
             </p>
@@ -211,7 +214,9 @@ const handleJoinRoom = async (roomId: string, roomType: string) => {
             {t("lobby_conn_failed")}
           </h2>
           <p className="text-gray-600 mb-4"></p>
-          <Button onClick={() => window.location.reload()}>{t("lobby_try_again")}</Button>
+          <Button onClick={() => window.location.reload()}>
+            {t("lobby_try_again")}
+          </Button>
         </div>
       </div>
     );
@@ -219,14 +224,26 @@ const handleJoinRoom = async (roomId: string, roomType: string) => {
 
   return (
     <>
-       {isJoinPrivateOpen && privateRoomId && (
-          <JoinPrivateRoomModal
-            isOpen={isJoinPrivateOpen}
-            onClose={() => { onCloseJoinPrivate(); setPrivateRoomId(null); }}
-            roomId={privateRoomId}
-          />
-        )}  
-      {isCreateModalOpen &&  <CreateRoomModal isOpen={isCreateModalOpen} onClose={onCloseCreateModal} /> }
+      {isJoinPrivateOpen && privateRoomId && (
+        <JoinPrivateRoomModal
+          isOpen={isJoinPrivateOpen}
+          onClose={() => {
+            onCloseJoinPrivate();
+            setPrivateRoomId(null);
+          }}
+          roomId={privateRoomId}
+        />
+      )}
+      {/* {isCreateModalOpen && (
+        <CreateRoomModal
+          isOpen={isCreateModalOpen}
+          onClose={onCloseCreateModal}
+        />
+      )} */}
+      <CreateRoomModal
+        isOpen={isCreateModalOpen}
+        onClose={onCloseCreateModal}
+      />
       {joiningRoomId && <LoadingOverlay message={t("lobby_joining_overlay")} />}
       {isCreating && <LoadingOverlay message={t("lobby_creating_overlay")} />}
       <div className="sm:min-h-[calc(80vh)] bg-gray-50 py-8">
@@ -237,19 +254,21 @@ const handleJoinRoom = async (roomId: string, roomType: string) => {
                 {t("lobby_rooms_title")}
               </h1>
 
-              <p className="text-gray-600 mt-2">
-                {t("lobby_rooms_desc")}
-              </p>
+              <p className="text-gray-600 mt-2">{t("lobby_rooms_desc")}</p>
               <div className="flex items-center gap-2 mt-2">
                 {isConnected ? (
                   <>
                     <Wifi className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-green-600">{t("lobby_connected")}</span>
+                    <span className="text-sm text-green-600">
+                      {t("lobby_connected")}
+                    </span>
                   </>
                 ) : (
                   <>
                     <WifiOff className="h-4 w-4 text-red-500" />
-                    <span className="text-sm text-red-600">{t("lobby_disconnected")}</span>
+                    <span className="text-sm text-red-600">
+                      {t("lobby_disconnected")}
+                    </span>
                   </>
                 )}
               </div>
@@ -290,9 +309,7 @@ const handleJoinRoom = async (roomId: string, roomType: string) => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   {t("lobby_no_rooms")}
                 </h3>
-                <p className="text-gray-500 mb-4">
-                  {t("lobby_first_room")}
-                </p>
+                <p className="text-gray-500 mb-4">{t("lobby_first_room")}</p>
                 <Button
                   onClick={handleCreateRoom}
                   disabled={isCreating || !isConnected}

@@ -7,6 +7,7 @@ export default function Game() {
     <div>
       <SignalRProvider hubURL="/gameHub">
         <ContentGameDetail />
+       
       </SignalRProvider>
     </div>
   );

@@ -1,9 +1,8 @@
 "use client";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { GemColor, SplendorGameState } from "@/src/types/splendor";
 import CardsBoard from "./cards";
 import GemsCard from "./gems";
-import { LastRoundBanner } from "./lastRoundBanner";
 import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
 
 type TProps = {
@@ -63,7 +62,6 @@ export default function BoardContainer({
         overflow: allowScroll ? "auto" : "hidden",
         background: "#13131B"
       }}
-      className="md:border-r-3"
     >
       {/* Gems panel */}
       <div

@@ -1,6 +1,6 @@
 import React from "react";
 import { GemColor, GemsBankType } from "@/src/types/splendor";
-import { gemIconMap } from "@/src/utils";
+import { cn, COST_COLOR_MAP, gemIconMap } from "@/src/utils";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { useGemCollect } from "@/src/hook/game/useGemCollect";
@@ -53,7 +53,7 @@ export default function GemsCard({
         style={{
           display: "flex",
           flexDirection: isLandscape ? "column" : "row",
-          gap: isLandscape ? 12 : 6,
+          gap: isLandscape ? 12 : 16,
           flex: 1,
           alignItems: "center",
           justifyContent: isLandscape ? "center" : "center",
@@ -102,7 +102,7 @@ export default function GemsCard({
                     border: `2px solid ${
                       selectedCount > 0 ? "#facc15" : "#4b5563"
                     }`,
-                    background: "#1f2937",
+
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -123,6 +123,10 @@ export default function GemsCard({
                         ? 1
                         : 0.45
                   }}
+                  className={cn(
+                    "",
+                    COST_COLOR_MAP[color as keyof typeof COST_COLOR_MAP]
+                  )}
                 >
                   <div
                     style={{
@@ -192,8 +196,8 @@ export default function GemsCard({
                   <div
                     style={{
                       position: "absolute",
-                      bottom: -8,
-                      right: -6,
+                      bottom: -4,
+                      right: -2,
                       background: "white",
                       color: "#111",
                       fontSize: 11,

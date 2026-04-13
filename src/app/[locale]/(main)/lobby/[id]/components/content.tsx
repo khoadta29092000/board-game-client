@@ -38,6 +38,7 @@ import { useAuth } from "@/src/redux/global/selectors";
 import BotThinkingIndicator from "@/src/components/splendor/common/BotThinkingIndicator";
 import { useTranslations } from "next-intl";
 import { PasswordModal } from "./PasswordModal ";
+import ChatWidget from "@/src/components/widget/chat";
 
 export default function ContentRoomDetail() {
   const router = useRouter();
@@ -270,7 +271,6 @@ export default function ContentRoomDetail() {
         // ✅ Check room type trước
         const roomInfo = await invoke("GetRoomInfo", roomId);
 
-        console.log("roomInfo", roomInfo);
         if (!roomInfo?.success) {
           toast.error(roomInfo?.error ?? "Room not found");
           router.push("/lobby");
@@ -312,7 +312,6 @@ export default function ContentRoomDetail() {
           roomId,
           password: password ?? null
         });
-        console.log("123", result);
         if (result?.success && result?.room) {
           setRoom(result.room);
           hasJoinedRef.current = true;
@@ -484,6 +483,7 @@ export default function ContentRoomDetail() {
 
   return (
     <div className="min-h-[calc(80vh)] bg-gray-50 py-8">
+      <ChatWidget roomId={roomId} />
       <PasswordModal
         isOpen={showPasswordModal}
         isJoining={isJoining}

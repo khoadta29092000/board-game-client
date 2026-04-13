@@ -22,23 +22,21 @@ type InfoFormData = {
 
 type Props = {
   isChange?: boolean;
-}
+};
 
-export function UpdateInfoTab({isChange = true}: Props) {
+export function UpdateInfoTab({ isChange = true }: Props) {
   const t = useTranslations();
   const profile = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
-
   const schema = yup.object().shape({
-     name: yup
+    name: yup
       .string()
       .matches(/^[a-zA-Z0-9]+$/, t("profile_name_invalid"))
       .max(16, t("profile_name_max"))
       .min(2, t("profile_name_min"))
       .required(t("profile_name_required")),
-    
+
     username: yup
       .string()
       .email(t("profile_email_invalid"))
@@ -59,19 +57,18 @@ export function UpdateInfoTab({isChange = true}: Props) {
   });
 
   useEffect(() => {
-  if (profile?.Name || profile?.Email) {
-    reset({
-      name: profile.Name ?? "",
-      username: profile.Email ?? ""
-    });
-  }
-}, [profile?.Name, profile?.Email, reset]);
+    if (profile?.Name || profile?.Email) {
+      reset({
+        name: profile.Name ?? "",
+        username: profile.Email ?? ""
+      });
+    }
+  }, [profile?.Name, profile?.Email, reset]);
 
   const onSubmit = async (data: InfoFormData) => {
     try {
       setIsSubmitting(true);
       // TODO: call API update profile
-      console.log("Update info:", data);
       await new Promise(r => setTimeout(r, 800)); // mock
       toast.success(t("profile_update_success"));
     } catch {
@@ -89,7 +86,9 @@ export function UpdateInfoTab({isChange = true}: Props) {
           {profile?.Name?.charAt(0).toUpperCase() ?? "?"}
         </div>
         <div>
-          <p className="font-semibold text-gray-900 text-base">{profile?.Name}</p>
+          <p className="font-semibold text-gray-900 text-base">
+            {profile?.Name}
+          </p>
           <p className="text-sm text-gray-500">{profile?.Email}</p>
         </div>
       </div>
@@ -126,21 +125,25 @@ export function UpdateInfoTab({isChange = true}: Props) {
         )}
       </div>
 
-      
-      {
-        isChange &&   <Button
-        type="submit"
-        disabled={isSubmitting || !isDirty}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
-      >
-        {isSubmitting ? (
-          <><Loader2 className="h-4 w-4 animate-spin" />{t("profile_saving")}</>
-        ) : (
-          <><Save className="h-4 w-4" />{t("profile_save")}</>
-        )}
-      </Button>
-      }
-    
+      {isChange && (
+        <Button
+          type="submit"
+          disabled={isSubmitting || !isDirty}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t("profile_saving")}
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4" />
+              {t("profile_save")}
+            </>
+          )}
+        </Button>
+      )}
     </form>
   );
 }
@@ -153,10 +156,14 @@ type PasswordFormData = {
 };
 
 function ChangePasswordTab() {
-  const {changePassword, loading} = useApi()
+  const { changePassword, loading } = useApi();
   const t = useTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [show, setShow] = useState({ current: false, newPwd: false, confirm: false });
+  const [show, setShow] = useState({
+    current: false,
+    newPwd: false,
+    confirm: false
+  });
 
   const schema = yup.object().shape({
     currentPassword: yup.string().required(t("profile_pwd_current_required")),
@@ -184,11 +191,10 @@ function ChangePasswordTab() {
       setIsSubmitting(true);
       const body: TChangePassword = {
         newPassword: data.newPassword,
-        oldPassword: data.currentPassword,
-      }
-       await changePassword(body);
-    
-    }  finally {
+        oldPassword: data.currentPassword
+      };
+      await changePassword(body);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -219,10 +225,16 @@ function ChangePasswordTab() {
         />
         <button
           type="button"
-          onClick={() => setShow(prev => ({ ...prev, [showKey]: !prev[showKey] }))}
+          onClick={() =>
+            setShow(prev => ({ ...prev, [showKey]: !prev[showKey] }))
+          }
           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
         >
-          {show[showKey] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {show[showKey] ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
         </button>
       </div>
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
@@ -259,9 +271,15 @@ function ChangePasswordTab() {
         className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
       >
         {isSubmitting ? (
-          <><Loader2 className="h-4 w-4 animate-spin" />{t("profile_saving")}</>
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t("profile_saving")}
+          </>
         ) : (
-          <><KeyRound className="h-4 w-4" />{t("profile_pwd_change_btn")}</>
+          <>
+            <KeyRound className="h-4 w-4" />
+            {t("profile_pwd_change_btn")}
+          </>
         )}
       </Button>
     </form>
@@ -274,16 +292,26 @@ export default function ContentProfile() {
   const profile = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("info");
 
-   const isGuest = profile?.Email?.startsWith("guest_") ?? false;
+  const isGuest = profile?.Email?.startsWith("guest_") ?? false;
 
-   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: "info", label: t("profile_tab_info"), icon: <User className="h-4 w-4" /> },
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    {
+      key: "info",
+      label: t("profile_tab_info"),
+      icon: <User className="h-4 w-4" />
+    },
     ...(!isGuest
-      ? [{ key: "password" as Tab, label: t("profile_tab_password"), icon: <KeyRound className="h-4 w-4" /> }]
+      ? [
+          {
+            key: "password" as Tab,
+            label: t("profile_tab_password"),
+            icon: <KeyRound className="h-4 w-4" />
+          }
+        ]
       : [])
   ];
   return (
-   <div className="min-h-[calc(80vh)] bg-gray-50 py-8 px-4">
+    <div className="min-h-[calc(80vh)] bg-gray-50 py-8 px-4">
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -325,9 +353,11 @@ export default function ContentProfile() {
 
           {/* Tab Content */}
           <div className="p-6 sm:p-8">
-            {activeTab === "info" || isGuest
-              ? <UpdateInfoTab isChange={!isGuest} />
-              : <ChangePasswordTab />}
+            {activeTab === "info" || isGuest ? (
+              <UpdateInfoTab isChange={!isGuest} />
+            ) : (
+              <ChangePasswordTab />
+            )}
           </div>
         </div>
       </div>

@@ -29,7 +29,6 @@ export default function ModalPlayGuest() {
     <>
       <button
         onClick={() => {
-          console.log("profile", profile);
           // if (profile) return router.push("/lobby");
           onOpen();
         }}

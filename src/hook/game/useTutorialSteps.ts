@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { SplendorGameState, GemColor } from "@/src/types/splendor";

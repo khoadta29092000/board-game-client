@@ -29,6 +29,7 @@ import { useTutorialSteps } from "@/src/hook/game/useTutorialSteps";
 import { LoadingOverlay } from "@/src/components/common/loading";
 import useSkipTurn from "@/src/hook/game/useSkipTurn";
 import { useTranslations } from "next-intl";
+import ChatWidget from "@/src/components/widget/chat";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -319,6 +320,10 @@ function GameContent() {
   return (
     <>
       <AnimationLayer />
+      <ChatWidget
+        roomId={gameId}
+        initialChatHistory={gameState?.chatHistory ?? []}
+      />
       <div
         style={{
           width: "100%",
@@ -442,7 +447,7 @@ function GameContent() {
             minWidth: 0,
             overflow: "hidden"
           }}
-          className="md:p-2"
+          className=" px-2 py-4 md:p-5"
         >
           <BoardContainer
             currentStep={currentStep?.id == 0 ? null : currentStep}

@@ -1,15 +1,7 @@
 import { SplendorNoble } from "@/src/types/splendor";
-import { gemIconMap } from "@/src/utils";
+import { costButtonClassMap, gemIconMap } from "@/src/utils";
 import Image from "next/image";
 import { registerNoble } from "@/src/redux/animation/Animationrefs";
-
-const costButtonClassMap: Record<string, string> = {
-  White: "CostDiamondButton",
-  Blue: "CostBlueButton",
-  Green: "CostGreenButton",
-  Red: "CostRubyButton",
-  Black: "CostPurpleButton"
-};
 
 type Props = { nobles: SplendorNoble[] | null };
 
@@ -37,6 +29,7 @@ export default function NobleCard({ nobles }: Props) {
                   src={noble.imageUrl}
                   alt="noble-bg"
                   fill
+                  sizes="(max-width: 768px) 100vw, 20vw"
                   className="object-contain"
                 />
                 <div className="absolute inset-0 bg-black/50" />

@@ -1,6 +1,11 @@
-import React from "react";
 import { SplendorCard } from "@/src/types/splendor";
-import { cn, gemIconMap } from "@/src/utils";
+import {
+  cn,
+  COST_COLOR_MAP,
+  costButtonClassMap,
+  costIconMap,
+  gemIconMap
+} from "@/src/utils";
 import Image from "next/image";
 import { registerCardBoard } from "@/src/redux/animation/Animationrefs";
 import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
@@ -27,21 +32,10 @@ export default function SplendorCardUI({
   onClick,
   currentStep = null
 }: Props) {
-  const bg =
-    card.bonusColor === "White"
-      ? "bg-slate-600"
-      : card.bonusColor === "Blue"
-        ? "bg-blue-900"
-        : card.bonusColor === "Green"
-          ? "bg-green-900"
-          : card.bonusColor === "Red"
-            ? "bg-red-900"
-            : "bg-slate-800";
-
   const costEntries = Object.entries(card.cost).filter(
     ([, amount]) => amount > 0
   );
-
+  const bg = COST_COLOR_MAP[card.bonusColor as keyof typeof COST_COLOR_MAP];
   const isTutorialLock =
     currentStep !== null && currentStep?.id !== 5 && currentStep?.id !== 6;
 
@@ -54,21 +48,16 @@ export default function SplendorCardUI({
         }
       }}
       disabled={!isMyTurn}
-      className={`
-        bg-[#575a59]
-        relative overflow-hidden
-        rounded-lg border w-full h-full
-        sm:max-h-[200px] max-h-[160px]
-        text-white
-        transition-all duration-150
-        ${
-          isMyTurn
-            ? isTutorialLock
-              ? "border-gray-600"
-              : "border-gray-600 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-400/30 active:scale-95 cursor-pointer"
-            : "border-gray-600 opacity-75 cursor-default"
-        }
-      `}
+      className={cn(
+        " relative overflow-hidden rounded-lg border w-full h-full text-white transition-all duration-150",
+        "sm:max-h-[200px] max-h-[160px]",
+        isMyTurn
+          ? isTutorialLock
+            ? "border-gray-600"
+            : "border-gray-600 hover:scale-[1.03] hover:shadow-lg hover:shadow-yellow-400/30 active:scale-95 cursor-pointer"
+          : "border-gray-600 opacity-75 cursor-default",
+        bg
+      )}
     >
       {/* BACKGROUND IMAGE */}
       {card.imageUrl && (
@@ -119,23 +108,19 @@ export default function SplendorCardUI({
         </div>
 
         {/* COST */}
-        <div
-          className={`
-            grid grid-cols-2
-          `}
-        >
+        <div className="grid grid-cols-2 gap-1">
           {[...costEntries].map(([color, amount], index) => (
             <div
               key={color}
               className={cn(
-                "flex items-end  gap-1 p-1",
-                index % 2 === 0 ? "justify-start" : "justify-end"
+                "flex items-center pr-1",
+                index % 2 === 0
+                  ? "justify-self-start" // 0,2,4 → trái
+                  : "justify-self-end", // 1,3,5 → phải
+                costIconMap[color]
               )}
             >
-              <div
-                className="relative flex-shrink-0"
-                style={{ width: 24, height: 24 }}
-              >
+              <div className="relative w-6 h-6 flex-shrink-0">
                 <Image
                   src={gemIconMap[color]}
                   alt={`gems-${color}-${amount}`}
@@ -143,7 +128,10 @@ export default function SplendorCardUI({
                   className="object-contain"
                 />
               </div>
-              <span className="font-black text-lg drop-shadow">{amount}</span>
+
+              <span className="font-black text-lg drop-shadow ml-1">
+                {amount}
+              </span>
             </div>
           ))}
         </div>

@@ -1,3 +1,5 @@
+import { Message } from "./chat";
+
 export type GemColor = "White" | "Blue" | "Green" | "Red" | "Black" | "Gold";
 
 export type GemSet = Record<GemColor, number>;
@@ -225,6 +227,7 @@ export interface SplendorGameState {
   board: BoardState;
   turn: ITurnState;
   cardDecks: ITotalDeck;
+  chatHistory: Message[];
 }
 
 export type DiscardGemData = {

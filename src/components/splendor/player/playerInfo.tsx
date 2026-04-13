@@ -68,7 +68,7 @@ export default function PlayerInfo({
           // padding: isLandscape ? "0px 10px" : "0px 8px",
           background: "#13131B",
           backdropFilter: "blur(4px)",
-          width: isLandscape ? 264 : "auto",
+          width: isLandscape ? 264.5 : "auto",
           height: isLandscape ? "100%" : "auto",
           flexShrink: 0,
           overflowX: isLandscape ? "hidden" : "auto",
@@ -142,7 +142,7 @@ export default function PlayerInfo({
                   height: isLandscape ? "auto" : "100%",
                   borderRadius: 10,
                   border: `2px solid ${isCurrentTurn ? "#facc15" : "#374151"}`,
-                  outline: isMe ? "2px solid #3b82f6" : "none",
+                  // outline: isMe ? "2px solid #3b82f6" : "none",
                   outlineOffset: 1,
                   background: "#1f2937",
                   boxShadow: isCurrentTurn
