@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageCircleMore, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { MessageCircleMore, Send, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/src/utils";
 import { usePathname } from "next/navigation";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
@@ -45,56 +45,52 @@ export default function ChatWidget({
   const [user, setUser] = useState<UserData | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { connection } = useSignalR();
   const pathname = usePathname();
 
   const isGame = pathname?.split("/").includes("game");
-  const sizeClass = isGame ? "sm:w-8 sm:h-8 w-10 h-10" : "w-12 h-12";
   const positionClass = isGame ? "bottom-2 right-2" : "bottom-4 right-4";
-  const bottomChatClass = isGame ? "md:bottom-[42px]" : "md:bottom-[68px]";
+  const buttonSize = isGame ? "w-10 h-10" : "w-12 h-12";
 
   useEffect(() => {
     setUser(getUserData());
   }, []);
 
   useEffect(() => {
-    if (initialChatHistory.length > 0) {
-      setMessages(initialChatHistory);
-    }
+    if (initialChatHistory.length > 0) setMessages(initialChatHistory);
   }, [initialChatHistory]);
 
   useEffect(() => {
     if (!connection) return;
-
     const handleReceiveMessage = (msg: Message) => {
       setMessages(prev => [...prev, msg]);
       setUnread(prev => prev + 1);
     };
-
     connection.on("ReceiveMessage", handleReceiveMessage);
+    return () => connection.off("ReceiveMessage", handleReceiveMessage);
+  }, [connection]);
 
-    return () => {
-      connection.off("ReceiveMessage", handleReceiveMessage);
-    };
-  }, [connection]); // ← bỏ open ra
-
-  // ── Auto scroll ──
-  useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth"
+  const scrollToBottom = () => {
+    requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
     });
-  }, [messages, open]);
+  };
 
-  // ── Reset unread khi mở ──
   useEffect(() => {
-    if (open) setUnread(0);
+    if (open) scrollToBottom();
+  }, [messages, open]);
+  useEffect(() => {
+    if (open) {
+      setUnread(0);
+      scrollToBottom();
+    }
   }, [open]);
 
-  // ── Gửi tin nhắn ──
   const sendMessage = async () => {
     if (!input.trim() || !connection || !user) return;
-
     try {
       await connection.invoke(
         "SendMessage",
@@ -104,6 +100,7 @@ export default function ChatWidget({
         input.trim()
       );
       setInput("");
+      scrollToBottom();
     } catch (err) {
       console.error("SendMessage failed:", err);
     }
@@ -111,120 +108,159 @@ export default function ChatWidget({
 
   return (
     <>
-      {/* OVERLAY mobile */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9990] md:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      {/* OVERLAY — chỉ mobile */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-[9990] md:hidden"
+            onClick={() => setOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* CHAT PANEL */}
-      {open && (
-        <div
-          className={cn(
-            "fixed z-[10000] flex flex-col transition-all duration-300",
-            "left-0 right-0 bottom-0 top-0 sm:rounded-t-2xl bg-white",
-            "md:top-auto md:left-auto md:right-5   md:w-[380px] md:h-[560px] md:rounded-2xl md:shadow-2xl md:border",
-            bottomChatClass
-          )}
-        >
-          {/* Header */}
-          <div className="px-4 py-3 flex justify-between items-center border-b">
-            <span className="font-semibold text-gray-800">
-              {isGame ? "Game Chat" : "Lobby Chat"}
-            </span>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-gray-500 hover:text-gray-700 transition"
-            >
-              <X size={20} />
-            </button>
-          </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="chat"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className={cn(
+              // ── MOBILE ──
+              // Chiếm toàn màn hình, dùng flex column
+              // Header + Footer cố định, content flex-1
+              "fixed inset-0 z-[10000] flex flex-col bg-white",
 
-          {/* Messages */}
-          <div
-            ref={scrollRef}
-            className="flex-1 overflow-y-auto px-3 py-4 bg-gray-50 space-y-1"
-          >
-            {messages.length === 0 && (
-              <div className="text-center text-gray-400 text-sm mt-8">
-                Chưa có tin nhắn nào
-              </div>
+              // ── DESKTOP ──
+              "md:inset-auto md:shadow-2xl md:border",
+              "md:right-5 md:w-[380px] md:h-[520px]",
+              isGame ? "md:bottom-[52px]" : "md:bottom-[68px]"
             )}
+          >
+            {/* ── HEADER — cố định trên cùng ── */}
+            <div className="flex-none px-5 py-4 flex justify-between items-center  bg-white">
+              <div className="flex items-center gap-2">
+                <MessageCircleMore size={20} className="text-blue-500" />
+                <span className="font-bold text-base text-gray-800">
+                  {isGame ? "Game Chat" : "Lobby Chat"}
+                </span>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
 
-            {messages.map((m, i) => {
-              const isMe = m.playerChat.playerId === user?.Id;
-              const prev = messages[i - 1];
-              const isSameUser =
-                prev && prev.playerChat.name === m.playerChat.name;
-
-              return (
-                <div
-                  key={m.id}
-                  className={cn(
-                    "flex items-end gap-2",
-                    isMe ? "justify-end" : "justify-start"
-                  )}
-                >
-                  {!isMe && !isSameUser && (
-                    <div
-                      className={cn(
-                        "w-8 h-8 rounded-full text-white text-xs flex items-center justify-center shrink-0",
-                        getAvatarColor(m.playerChat.name)
-                      )}
-                    >
-                      {m.playerChat.name[0]}
-                    </div>
-                  )}
-                  {!isMe && isSameUser && <div className="w-8 shrink-0" />}
-
-                  <div className="flex flex-col">
-                    {!isMe && !isSameUser && (
-                      <div className="text-xs text-gray-500 ml-1 mb-1">
-                        {m.playerChat.name} · {m.time}
-                      </div>
-                    )}
-                    <div
-                      className={cn(
-                        "px-4 py-2 text-sm max-w-[260px] break-words w-fit",
-                        isMe
-                          ? "bg-blue-500 text-white rounded-2xl rounded-br-md"
-                          : "bg-white text-gray-800 rounded-2xl rounded-bl-md shadow"
-                      )}
-                    >
-                      {m.message}
-                    </div>
-                    {isMe && (
-                      <div className="text-xs text-gray-400 text-right mt-1 mr-1">
-                        {m.time}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Input */}
-          <div className="p-3 flex gap-2 border-t">
-            <input
-              className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none"
-              placeholder="Nhập tin nhắn..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && sendMessage()}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!input.trim() || !connection || !user}
-              className="bg-blue-500 text-white px-4 py-2 rounded-full disabled:opacity-50 transition"
+            {/* ── CONTENT — tự co giãn, chỉ vùng này scroll ── */}
+            <div
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 space-y-2"
+              style={{ overscrollBehavior: "contain" }}
             >
-              ➤
-            </button>
-          </div>
-        </div>
-      )}
+              {messages.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-400">
+                  <MessageCircleMore size={36} className="opacity-30" />
+                  <p className="text-sm">Chưa có tin nhắn nào</p>
+                </div>
+              )}
+
+              {messages.map((m, i) => {
+                const isMe = m.playerChat.playerId === user?.Id;
+                const prev = messages[i - 1];
+                const isSameUser =
+                  prev && prev.playerChat.name === m.playerChat.name;
+
+                return (
+                  <div
+                    key={m.id}
+                    className={cn(
+                      "flex items-end gap-2",
+                      isMe ? "justify-end" : "justify-start"
+                    )}
+                  >
+                    {!isMe && !isSameUser && (
+                      <div
+                        className={cn(
+                          "w-9 h-9 rounded-full text-white text-sm font-semibold",
+                          "flex items-center justify-center shrink-0",
+                          getAvatarColor(m.playerChat.name)
+                        )}
+                      >
+                        {m.playerChat.name[0].toUpperCase()}
+                      </div>
+                    )}
+                    {!isMe && isSameUser && <div className="w-9 shrink-0" />}
+
+                    <div
+                      className={cn(
+                        "flex flex-col max-w-[72%]",
+                        isMe && "items-end"
+                      )}
+                    >
+                      {!isMe && !isSameUser && (
+                        <div className="text-xs text-gray-500 ml-1 mb-1 font-medium">
+                          {m.playerChat.name}
+                          <span className="font-normal ml-1 text-gray-400">
+                            · {m.time}
+                          </span>
+                        </div>
+                      )}
+                      <div
+                        className={cn(
+                          "px-4 py-2.5 break-words w-fit text-[15px] leading-snug",
+                          isMe
+                            ? "bg-blue-500 text-white rounded-2xl rounded-br-sm"
+                            : "bg-white text-gray-800 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100"
+                        )}
+                      >
+                        {m.message}
+                      </div>
+                      {isMe && (
+                        <div className="text-xs text-gray-400 mt-1 mr-1">
+                          {m.time}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── FOOTER — cố định dưới cùng, keyboard đẩy lên ── */}
+            <div className="flex-none px-4 py-3 flex gap-3 border-t bg-white">
+              <input
+                ref={inputRef}
+                className="flex-1 bg-gray-100 rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                placeholder="Nhập tin nhắn..."
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && sendMessage()}
+                onFocus={scrollToBottom}
+                style={{ fontSize: "16px" }}
+              />
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || !connection || !user}
+                className={cn(
+                  "w-12 h-12 flex items-center justify-center rounded-full shrink-0 transition",
+                  input.trim()
+                    ? "bg-blue-500 text-white shadow-md"
+                    : "bg-gray-200 text-gray-400"
+                )}
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* WIDGET BUTTON */}
       <div
@@ -232,25 +268,25 @@ export default function ChatWidget({
         onClick={() => setOpen(prev => !prev)}
       >
         <motion.div
-          whileHover={{ scale: 1.15, rotate: 8 }}
+          whileHover={{ scale: 1.12, rotate: 6 }}
           whileTap={{ scale: 0.9 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
           className={cn(
             "flex items-center justify-center relative",
-            sizeClass,
-            "rounded-sm sm:rounded-lg",
-            "bg-gradient-to-br from-blue-400 to-blue-700",
-            "shadow-lg shadow-black/50",
-            "ring-1 ring-white/20",
-            "cursor-pointer"
+            buttonSize,
+            "rounded-xl bg-gradient-to-br from-blue-400 to-blue-600",
+            "shadow-lg shadow-blue-500/40 cursor-pointer"
           )}
         >
-          <MessageCircleMore className="text-white" size={26} />
-
+          <MessageCircleMore className="text-white" size={22} />
           {unread > 0 && !open && (
-            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center font-bold px-1"
+            >
               {unread > 9 ? "9+" : unread}
-            </div>
+            </motion.div>
           )}
         </motion.div>
       </div>

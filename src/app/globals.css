@@ -355,8 +355,11 @@
 html,
 body {
   min-width: 320px;
-  height: 100%;
   width: 100%;
   overflow: visible;
   position: relative;
+  height: 100dvh;
+  max-height: -webkit-fill-available;
 }
+
+/* globals.css — thêm vào */
