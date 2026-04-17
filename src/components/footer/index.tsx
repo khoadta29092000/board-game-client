@@ -130,7 +130,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">{t("footerCopyright")}</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
+          <div className="flex flex-col sm:flex-row w-full sm:justify-end space-x-6 mt-4 md:mt-0">
             <a
               href="#privacy"
               className="text-gray-400 hover:text-white text-sm transition-colors"

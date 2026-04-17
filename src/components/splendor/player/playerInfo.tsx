@@ -68,7 +68,7 @@ export default function PlayerInfo({
           // padding: isLandscape ? "0px 10px" : "0px 8px",
           background: "#13131B",
           backdropFilter: "blur(4px)",
-          width: isLandscape ? 264.5 : "auto",
+          width: isLandscape ? 267 : "auto",
           height: isLandscape ? "100%" : "auto",
           flexShrink: 0,
           overflowX: isLandscape ? "hidden" : "auto",
