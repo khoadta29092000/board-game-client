@@ -120,22 +120,31 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
   };
 
   const CreateRoomContent = (
-    <form id="create-room-form" onSubmit={handleSubmit(submitCreateRoom)} className="space-y-4">
+    <form
+      id="create-room-form"
+      onSubmit={handleSubmit(submitCreateRoom)}
+      className="space-y-4"
+    >
       <div>
         <label className="block txt-14 font-inter mb-2 text-black">
-          {t("lobby_create_game_lbl")}<span className="text-primary-400"> *</span>
+          {t("lobby_create_game_lbl")}
+          <span className="text-primary-400"> *</span>
         </label>
         <select
           {...register("gameName")}
           className="text-black w-full border border-gray-300 rounded px-4 py-2 bg-white disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isGamesLoading}
-        >a
+        >
           {isGamesLoading ? (
             <option value="">{t("lobby_create_loading")}</option>
           ) : (
-            gameNames.map((name: string) => (
-              <option key={name} value={name}>{name}</option>
-            ))
+            gameNames
+              .filter((name: string) => name.toLowerCase().includes("splendor"))
+              .map((name: string) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))
           )}
         </select>
         {errors.gameName && (
@@ -145,7 +154,8 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
 
       <div>
         <label className="block txt-14 font-inter mb-2 text-black">
-          {t("lobby_create_players_lbl")}<span className="text-primary-400"> *</span>
+          {t("lobby_create_players_lbl")}
+          <span className="text-primary-400"> *</span>
         </label>
         <select
           {...register("quantityPlayer", { valueAsNumber: true })}
@@ -153,17 +163,22 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
           disabled={availablePlayers.length === 0}
         >
           {availablePlayers.map((num: number) => (
-            <option key={num} value={num}>{num}</option>
+            <option key={num} value={num}>
+              {num}
+            </option>
           ))}
         </select>
         {errors.quantityPlayer && (
-          <p className="text-red-500 text-sm mt-1">{errors.quantityPlayer.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.quantityPlayer.message}
+          </p>
         )}
       </div>
 
       <div>
         <label className="block txt-14 font-inter mb-2 text-black">
-          {t("lobby_create_type_lbl")}<span className="text-primary-400"> *</span>
+          {t("lobby_create_type_lbl")}
+          <span className="text-primary-400"> *</span>
         </label>
         <select
           {...register("roomType")}
@@ -179,30 +194,36 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
 
       {watchRoomType === RoomType.Private && (
         <div>
-        <label className="block txt-14 font-inter mb-2 text-black">
-          {t("lobby_join_pwd_lbl")}
-          <span className="text-primary-400"> *</span>
-        </label>
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            {...register("password")}
-            className="text-black w-full border border-gray-300 rounded px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder={t("lobby_join_pwd_placeholder")}
-            autoFocus
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(prev => !prev)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+          <label className="block txt-14 font-inter mb-2 text-black">
+            {t("lobby_join_pwd_lbl")}
+            <span className="text-primary-400"> *</span>
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              {...register("password")}
+              className="text-black w-full border border-gray-300 rounded px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={t("lobby_join_pwd_placeholder")}
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(prev => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.password.message}
+            </p>
+          )}
         </div>
-        {errors.password && (
-          <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-        )}
-      </div>
       )}
     </form>
   );

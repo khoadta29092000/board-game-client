@@ -117,7 +117,7 @@ export default function PlayerInfo({
             </span>
           </div>
         </div>
-        <div className="p-2 gap-2 flex  lg:flex-col w-full">
+        <div className="p-2 gap-2 flex  sm:flex-col w-full">
           {/* Players */}
           {[...sortedPlayers]?.map((player, idx) => {
             const isMe = player.playerId === myId;
