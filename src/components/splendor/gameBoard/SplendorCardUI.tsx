@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import { registerCardBoard } from "@/src/redux/animation/Animationrefs";
 import { TutorialStep } from "@/src/hook/game/useTutorialSteps";
+import React, { useState } from "react";
 
 type Props = {
   card: SplendorCard;
@@ -32,6 +33,7 @@ export default function SplendorCardUI({
   onClick,
   currentStep = null
 }: Props) {
+  const [imgLoaded, setImgLoaded] = useState(false);
   const costEntries = Object.entries(card.cost).filter(
     ([, amount]) => amount > 0
   );
@@ -62,15 +64,26 @@ export default function SplendorCardUI({
       {/* BACKGROUND IMAGE */}
       {card.imageUrl && (
         <div className="absolute inset-0 z-0">
+          {/* subtle skeleton while loading */}
+          <div
+            className={cn(
+              "absolute inset-0 bg-gradient-to-br from-white/10 to-white/0 transition-opacity duration-300",
+              imgLoaded ? "opacity-0" : "opacity-100"
+            )}
+          />
           <Image
             src={card.imageUrl}
             alt="card-bg"
             fill
-            className="object-contain"
+            className={cn(
+              "object-contain transition-opacity duration-300",
+              imgLoaded ? "opacity-100" : "opacity-0"
+            )}
             sizes="(max-width: 840px) 100vw, 200px"
             loading="lazy"
             placeholder="blur"
             blurDataURL="/images/placeholder.png"
+            onLoadingComplete={() => setImgLoaded(true)}
           />
 
           <div className="absolute inset-0 bg-black/40" />

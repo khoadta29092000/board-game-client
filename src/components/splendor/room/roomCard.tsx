@@ -59,6 +59,14 @@ export function RoomCard({
           <span className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`} />
           <span className="text-xs text-gray-400">{status.label}</span>
         </div>
+        <div className="mt-2">
+          <Badge
+            variant="secondary"
+            className="bg-gray-100 text-gray-700 border border-gray-200 text-xs"
+          >
+            {room.gameName || "Unknown game"}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

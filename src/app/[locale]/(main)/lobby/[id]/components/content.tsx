@@ -32,13 +32,19 @@ import {
   WifiOff as DisconnectIcon
 } from "lucide-react";
 import { toast } from "sonner";
-import { PlayerLeftRoom, Room, RoomPlayer } from "@/src/types/room";
+import {
+  PlayerLeftRoom,
+  Room,
+  RoomPlayer,
+  StartedRoom
+} from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { useAuth } from "@/src/redux/global/selectors";
 import BotThinkingIndicator from "@/src/components/splendor/common/BotThinkingIndicator";
 import { useTranslations } from "next-intl";
 import { PasswordModal } from "./PasswordModal ";
 import ChatWidget from "@/src/components/widget/chat";
+import { toPascalCase } from "@/src/utils";
 
 export default function ContentRoomDetail() {
   const router = useRouter();
@@ -49,6 +55,7 @@ export default function ContentRoomDetail() {
   const roomId = params.id as string;
 
   const [room, setRoom] = useState<Room | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -66,7 +73,7 @@ export default function ContentRoomDetail() {
   const toastShownRef = useRef(new Set<string>());
 
   const { isConnected, invoke, on, off } = useSignalR();
-
+  console.log("roomDât", room);
   // ─── Computed ────────────────────────────────────────────────────────────────
 
   const isOwner = useMemo(
@@ -176,9 +183,14 @@ export default function ContentRoomDetail() {
     if (data) setRoom(data.updatedRoom);
   }, []);
 
-  const handleStartGame = useCallback(() => {
-    router.push(`/game/${roomId}`);
-  }, [roomId]);
+  const handleStartGame = useCallback(
+    (data: StartedRoom) => {
+      console.log("room456", room, data);
+      if (!data) return;
+      router.push(`/game/${toPascalCase(data.startedRoom.gameName)}/${roomId}`);
+    },
+    [roomId]
+  );
 
   const handleBotThinking = useCallback((data: { message: string }) => {
     setIsBotThinking(true);
@@ -408,7 +420,11 @@ export default function ContentRoomDetail() {
     try {
       const result = await invoke("StartGame");
       if (result?.success) {
-        router.push(`/game/${roomId}`);
+        console.log("room123", result);
+        if (!room?.gameName) return;
+        router.push(
+          `/game/${toPascalCase(result?.success?.gameName)}/${roomId}`
+        );
       } else {
         toast.error(result?.error ?? "Failed to start game");
       }

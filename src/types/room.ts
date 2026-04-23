@@ -5,6 +5,11 @@ export interface RoomPlayer {
   playerId: string;
 }
 
+export interface StartedRoom {
+  startedRoom: Room;
+  roomId: string;
+}
+
 export interface Room {
   roomId: string;
   id: string;
@@ -13,6 +18,7 @@ export interface Room {
   players: RoomPlayer[];
   roomType: RoomType;
   status: RoomStatus;
+  gameName: string;
 }
 
 export enum RoomType {

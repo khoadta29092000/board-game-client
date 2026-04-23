@@ -63,13 +63,20 @@ export default function ChatWidget({
 
   useEffect(() => {
     if (!connection) return;
+
     const handleReceiveMessage = (msg: Message) => {
       setMessages(prev => [...prev, msg]);
-      setUnread(prev => prev + 1);
+
+      setUnread(prev => {
+        const isMe = msg.playerChat.playerId === user?.Id;
+        if (!open && !isMe) return prev + 1;
+        return prev;
+      });
     };
+
     connection.on("ReceiveMessage", handleReceiveMessage);
     return () => connection.off("ReceiveMessage", handleReceiveMessage);
-  }, [connection]);
+  }, [connection, open, user]);
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -173,9 +180,15 @@ export default function ChatWidget({
 
               {messages.map((m, i) => {
                 const isMe = m.playerChat.playerId === user?.Id;
+
                 const prev = messages[i - 1];
+                const next = messages[i + 1];
+
                 const isSameUser =
-                  prev && prev.playerChat.name === m.playerChat.name;
+                  prev && prev.playerChat.playerId === m.playerChat.playerId;
+
+                const isLastOfGroup =
+                  !next || next.playerChat.playerId !== m.playerChat.playerId;
 
                 return (
                   <div
@@ -185,6 +198,7 @@ export default function ChatWidget({
                       isMe ? "justify-end" : "justify-start"
                     )}
                   >
+                    {/* Avatar */}
                     {!isMe && !isSameUser && (
                       <div
                         className={cn(
@@ -196,33 +210,56 @@ export default function ChatWidget({
                         {m.playerChat.name[0].toUpperCase()}
                       </div>
                     )}
+
                     {!isMe && isSameUser && <div className="w-9 shrink-0" />}
 
+                    {/* Message block */}
                     <div
                       className={cn(
                         "flex flex-col max-w-[72%]",
                         isMe && "items-end"
                       )}
                     >
+                      {/* 👥 Header (người khác) */}
                       {!isMe && !isSameUser && (
                         <div className="text-xs text-gray-500 ml-1 mb-1 font-medium">
-                          {m.playerChat.name}
-                          <span className="font-normal ml-1 text-gray-400">
-                            · {m.time}
-                          </span>
+                          {m.playerChat.name},{m.time}
+                          {
+                            <span className="font-normal ml-1 text-gray-400">
+                              · {m.time}
+                            </span>
+                          }
                         </div>
                       )}
-                      <div
-                        className={cn(
-                          "px-4 py-2.5 break-words w-fit text-[15px] leading-snug",
-                          isMe
-                            ? "bg-blue-500 text-white rounded-2xl rounded-br-sm"
-                            : "bg-white text-gray-800 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100"
+
+                      {/* 💬 Bubble + hover time */}
+                      <div className="group relative">
+                        <div
+                          className={cn(
+                            "px-4 py-2.5 break-words w-fit text-[15px] leading-snug",
+                            isMe
+                              ? "bg-blue-500 text-white rounded-2xl rounded-br-sm"
+                              : "bg-white text-gray-800 rounded-2xl rounded-bl-sm border border-gray-100 shadow-sm"
+                          )}
+                        >
+                          {m.message}
+                        </div>
+
+                        {/* ⏱ Tooltip time (hover từng message) */}
+                        {!isLastOfGroup && (
+                          <div
+                            className={cn(
+                              "absolute bottom-full mb-1 text-xs text-white bg-black/70 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap",
+                              isMe ? "right-0" : "left-0"
+                            )}
+                          >
+                            {m.time}
+                          </div>
                         )}
-                      >
-                        {m.message}
                       </div>
-                      {isMe && (
+
+                      {/* 👤 Time của mình (chỉ message cuối) */}
+                      {isMe && isLastOfGroup && (
                         <div className="text-xs text-gray-400 mt-1 mr-1">
                           {m.time}
                         </div>

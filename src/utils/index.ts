@@ -37,3 +37,11 @@ export const COST_COLOR_MAP: Record<string, string> = {
   Red: "bg-gradient-to-br from-[#B91C1C] to-[#450A0A]",
   Gold: "bg-gradient-to-br from-[#B8962E] to-[#78350F]"
 };
+
+export function toPascalCase(input: string): string {
+  return input
+    .trim()
+    .split(/\s+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join("");
+}
