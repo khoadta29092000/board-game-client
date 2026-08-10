@@ -73,7 +73,6 @@ export default function ContentRoomDetail() {
   const toastShownRef = useRef(new Set<string>());
 
   const { isConnected, invoke, on, off } = useSignalR();
-  console.log("roomDât", room);
   // ─── Computed ────────────────────────────────────────────────────────────────
 
   const isOwner = useMemo(
@@ -185,7 +184,6 @@ export default function ContentRoomDetail() {
 
   const handleStartGame = useCallback(
     (data: StartedRoom) => {
-      console.log("room456", room, data);
       if (!data) return;
       router.push(`/game/${toPascalCase(data.startedRoom.gameName)}/${roomId}`);
     },
@@ -420,7 +418,6 @@ export default function ContentRoomDetail() {
     try {
       const result = await invoke("StartGame");
       if (result?.success) {
-        console.log("room123", result);
         if (!room?.gameName) return;
         router.push(
           `/game/${toPascalCase(result?.success?.gameName)}/${roomId}`

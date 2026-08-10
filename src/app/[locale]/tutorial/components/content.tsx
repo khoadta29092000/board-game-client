@@ -99,13 +99,22 @@ function TutorialContent() {
     isFreePlay
   } = useTutorialSteps(gameState, userId);
   const { isDeadlocked } = useSkipTurn();
-  // Wrap startFreePlay: xóa step trên Redis ngay lập tức thay vì phụ thuộc useEffect
+
+  const saveTutorialStep = useCallback(
+    (index: number, currentPhase: string) => {
+      if (!isConnected) return;
+      invoke("SaveTutorialStep", userId, index, currentPhase).catch(() => {});
+    },
+    [isConnected, invoke, userId]
+  );
+
+  // Wrap startFreePlay: lưu sentinel index = totalSteps khớp với stepIndex sau startFreePlayBase
   const startFreePlay = useCallback(() => {
     startFreePlayBase();
     if (isConnected && userId) {
-      saveTutorialStep(10, "FREE_PLAY");
+      saveTutorialStep(totalSteps, "FREE_PLAY");
     }
-  }, [startFreePlayBase, isConnected, userId, invoke]);
+  }, [startFreePlayBase, isConnected, userId, saveTutorialStep, totalSteps]);
   // isMyTurn: trong guided phase luôn cho phép action (validate thủ công)
   // trong free play: check turn bình thường
   const isMyTurn = isFreePlay
@@ -150,14 +159,6 @@ function TutorialContent() {
 
   // ─── Tutorial specific events ─────────────────────────────────────────────
 
-  // Helper: lưu step lên server mỗi khi stepIndex / phase thay đổi
-  const saveTutorialStep = useCallback(
-    (index: number, currentPhase: string) => {
-      if (!isConnected) return;
-      invoke("SaveTutorialStep", userId, index, currentPhase).catch(() => {});
-    },
-    [isConnected, invoke, userId]
-  );
   const isRestoredRef = useRef(false);
   // Handler cho TutorialReady — gộp TutorialStarted + TutorialReconnected
   const handleTutorialReady = useCallback(
@@ -169,42 +170,14 @@ function TutorialContent() {
     }) => {
       setIsLoading(false);
       isRestoredRef.current = true;
-      if (data.isReconnect) {
-        restoreStep(
-          data.stepIndex,
-          data.phase as "GUIDED" | "TRANSITION" | "FREE_PLAY" | "DONE"
-        );
-      }
-
-      // isReconnect=false → fresh start, useTutorialSteps đã init ở 0:GUIDED
+      restoreStep(
+        data.stepIndex,
+        data.phase as "GUIDED" | "TRANSITION" | "FREE_PLAY" | "DONE"
+      );
     },
     [restoreStep]
   );
 
-  // ─── Start tutorial khi connected ────────────────────────────────────────
-  // Đăng ký TutorialReady TRƯỚC khi invoke để không miss event
-  useEffect(() => {
-    if (!isConnected || !userId) return;
-
-    const start = async () => {
-      try {
-        await invoke("StartTutorial", profile?.Id, profile?.Name ?? "Player");
-      } catch (e) {
-        setIsLoading(false);
-        console.error("StartTutorial failed", e);
-        toast.error("Không thể bắt đầu tutorial");
-      }
-    };
-    start();
-  }, [isConnected, userId, handleTutorialReady, on, off, invoke]);
-
-  useEffect(() => {
-    if (!userId) return;
-    if (!isRestoredRef.current) return;
-    if (phase === "GUIDED" && stepIndex < totalSteps) {
-      saveTutorialStep(stepIndex, phase);
-    }
-  }, [stepIndex, phase, totalSteps, userId, saveTutorialStep]);
   // ─── Game state handlers ──────────────────────────────────────────────────
 
   const handleGameStateUpdated = useCallback(
@@ -305,7 +278,7 @@ function TutorialContent() {
     [onOpenNoble]
   );
 
-  // ─── SignalR subscriptions ────────────────────────────────────────────────
+  // ─── SignalR + auto-save step (sau handlers; subscribe trước StartTutorial)
   useEffect(() => {
     if (!isConnected) return;
     on("GameStateUpdated", handleGameStateUpdated);
@@ -336,11 +309,32 @@ function TutorialContent() {
     handleTutorialCompleted,
     handleTutorialFailed,
     handleNeedDiscard,
-    handleNeedSelectNoble
+    handleNeedSelectNoble,
+    handleTutorialReady
   ]);
 
-  // ─── Auto-save step khi stepIndex / phase thay đổi ──────────────────────
-  // Chỉ lưu khi GUIDED + trong range — FREE_PLAY được xóa trực tiếp trong startFreePlay
+  useEffect(() => {
+    if (!isConnected || !userId) return;
+    const start = async () => {
+      try {
+        await invoke("StartTutorial", profile?.Id, profile?.Name ?? "Player");
+      } catch (e) {
+        setIsLoading(false);
+        console.error("StartTutorial failed", e);
+        toast.error("Không thể bắt đầu tutorial");
+      }
+    };
+    start();
+  }, [isConnected, userId, invoke, profile?.Id, profile?.Name]);
+
+  // Chỉ sync Redis khi đã TutorialReady (isRestoredRef); FREE_PLAY do startFreePlay lưu
+  useEffect(() => {
+    if (!userId) return;
+    if (!isRestoredRef.current) return;
+    if (phase === "GUIDED" && stepIndex < totalSteps) {
+      saveTutorialStep(stepIndex, phase);
+    }
+  }, [stepIndex, phase, totalSteps, userId, saveTutorialStep]);
 
   // ─── Actions ──────────────────────────────────────────────────────────────
   const handleCollectGems = useCallback(
@@ -356,8 +350,8 @@ function TutorialContent() {
         const stepReq = currentStep?.requiredAction;
         const stepId = currentStep?.id;
 
-        if (stepId === 1) {
-          // id1 loop: cho phép cả 3-diff lẫn 2-same
+        if (stepId === 2) {
+          // id2: cho phép cả 3-diff lẫn 2-same
           const is3Diff = totalSelected === 3 && distinctColors === 3;
           const is2Same = totalSelected === 2 && maxSame === 2;
           if (!is3Diff && !is2Same) {
@@ -418,7 +412,7 @@ function TutorialContent() {
       if (
         isGuided &&
         currentStep?.requiredAction !== "PURCHASE_CARD" &&
-        currentStep?.id !== 5
+        currentStep?.id !== 6
       ) {
         onActionError("Bước này chưa yêu cầu mua card!");
         return;

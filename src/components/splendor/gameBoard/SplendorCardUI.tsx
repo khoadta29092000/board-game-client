@@ -39,7 +39,7 @@ export default function SplendorCardUI({
   );
   const bg = COST_COLOR_MAP[card.bonusColor as keyof typeof COST_COLOR_MAP];
   const isTutorialLock =
-    currentStep !== null && currentStep?.id !== 5 && currentStep?.id !== 6;
+    currentStep !== null && currentStep?.id !== 6 && currentStep?.id !== 7;
 
   return (
     <button

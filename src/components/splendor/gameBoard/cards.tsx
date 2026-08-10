@@ -37,7 +37,7 @@ export default function CardsBoard({
   const t = useTranslations();
   const levels = dataCards ? Object.entries(dataCards) : [];
   const isTutorialLock =
-    currentStep !== null && currentStep?.id !== 5 && currentStep?.id !== 6;
+    currentStep !== null && currentStep?.id !== 6 && currentStep?.id !== 7;
   return (
     <div
       style={{

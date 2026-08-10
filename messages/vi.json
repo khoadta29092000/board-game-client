@@ -119,37 +119,49 @@
   "notFound_description": "Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm.",
   "notFound_goHome": "Trở về trang chủ",
 
-  "tutorial_step0_title": "Chào mừng đến Splendor!",
-  "tutorial_step0_message": "Mục tiêu: gom đủ 15 điểm trước đối thủ để chiến thắng.",
-  "tutorial_step0_subMessage": "Điểm đến từ card phát triển và Noble tiles.",
+"tutorial_step0_title": "Chào mừng đến Splendor!",
+"tutorial_step0_message": "Mục tiêu của bạn là đạt 15 điểm trước đối thủ.",
+"tutorial_step0_subMessage": "Điểm đến từ Development Card và Noble Tiles.",
 
-  "tutorial_step1_title": "Nhắm tới Card này!",
-  "tutorial_step1_message": "hãy để ý phần cost bên dưới cần đủ để có thể mua đc card này",
-  "tutorial_step1_subMessage": "Lưu ý: mỗi lượt chỉ được tối đa 10 gem — cuối lượt phải bỏ bớt nếu vượt quá.",
 
-  "tutorial_step2_title": "Lấy 3 gem khác màu",
-  "tutorial_step2_message": "Mỗi lượt bạn có thể lấy tối đa 3 gem khác màu từ ngân hàng, nhưng bạn đang hướng tới Card mua đầu tiên bởi vậy hãy lấy Blue, Red, Purple.",
-  "tutorial_step2_subMessage": "Hãy chọn 3 gem khác màu — ưu tiên màu cost của card vừa xem để tiến gần hơn!",
+"tutorial_step1_title": "Trong lượt có gì?",
+"tutorial_step1_message": "Mỗi lượt bạn được thực hiện 1 trong 3 hành động:",
+"tutorial_step1_subMessage": "Lấy gem • Mua card • Reserve card",
 
-  "tutorial_step3_title": "Lấy 2 gem cùng màu",
-  "tutorial_step3_message": "Nếu ngân hàng còn ≥4 gem cùng màu, bạn có thể lấy 2 cùng lúc, nhưng bạn đang hướng tới Card mua đầu tiên bởi vậy hãy lấy 2 Green",
-  "tutorial_step3_subMessage": "Hãy chọn 1 màu có số ≥4 và lấy 2 gem! Nhớ: tổng gem không được vượt 10.",
 
-  "tutorial_step4_title": "Hiểu về Card phát triển",
-  "tutorial_step4_message": "Card có màu bonus (góc phải) và cost (góc dưới) và point nếu có ở góc trên bên trái. Mua card → nhận bonus mãi mãi để có thể thay thế gems khi mua card.",
-  "tutorial_step4_subMessage": "Bonus tính như gem khi mua card tiếp theo!",
+"tutorial_step2_title": "Hãy nhắm tới card này!",
+"tutorial_step2_message": "Nhìn phần cost bên dưới card. Bạn cần đủ gem tương ứng để mua nó.",
+"tutorial_step2_subMessage": "Hãy bắt đầu gom các màu gem cần thiết.",
 
-  "tutorial_step5_title": "Mua card!",
-  "tutorial_step5_message": "Bạn đã có đủ gem để mua card này. Nhấn vào card rồi chọn Purchase!",
-  "tutorial_step5_subMessage": "Trả gem → nhận bonus màu đó vĩnh viễn.",
 
-  "tutorial_step6_title": "Reserve card",
-  "tutorial_step6_message": "Reserve để giữ chỗ card xịn — nhận thêm 1 gold gem 🟡(có tác dụng thay thế được tất cả các gems)",
-  "tutorial_step6_subMessage": "Nhấn vào card lv2 đắt tiền rồi chọn Reserve!",
+"tutorial_step3_title": "Lấy 3 gem khác màu",
+"tutorial_step3_message": "Bạn có thể lấy tối đa 3 gem khác màu từ ngân hàng.",
+"tutorial_step3_subMessage": "Hãy lấy Blue, Red và Purple để tiến gần hơn tới card mục tiêu!",
 
-  "tutorial_step7_title": "Noble tiles",
-  "tutorial_step7_message": "Gom đủ bonus theo yêu cầu → Noble tự đến, +3 điểm!",
-  "tutorial_step7_subMessage": "Không cần làm gì thêm — Noble tự ghé thăm sau lượt mua card.",
+
+"tutorial_step4_title": "Lấy 2 gem cùng màu",
+"tutorial_step4_message": "Nếu một màu còn ít nhất 4 gem trong ngân hàng, bạn có thể lấy 2 gem cùng màu.",
+"tutorial_step4_subMessage": "Hãy lấy 2 Green gem. Nhớ: cuối lượt không được giữ quá 10 gem.",
+
+
+"tutorial_step5_title": "Development Card",
+"tutorial_step5_message": "Mỗi card có cost, bonus và đôi khi có điểm thưởng.",
+"tutorial_step5_subMessage": "Sau khi mua, bonus sẽ tồn tại vĩnh viễn và được tính như gem khi mua card khác.",
+
+
+"tutorial_step6_title": "Mua card!",
+"tutorial_step6_message": "Bạn đã đủ gem để mua card này.",
+"tutorial_step6_subMessage": "Nhấn vào card rồi chọn Purchase để nhận bonus vĩnh viễn!",
+
+
+"tutorial_step7_title": "Reserve card",
+"tutorial_step7_message": "Reserve giúp bạn giữ trước một card quan trọng.",
+"tutorial_step7_subMessage": "Bạn cũng sẽ nhận 1 Gold gem 🟡 có thể thay thế mọi màu gem.",
+
+
+"tutorial_step8_title": "Noble Tiles",
+"tutorial_step8_message": "Khi có đủ bonus theo yêu cầu, Noble sẽ tự động ghé thăm bạn.",
+"tutorial_step8_subMessage": "Mỗi Noble mang lại 3 điểm chiến thắng!",
 
   "tutorial_overlay_skip": "Bỏ qua",
   "tutorial_overlay_gotIt": "Hiểu rồi →",

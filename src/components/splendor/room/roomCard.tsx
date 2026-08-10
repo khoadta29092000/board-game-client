@@ -26,9 +26,21 @@ export function RoomCard({
   const isPrivate = room.roomType === RoomType.Private;
 
   const statusConfig = {
-    Waiting: { color: "#4ade80", label: t("room_card_waiting"), dot: "bg-green-400" },
-    Playing: { color: "#facc15", label: t("room_card_playing"), dot: "bg-yellow-400" },
-    Finished: { color: "#6b7280", label: t("room_card_finished"), dot: "bg-gray-500" }
+    Waiting: {
+      color: "#4ade80",
+      label: t("room_card_waiting"),
+      dot: "bg-green-400"
+    },
+    Playing: {
+      color: "#facc15",
+      label: t("room_card_playing"),
+      dot: "bg-yellow-400"
+    },
+    Finished: {
+      color: "#6b7280",
+      label: t("room_card_finished"),
+      dot: "bg-gray-500"
+    }
   };
 
   const status =
@@ -42,7 +54,7 @@ export function RoomCard({
           <div className="flex items-center gap-2">
             <CardTitle className="capitalize text-lg">{room.roomId}</CardTitle>
           </div>
-          <div>
+          <div className="text-center">
             {isPrivate ? (
               <Badge className="flex items-center gap-1 hover:bg-yellow-200 bg-yellow-100 text-yellow-700 border border-yellow-300 text-xs">
                 <Lock className="w-3 h-3" />
@@ -56,7 +68,9 @@ export function RoomCard({
           </div>
         </div>
         <div className="flex items-center gap-1.5 mt-1">
-          <span className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`} />
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`}
+          />
           <span className="text-xs text-gray-400">{status.label}</span>
         </div>
         <div className="mt-2">
@@ -74,7 +88,9 @@ export function RoomCard({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-gray-500" />
-                <span className="text-sm text-gray-500">{t("room_card_players")}</span>
+                <span className="text-sm text-gray-500">
+                  {t("room_card_players")}
+                </span>
               </div>
               <span
                 className="text-xs font-bold"
@@ -102,7 +118,10 @@ export function RoomCard({
                 <div key={player.playerId} className="flex items-center gap-2">
                   <div
                     className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    style={{ background: "rgba(167,139,250,0.2)", color: "#a78bfa" }}
+                    style={{
+                      background: "rgba(167,139,250,0.2)",
+                      color: "#a78bfa"
+                    }}
                   >
                     {player.name.charAt(0).toUpperCase()}
                   </div>
@@ -114,10 +133,17 @@ export function RoomCard({
                   )}
                 </div>
               ))}
-              {Array.from({ length: room.quantityPlayer - room.currentPlayers }).map((_, i) => (
-                <div key={`empty-${i}`} className="flex items-center gap-2 opacity-30">
+              {Array.from({
+                length: room.quantityPlayer - room.currentPlayers
+              }).map((_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className="flex items-center gap-2 opacity-30"
+                >
                   <div className="w-5 h-5 rounded-full border border-dashed border-gray-600" />
-                  <span className="text-sm text-gray-600">{t("room_card_slot_waiting")}</span>
+                  <span className="text-sm text-gray-600">
+                    {t("room_card_slot_waiting")}
+                  </span>
                 </div>
               ))}
             </div>

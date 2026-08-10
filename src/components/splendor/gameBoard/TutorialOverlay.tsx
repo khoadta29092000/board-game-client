@@ -170,7 +170,9 @@ function MessageBox({
       })() );
 
     return base(pos);
-  }, [highlightRects]);
+    // highlightRects alone is not enough: e.g. CARD with [] (hidden) → NONE (id -1) with []
+    // must recompute visibility when step / highlight kind changes.
+  }, [highlightRects, step.highlight.type]);
 
   const progress = ((stepIndex + 1) / totalSteps) * 100;
 
@@ -315,7 +317,7 @@ function MessageBox({
           {step.allowNext ? (
             <button
               onClick={() => {
-                saveTutorialStep(stepIndex + 1, "Guide");
+                saveTutorialStep(stepIndex + 1, "GUIDED");
                 onNext();
               }}
               style={{

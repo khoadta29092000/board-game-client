@@ -51,10 +51,14 @@ export default function CardPickerModal(props: {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "min(820px, 100%)",
+          maxHeight: "85vh",
           background: "#0b0b0b",
           border: "1px solid #333",
           borderRadius: 12,
-          padding: 16
+          padding: 16,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden"
         }}
       >
         <div className="flex items-center justify-between gap-2">
@@ -69,7 +73,17 @@ export default function CardPickerModal(props: {
 
         {subtitle ? <div style={{ marginTop: 10 }}>{subtitle}</div> : null}
 
-        <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+        <div
+          style={{
+            marginTop: 12,
+            display: "grid",
+            gap: 8,
+            overflow: "auto",
+            paddingRight: 4,
+            flex: "1 1 auto",
+            minHeight: 0
+          }}
+        >
           {items.length === 0 ? (
             <div style={{ opacity: 0.8, fontSize: 12 }}>No cards to show.</div>
           ) : (
@@ -122,7 +136,29 @@ export default function CardPickerModal(props: {
 
                   <div style={{ minWidth: 0, flex: "1 1 auto" }}>
                     <div style={{ fontWeight: 700 }}>
-                      {card?.heroClass ?? card?.type ?? "Card"}
+                      {card?.classOverriddenByItem ? (
+                        <>
+                          <span style={{ opacity: 0.75 }}>
+                            {String(card.baseHeroClass ?? "")}
+                          </span>
+                          <span style={{ margin: "0 6px" }}>→</span>
+                          <span>{String(card.effectiveHeroClass ?? "")}</span>
+                        </>
+                      ) : (
+                        (() => {
+                          const t = String(
+                            card?.type ?? card?.Type ?? ""
+                          ).toLowerCase();
+                          if (t === "hero" && card?.heroClass)
+                            return String(card.heroClass);
+                          return String(
+                            card?.type ??
+                              card?.Type ??
+                              card?.heroClass ??
+                              "Card"
+                          );
+                        })()
+                      )}
                     </div>
                     {card?.configId ? (
                       <div style={{ fontSize: 12, opacity: 0.85 }}>
@@ -144,7 +180,7 @@ export default function CardPickerModal(props: {
           )}
         </div>
 
-        {footer ? <div style={{ marginTop: 12 }}>{footer}</div> : null}
+        {footer ? <div style={{ marginTop: 12, flex: "0 0 auto" }}>{footer}</div> : null}
       </div>
     </div>
   );

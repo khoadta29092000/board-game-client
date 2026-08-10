@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from "react";
 import CardPickerModal, { CardPickerItem } from "./CardPickerModal";
 
 export default function PartyTargetModal(props: {
   isOpen: boolean;
   title: string;
+  targetCount?: number | null;
+  remainingSelections?: number | null;
   confirmLabel: string;
   statePlayers: Record<string, any> | null | undefined;
   validIds: string[] | null;
@@ -17,6 +20,8 @@ export default function PartyTargetModal(props: {
   const {
     isOpen,
     title,
+    targetCount,
+    remainingSelections,
     confirmLabel,
     statePlayers,
     validIds,
@@ -49,7 +54,10 @@ export default function PartyTargetModal(props: {
 
   const footer = (
     <div className="flex gap-2 justify-end">
-      <button className="bg-gray-700 text-white px-4 py-2 rounded-md" onClick={onClose}>
+      <button
+        className="bg-gray-700 text-white px-4 py-2 rounded-md"
+        onClick={onClose}
+      >
         Cancel
       </button>
       <button
@@ -59,7 +67,10 @@ export default function PartyTargetModal(props: {
       >
         {confirmLabel}
       </button>
-      <button className="bg-gray-700 text-white px-4 py-2 rounded-md" onClick={onGiveUp}>
+      <button
+        className="bg-gray-700 text-white px-4 py-2 rounded-md"
+        onClick={onGiveUp}
+      >
         Give up
       </button>
     </div>
@@ -71,6 +82,13 @@ export default function PartyTargetModal(props: {
       title={title}
       subtitle={
         <div style={{ opacity: 0.8, fontSize: 12 }}>
+          {typeof targetCount === "number" &&
+          targetCount > 1 &&
+          typeof remainingSelections === "number" ? (
+            <div style={{ marginBottom: 6 }}>
+              Picks left: {Math.max(0, remainingSelections)}/{targetCount}
+            </div>
+          ) : null}
           Valid targets: {String(validIds?.length ?? 0)}
         </div>
       }
@@ -83,4 +101,3 @@ export default function PartyTargetModal(props: {
     />
   );
 }
-

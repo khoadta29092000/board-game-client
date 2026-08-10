@@ -24,8 +24,8 @@ export default function ModalCardAction({
   currentStep = null
 }: Props) {
   const t = useTranslations();
-  const isReserve = currentStep !== null && currentStep.id !== 5;
-  const isPurchase = currentStep !== null && currentStep.id !== 6;
+  const isReserve = currentStep !== null && currentStep.id !== 6;
+  const isPurchase = currentStep !== null && currentStep.id !== 7;
   return (
     <ModalCommon
       isOpen={isOpen}

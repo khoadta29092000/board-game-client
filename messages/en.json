@@ -25,8 +25,8 @@
   "fullNameRequired": "Full Name is required",
   "passwordsMustMatch": "Passwords must match",
   "confirmPasswordRequired": "Please confirm your password",
-  
-   "_comment_wrapApi": "dịch cho wrapapi",
+
+  "_comment_wrapApi": "dịch cho wrapapi",
   "loginGuessTitle": "Login Guest",
   "loginGuessFailed": "Login Guest Failed",
   "loginTitle": "Login",
@@ -59,8 +59,8 @@
   "changePasswordTitle": "Change Password",
   "changePasswordDes": "Change Password Success",
   "changePasswordFailed": "Change Password Failed",
- 
- "homeHeroPlayTogether": "Play Together,",
+
+  "homeHeroPlayTogether": "Play Together,",
   "homeHeroWinTogether": "Have Fun Together",
   "homeHeroPitch": "Experience the ultimate multiplayer board gaming platform. Connect with friends worldwide and enjoy classic games in stunning digital format.",
   "homeStartPlaying": "Start Playing",
@@ -118,38 +118,41 @@
   "notFound_heading": "Page not found",
   "notFound_description": "Sorry, we couldn't find the page you're looking for.",
   "notFound_goHome": "Go back home",
-
   "tutorial_step0_title": "Welcome to Splendor!",
-  "tutorial_step0_message": "Goal: collect 15 points before your opponent to win.",
-  "tutorial_step0_subMessage": "Points come from development cards and Noble tiles.",
+  "tutorial_step0_message": "Reach 15 points before your opponent to win the game.",
+  "tutorial_step0_subMessage": "Points come from Development Cards and Noble Tiles.",
 
-  "tutorial_step1_title": "Aim for this Card!",
-  "tutorial_step1_message": "Pay attention to the cost below to buy this card",
-  "tutorial_step1_subMessage": "Note: each turn you can only have up to 10 gems — you must discard excess at the end of the turn.",
+  "tutorial_step1_title": "Your Turn",
+  "tutorial_step1_message": "Each turn, choose 1 of 3 possible actions.",
+  "tutorial_step1_subMessage": "Take gems • Buy a card • Reserve a card",
 
-  "tutorial_step2_title": "Take 3 different gems",
-  "tutorial_step2_message": "Each turn you can take up to 3 different gems from the bank, but since you are aiming for the first card, choose Blue, Red, Purple.",
-  "tutorial_step2_subMessage": "Choose 3 different gems — prioritize the color of the card you just saw to get closer to buying it!",
+  "tutorial_step2_title": "Aim for this Card!",
+  "tutorial_step2_message": "Check the cost at the bottom of the card. You need matching gems to buy it.",
+  "tutorial_step2_subMessage": "Plan ahead and collect the colors you need.",
 
-  "tutorial_step3_title": "Take 2 identical gems",
-  "tutorial_step3_message": "If the bank has ≥4 gems of the same color, you can take 2 at once, but since you are aiming for the first card, take 2 Green.",
-  "tutorial_step3_subMessage": "Choose a color that has ≥4 and take 2 gems! Remember: total gems cannot exceed 10.",
+  "tutorial_step3_title": "Take 3 Different Gems",
+  "tutorial_step3_message": "You may take up to 3 different gems from the bank each turn.",
+  "tutorial_step3_subMessage": "Take Blue, Red, and Purple to get closer to buying this card!",
 
-  "tutorial_step4_title": "Understanding Development Cards",
-  "tutorial_step4_message": "Cards have a bonus color (top right) and cost (bottom) and points if applicable (top left). Buy cards to get a permanent bonus that can substitute for gems.",
-  "tutorial_step4_subMessage": "Bonuses count as gems when buying future cards!",
+  "tutorial_step4_title": "Take 2 Identical Gems",
+  "tutorial_step4_message": "If there are at least 4 gems of one color in the bank, you may take 2 of that color.",
+  "tutorial_step4_subMessage": "Take 2 Green gems. Remember: you cannot keep more than 10 gems.",
 
-  "tutorial_step5_title": "Buy the card!",
-  "tutorial_step5_message": "You have enough gems to buy this card. Click on it and select Purchase!",
-  "tutorial_step5_subMessage": "Spend gems → receive its permanent bonus.",
+  "tutorial_step5_title": "Understanding Development Cards",
+  "tutorial_step5_message": "Cards have a cost, a permanent bonus, and sometimes victory points.",
+  "tutorial_step5_subMessage": "Bonuses count as free gems when buying future cards.",
 
-  "tutorial_step6_title": "Reserve card",
-  "tutorial_step6_message": "Reserve a good card to keep it — get 1 gold gem 🟡(acts as a wildcard for any gem).",
-  "tutorial_step6_subMessage": "Click on an expensive level 2 card and select Reserve!",
+  "tutorial_step6_title": "Buy the Card!",
+  "tutorial_step6_message": "You now have enough gems to buy this card.",
+  "tutorial_step6_subMessage": "Select the card and choose Purchase to gain its permanent bonus!",
 
-  "tutorial_step7_title": "Noble tiles",
-  "tutorial_step7_message": "Gather the required bonuses → A Noble visits automatically, +3 points!",
-  "tutorial_step7_subMessage": "No action needed — Nobles visit after buying a card.",
+  "tutorial_step7_title": "Reserve a Card",
+  "tutorial_step7_message": "Reserve a valuable card to save it for later.",
+  "tutorial_step7_subMessage": "You also gain 1 Gold gem 🟡 that can replace any gem color.",
+
+  "tutorial_step8_title": "Noble Tiles",
+  "tutorial_step8_message": "Collect the required bonuses and a Noble will visit you automatically.",
+  "tutorial_step8_subMessage": "Each Noble gives you +3 victory points!",
 
   "tutorial_overlay_skip": "Skip",
   "tutorial_overlay_gotIt": "Got it →",
@@ -302,7 +305,7 @@
   "confirm_no": "No",
   "confirm_loading": "Loading...",
   "confirm_default_desc": "Do you want to {title}?",
-  
+
   "reserve_deck_title": "Reserve Card",
   "reserve_deck_desc": "Are you sure you want to reserve a random Level {level} development card from the deck?",
   "reserve_deck_loading": "Reserving...",
@@ -336,7 +339,7 @@
   "lobby_join_pwd_placeholder": "Enter password...",
   "lobby_join_pwd_required": "Password is required",
   "lobby_joining": "Joining...",
-  "lobby_join_btn": "Join Room" ,
+  "lobby_join_btn": "Join Room",
 
   "room_card_waiting": "Waiting",
   "room_card_playing": "In Progress",

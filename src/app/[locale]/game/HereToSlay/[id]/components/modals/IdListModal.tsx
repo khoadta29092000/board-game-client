@@ -43,10 +43,14 @@ export default function IdListModal(props: {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "min(820px, 100%)",
+          maxHeight: "85vh",
           background: "#0b0b0b",
           border: "1px solid #333",
           borderRadius: 12,
-          padding: 16
+          padding: 16,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden"
         }}
       >
         <div className="flex items-center justify-between gap-2">
@@ -63,7 +67,17 @@ export default function IdListModal(props: {
           Valid targets: {String(ids.length)}
         </div>
 
-        <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+        <div
+          style={{
+            marginTop: 12,
+            display: "grid",
+            gap: 8,
+            overflow: "auto",
+            paddingRight: 4,
+            flex: "1 1 auto",
+            minHeight: 0
+          }}
+        >
           {ids.length === 0 ? (
             <div style={{ opacity: 0.8, fontSize: 12 }}>No valid targets.</div>
           ) : (
@@ -90,7 +104,7 @@ export default function IdListModal(props: {
           )}
         </div>
 
-        <div className="flex gap-2 justify-end" style={{ marginTop: 12 }}>
+        <div className="flex gap-2 justify-end" style={{ marginTop: 12, flex: "0 0 auto" }}>
           <button className="bg-gray-700 text-white px-4 py-2 rounded-md" onClick={onClose}>
             Cancel
           </button>

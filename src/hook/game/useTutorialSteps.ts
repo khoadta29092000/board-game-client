@@ -42,20 +42,20 @@ export type TutorialPhase = "GUIDED" | "TRANSITION" | "FREE_PLAY" | "DONE";
 
 // ─── Step definitions ─────────────────────────────────────────────────────────
 //
-// Luồng mới:
-//   id 0 — Chào mừng: mục tiêu game (READ_ONLY)
-//   id 1 — Giới thiệu card lv1: highlight card rẻ nhất, giải thích cost/bonus (READ_ONLY)
-//   id 2 — Lấy 3 gem KHÁC màu: highlight đúng màu cost của card đó (COLLECT_3_DIFF)
-//   id 3 — Lấy 2 gem CÙNG màu: highlight màu còn ≥4 (COLLECT_2_SAME)
-//   id 4 — Hiểu về card: mở KHI player đủ gems để mua 1 card (READ_ONLY + allowNext)
-//   id 5 — Mua card: mở ngay sau id4 (PURCHASE_CARD)
-//   id 6 — Reserve card (RESERVE_CARD)
-//   id 7 — Noble tiles (READ_ONLY)
+// id 0–8 (khớp i18n tutorial_step0 … tutorial_step8):
+//   0 — Chào mừng / mục tiêu (READ_ONLY, NONE)
+//   1 — Lượt & 3 hành động (READ_ONLY, NONE)
+//   2 — Giới thiệu card lv1 (READ_ONLY, CARD)
+//   3 — COLLECT_3_DIFF (GEM_BANK)
+//   4 — COLLECT_2_SAME (GEM_BANK)
+//   5 — Hiểu card khi đủ gem (READ_ONLY + resolveCardId)
+//   6 — PURCHASE_CARD
+//   7 — RESERVE_CARD
+//   8 — Nobles (READ_ONLY)
 //
-// id 4+5 chỉ unlock khi resolveCardId trả về non-null (player đủ gems)
+// id 5–6: nextStep chỉ advance đúng khi resolveCardId có card (đủ gem).
 
 const getSteps = (t: any): TutorialStep[] => [
-  // ── id 0: Mục tiêu game ────────────────────────────────────────────────────
   {
     id: 0,
     title: t("tutorial_step0_title"),
@@ -67,12 +67,23 @@ const getSteps = (t: any): TutorialStep[] => [
     emoji: "👑"
   },
 
-  // ── id 1: Giới thiệu card — highlight card lv1 rẻ nhất để player nhắm tới ─
   {
     id: 1,
     title: t("tutorial_step1_title"),
     message: t("tutorial_step1_message"),
     subMessage: t("tutorial_step1_subMessage"),
+    highlight: { type: "NONE" },
+    requiredAction: "READ_ONLY",
+    allowNext: true,
+    emoji: "👑"
+  },
+
+  // ── id 2: Giới thiệu card — highlight card lv1 rẻ nhất để player nhắm tới ─
+  {
+    id: 2,
+    title: t("tutorial_step2_title"),
+    message: t("tutorial_step2_message"),
+    subMessage: t("tutorial_step2_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "READ_ONLY",
     allowNext: true,
@@ -86,36 +97,36 @@ const getSteps = (t: any): TutorialStep[] => [
     }
   },
 
-  // ── id 2: Lấy 3 gem khác màu — highlight đúng màu cost của card id1 ────────
-  {
-    id: 2,
-    title: t("tutorial_step2_title"),
-    message: t("tutorial_step2_message"),
-    subMessage: t("tutorial_step2_subMessage"),
-    highlight: { type: "GEM_BANK", colors: [] },
-    requiredAction: "COLLECT_3_DIFF",
-    allowNext: false,
-    emoji: "💎"
-  },
-
-  // ── id 3: Lấy 2 gem cùng màu ────────────────────────────────────────────────
+  // ── id 3: Lấy 3 gem khác màu ────────────────────────────────────────────────
   {
     id: 3,
     title: t("tutorial_step3_title"),
     message: t("tutorial_step3_message"),
     subMessage: t("tutorial_step3_subMessage"),
     highlight: { type: "GEM_BANK", colors: [] },
-    requiredAction: "COLLECT_2_SAME",
+    requiredAction: "COLLECT_3_DIFF",
     allowNext: false,
-    emoji: "💎💎"
+    emoji: "💎"
   },
 
-  // ── id 4: Hiểu về card — chỉ mở khi player đủ gems mua ≥1 card ─────────────
+  // ── id 4: Lấy 2 gem cùng màu ────────────────────────────────────────────────
   {
     id: 4,
     title: t("tutorial_step4_title"),
     message: t("tutorial_step4_message"),
     subMessage: t("tutorial_step4_subMessage"),
+    highlight: { type: "GEM_BANK", colors: [] },
+    requiredAction: "COLLECT_2_SAME",
+    allowNext: false,
+    emoji: "💎💎"
+  },
+
+  // ── id 5: Hiểu về card — chỉ mở khi player đủ gems mua ≥1 card ─────────────
+  {
+    id: 5,
+    title: t("tutorial_step5_title"),
+    message: t("tutorial_step5_message"),
+    subMessage: t("tutorial_step5_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "READ_ONLY",
     allowNext: true,
@@ -148,12 +159,12 @@ const getSteps = (t: any): TutorialStep[] => [
     }
   },
 
-  // ── id 5: Mua card ───────────────────────────────────────────────────────────
+  // ── id 6: Mua card ───────────────────────────────────────────────────────────
   {
-    id: 5,
-    title: t("tutorial_step5_title"),
-    message: t("tutorial_step5_message"),
-    subMessage: t("tutorial_step5_subMessage"),
+    id: 6,
+    title: t("tutorial_step6_title"),
+    message: t("tutorial_step6_message"),
+    subMessage: t("tutorial_step6_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "PURCHASE_CARD",
     allowNext: false,
@@ -185,12 +196,12 @@ const getSteps = (t: any): TutorialStep[] => [
     }
   },
 
-  // ── id 6: Reserve card ───────────────────────────────────────────────────────
+  // ── id 7: Reserve card ───────────────────────────────────────────────────────
   {
-    id: 6,
-    title: t("tutorial_step6_title"),
-    message: t("tutorial_step6_message"),
-    subMessage: t("tutorial_step6_subMessage"),
+    id: 7,
+    title: t("tutorial_step7_title"),
+    message: t("tutorial_step7_message"),
+    subMessage: t("tutorial_step7_subMessage"),
     highlight: { type: "CARD", cardId: "" },
     requiredAction: "RESERVE_CARD",
     allowNext: false,
@@ -201,12 +212,12 @@ const getSteps = (t: any): TutorialStep[] => [
     }
   },
 
-  // ── id 7: Noble tiles ────────────────────────────────────────────────────────
+  // ── id 8: Noble tiles ────────────────────────────────────────────────────────
   {
-    id: 7,
-    title: t("tutorial_step7_title"),
-    message: t("tutorial_step7_message"),
-    subMessage: t("tutorial_step7_subMessage"),
+    id: 8,
+    title: t("tutorial_step8_title"),
+    message: t("tutorial_step8_message"),
+    subMessage: t("tutorial_step8_subMessage"),
     highlight: { type: "NOBLE", nobleIds: [] },
     requiredAction: "READ_ONLY",
     allowNext: true,
@@ -236,24 +247,38 @@ export function useTutorialSteps(
   // Chỉ restore GUIDED phase với stepIndex trong range — ngoài range thì reset
   const restoreStep = useCallback(
     (index: number, restoredPhase: TutorialPhase) => {
-      console.log(index, restoredPhase);
-      if (index === 10 && restoredPhase == "FREE_PLAY") {
+      setHintText(null);
+
+      if (restoredPhase === "FREE_PLAY") {
+        setPhase("FREE_PLAY");
         setStepIndex(STEPS.length);
-        setPhase("GUIDED");
-        setHintText(null);
         return;
       }
-      if (restoredPhase === "GUIDED" && index >= 0 && index < STEPS.length) {
+
+      if (restoredPhase === "DONE") {
+        setPhase("DONE");
+        setStepIndex(STEPS.length);
+        return;
+      }
+
+      if (restoredPhase === "TRANSITION") {
+        setPhase("TRANSITION");
+        return;
+      }
+
+      const isGuided =
+        restoredPhase === "GUIDED" ||
+        (restoredPhase as string).toUpperCase() === "GUIDE";
+      if (isGuided && index >= 0 && index < STEPS.length) {
         setStepIndex(index);
         setPhase("GUIDED");
-      } else {
-        // index >= totalSteps hoặc phase không phải GUIDED → reset về đầu
-        setStepIndex(0);
-        setPhase("GUIDED");
+        return;
       }
-      setHintText(null);
+
+      setStepIndex(0);
+      setPhase("GUIDED");
     },
-    []
+    [STEPS.length]
   );
 
   // ── Resolve step với gameState thực tế ──────────────────────────────────────
@@ -276,8 +301,8 @@ export function useTutorialSteps(
     if (step.highlight.type === "GEM_BANK") {
       const bank = gameState.board?.gemBank ?? {};
 
-      if (currentStep.id === 2) {
-        // id2 COLLECT_3_DIFF: highlight màu cost của card lv1 đơn giản nhất
+      if (currentStep.id === 3) {
+        // id3 COLLECT_3_DIFF: highlight màu cost của card lv1 đơn giản nhất
         // để gợi ý player lấy đúng màu cần thiết
         const lv1 = gameState.board?.visibleCards?.level1 ?? [];
         const targetCard = lv1.find(
@@ -296,8 +321,8 @@ export function useTutorialSteps(
           type: "GEM_BANK",
           colors: targetColors.length > 0 ? allAvailable : allAvailable
         };
-      } else if (currentStep.id === 3) {
-        // id3 COLLECT_2_SAME: highlight màu còn ≥4
+      } else if (currentStep.id === 4) {
+        // id4 COLLECT_2_SAME: highlight màu còn ≥4
         step.highlight = {
           type: "GEM_BANK",
           colors: (Object.keys(bank) as GemColor[]).filter(
@@ -352,20 +377,20 @@ export function useTutorialSteps(
       return;
     }
 
-    // Nếu step tiếp theo là id4 (READ_ONLY card) hoặc id5 (PURCHASE_CARD)
+    // Nếu step tiếp theo là id5 (READ_ONLY card) hoặc id6 (PURCHASE_CARD)
     // → chỉ advance nếu player đang đủ gems mua ≥1 card
     const nextStepDef = STEPS[next];
     if (
-      (nextStepDef.id === 4 || nextStepDef.id === 5) &&
+      (nextStepDef.id === 5 || nextStepDef.id === 6) &&
       nextStepDef.resolveCardId
     ) {
       if (gameState) {
         const cardId = nextStepDef.resolveCardId(gameState, myId);
         if (!cardId) {
-          // Chưa đủ gems → skip id4 và id5, tiến thẳng tới id6 (RESERVE)
+          // Chưa đủ gems → skip id5 và id6, tiến thẳng tới id7 (RESERVE)
           // nhưng vẫn cho player biết bằng hint
           setHintText(null);
-          setStepIndex(next); // vẫn vào id4 nhưng resolveCardId sẽ trả null
+          setStepIndex(next); // vẫn vào id5 nhưng resolveCardId sẽ trả null
           return;
         }
       }
@@ -373,7 +398,7 @@ export function useTutorialSteps(
 
     setStepIndex(next);
     setHintText(null);
-  }, [stepIndex, totalSteps, gameState, myId]);
+  }, [stepIndex, totalSteps, STEPS, gameState, myId]);
 
   // ── onActionSuccess ──────────────────────────────────────────────────────────
   const onActionSuccess = useCallback(
@@ -386,7 +411,7 @@ export function useTutorialSteps(
       ) {
         lastActionRef.current = action;
 
-        // Sau COLLECT_2_SAME (id3): kiểm tra player đủ gems mua card chưa
+        // Sau COLLECT_2_SAME (id4): kiểm tra player đủ gems mua card chưa
         // Nếu đủ → tiến tới id4, nếu chưa → vẫn tiến (sẽ check lại ở nextStep)
         nextStep();
       }

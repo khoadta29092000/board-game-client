@@ -37,7 +37,7 @@ export default function GemsCard({
   const gemSize = isLandscape ? 64 : 72;
 
   const isTutorialLock =
-    currentStep !== null && currentStep.id !== 2 && currentStep.id !== 3;
+    currentStep !== null && currentStep.id !== 3 && currentStep.id !== 4;
 
   return (
     <div
@@ -88,11 +88,11 @@ export default function GemsCard({
                     if (color == "Gold") return;
                     if (!selectable || isTutorialLock) return;
                     if (
-                      (currentStep?.id == 2 && color == "White") ||
-                      (currentStep?.id == 2 && color == "Green")
+                      (currentStep?.id == 3 && color == "White") ||
+                      (currentStep?.id == 3 && color == "Green")
                     )
                       return;
-                    if (currentStep?.id == 3 && color !== "Green") return;
+                    if (currentStep?.id == 4 && color !== "Green") return;
                     handleSelectGem(color, numAmount);
                   }}
                   style={{
