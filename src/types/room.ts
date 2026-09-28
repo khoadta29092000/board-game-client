@@ -17,8 +17,14 @@ export interface Room {
   quantityPlayer: number;
   players: RoomPlayer[];
   roomType: RoomType;
+  matchMode?: MatchMode;
   status: RoomStatus;
   gameName: string;
+}
+
+export enum MatchMode {
+  Casual = "Casual",
+  Ranked = "Ranked"
 }
 
 export enum RoomType {
@@ -30,6 +36,14 @@ export enum RoomStatus {
   Waiting = "Waiting",
   Playing = "Playing",
   Finished = "Finished"
+}
+
+export function isRankedMode(mode?: MatchMode | string | number | null) {
+  return mode === MatchMode.Ranked || mode === "Ranked" || mode === 1;
+}
+
+export function isGuestPlayer(id?: string | null) {
+  return !!id && id.startsWith("GUEST_");
 }
 
 export interface PlayerLeftRoom {

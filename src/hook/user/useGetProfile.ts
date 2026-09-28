@@ -8,11 +8,18 @@ import { useAuth } from "@/src/redux/global/selectors";
 import { setAuth } from "@/src/redux/global/slice";
 import { useDispatch } from "react-redux";
 
-async function verifyToken(): Promise<void> {
+async function fetchProfileBalances() {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("user_token") : null;
   if (!token) throw new Error("NO_TOKEN");
-  await callProfile();
+  const res = await callProfile();
+  const d = res?.data?.data ?? {};
+  return {
+    Coin: d.Coin ?? d.coin ?? 0,
+    RewardPoint: d.RewardPoint ?? d.rewardPoint ?? 0,
+    RankPoint: d.RankPoint ?? d.rankPoint ?? 0,
+    Role: d.Role ?? d.role
+  };
 }
 
 export const useProfile = () => {
@@ -25,12 +32,22 @@ export const useProfile = () => {
 
   const { error, isValidating, mutate } = useSWR(
     shouldFetch ? "profile/verify" : null,
-    verifyToken,
+    fetchProfileBalances,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       dedupingInterval: 6000,
       shouldRetryOnError: false,
+      onSuccess: balances => {
+        const raw =
+          typeof window !== "undefined"
+            ? localStorage.getItem("user_data")
+            : null;
+        const current = raw ? JSON.parse(raw) : reduxProfile ?? {};
+        const next = { ...current, ...balances };
+        localStorage.setItem("user_data", JSON.stringify(next));
+        dispatch(setAuth(next));
+      },
       onError: (err: any) => {
         if (err?.response?.status === 401) {
           localStorage.removeItem("user_token");

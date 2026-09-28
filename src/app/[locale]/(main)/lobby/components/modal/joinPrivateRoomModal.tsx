@@ -63,6 +63,11 @@ export function JoinPrivateRoomModal({ isOpen, onClose, roomId }: TProps) {
         handleClose();
         sessionStorage.setItem(`room_pwd_${roomId}`, data.password);
         router.push(`/lobby/${roomId}`);
+      } else if (result?.error === "NEED_ACCOUNT") {
+        toast.error(t("ranked_need_account"));
+        setIsJoining(false);
+        handleClose();
+        router.push("/register");
       } else {
         toast.error(result?.error ?? "Failed to join room");
         setIsJoining(false);

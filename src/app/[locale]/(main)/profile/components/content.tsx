@@ -327,6 +327,27 @@ export default function ContentProfile() {
               <span>{t("profile_guest_warning")}</span>
             </div>
           )}
+
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <div className="rounded-lg border border-gray-100 bg-white px-3 py-2 text-center">
+              <p className="text-xs text-gray-500">{t("profile_coin")}</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {profile?.Coin ?? 0}
+              </p>
+            </div>
+            <div className="rounded-lg border border-gray-100 bg-white px-3 py-2 text-center">
+              <p className="text-xs text-gray-500">{t("profile_reward")}</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {profile?.RewardPoint ?? 0}
+              </p>
+            </div>
+            <div className="rounded-lg border border-gray-100 bg-white px-3 py-2 text-center">
+              <p className="text-xs text-gray-500">{t("profile_rank")}</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {profile?.RankPoint ?? 0}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Card */}

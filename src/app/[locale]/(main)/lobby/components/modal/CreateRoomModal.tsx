@@ -10,7 +10,7 @@ import { useRouter } from "@/src/i18n/navigation";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { ModalCommon } from "@/src/components/common/modal";
 import { Button } from "@/src/components/ui/button";
-import { RoomType } from "@/src/types/room";
+import { RoomType, MatchMode } from "@/src/types/room";
 import { useGetAvailableGameName } from "@/src/hook/game/useGetAvailableGameName";
 import { useTranslations } from "next-intl";
 import { Eye, EyeOff } from "lucide-react";
@@ -37,6 +37,7 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
           .number()
           .required(t("lobby_create_err_players")),
         roomType: yup.string().required(t("lobby_create_err_type")),
+        matchMode: yup.string().required(),
         password: yup.string().when("roomType", {
           is: (val: string) => val === RoomType.Private,
           then: schema => schema.required(t("lobby_create_err_pwd")),
@@ -59,6 +60,7 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
       gameName: "Splendor",
       quantityPlayer: 4,
       roomType: RoomType.Public,
+      matchMode: MatchMode.Casual,
       password: ""
     }
   });
@@ -84,6 +86,7 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
         gameName: gameNames[0],
         quantityPlayer: gamesData[gameNames[0]]?.[0] || 4,
         roomType: RoomType.Public,
+        matchMode: MatchMode.Casual,
         password: ""
       });
     }
@@ -105,16 +108,23 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
       };
 
       const roomId = await invoke("CreateSettingRoom", payload);
+      if (roomId?.error === "NEED_ACCOUNT") {
+        toast.error(t("ranked_need_account"));
+        setIsCreating(false);
+        router.push("/register");
+        return;
+      }
       if (roomId && roomId.room) {
         onClose();
         sessionStorage.setItem(`room_pwd_${roomId.room.id}`, data.password);
         router.push(`/lobby/${roomId.room.id}`);
       } else {
+        toast.error(roomId?.error ?? t("lobby_create_failed"));
         setIsCreating(false);
       }
     } catch (error) {
       console.error("Create room error:", error);
-      toast.error("Failed to create room");
+      toast.error(t("lobby_create_failed"));
       setIsCreating(false);
     }
   };
@@ -129,7 +139,7 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
           {...register("gameName")}
           className="text-black w-full border border-gray-300 rounded px-4 py-2 bg-white disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isGamesLoading}
-        >a
+        >
           {isGamesLoading ? (
             <option value="">{t("lobby_create_loading")}</option>
           ) : (
@@ -174,6 +184,22 @@ export function CreateRoomModal({ isOpen, onClose }: TProps) {
         </select>
         {errors.roomType && (
           <p className="text-red-500 text-sm mt-1">{errors.roomType.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="block txt-14 font-inter mb-2 text-black">
+          {t("lobby_create_mode_lbl")}<span className="text-primary-400"> *</span>
+        </label>
+        <select
+          {...register("matchMode")}
+          className="text-black w-full border border-gray-300 rounded px-4 py-2 bg-white"
+        >
+          <option value={MatchMode.Casual}>{t("lobby_create_casual")}</option>
+          <option value={MatchMode.Ranked}>{t("lobby_create_ranked")}</option>
+        </select>
+        {errors.matchMode && (
+          <p className="text-red-500 text-sm mt-1">{errors.matchMode.message}</p>
         )}
       </div>
 

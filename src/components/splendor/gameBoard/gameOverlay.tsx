@@ -168,6 +168,32 @@ export function GameOverOverlay({
                   )}{" "}
                   {t("game_over_bonuses")}
                 </div>
+                {(() => {
+                  const award = gameState.info?.awards?.[player.playerId] as
+                    | {
+                        rewardPoint?: number;
+                        rankPoint?: number;
+                        RewardPoint?: number;
+                        RankPoint?: number;
+                      }
+                    | undefined;
+                  if (!award) return null;
+                  const reward = award.rewardPoint ?? award.RewardPoint ?? 0;
+                  const rank = award.rankPoint ?? award.RankPoint ?? 0;
+                  if (reward === 0 && rank === 0) return null;
+                  return (
+                  <div style={{ color: "#93c5fd", fontSize: 11, marginTop: 2 }}>
+                    {t("game_over_reward")}: +{reward}
+                    {rank !== 0 && (
+                      <>
+                        {" "}
+                        · {t("game_over_rank")}: {rank > 0 ? "+" : ""}
+                        {rank}
+                      </>
+                    )}
+                  </div>
+                  );
+                })()}
               </div>
 
               <div

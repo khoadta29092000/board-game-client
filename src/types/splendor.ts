@@ -208,6 +208,7 @@ export interface GameInfo {
   startedAt?: string;
   completedAt?: string | null;
   winnerId?: string | null;
+  awards?: Record<string, { rewardPoint: number; rankPoint: number }>;
 }
 
 export interface BoardState {

@@ -57,6 +57,10 @@ export type TDataToken = {
   Id: string;
   Name: string;
   TokenId: string;
+  Role?: string;
+  Coin?: number;
+  RewardPoint?: number;
+  RankPoint?: number;
   nbf: number;
   exp: number;
   iat: number;

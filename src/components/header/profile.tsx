@@ -60,6 +60,11 @@ export function Profile({ auth }: TProps) {
             <div className="flex flex-col">
               <h2 className="txt-16 font-bold break-all">{auth?.Email}</h2>
               <p className="txt-14  font-medium break-all">{auth?.Name}</p>
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 txt-14 text-gray-600">
+                <span>{t("profile_coin")}: {auth?.Coin ?? 0}</span>
+                <span>{t("profile_reward")}: {auth?.RewardPoint ?? 0}</span>
+                <span>{t("profile_rank")}: {auth?.RankPoint ?? 0}</span>
+              </div>
             </div>
           </div>
           <Link href={"/profile"}>

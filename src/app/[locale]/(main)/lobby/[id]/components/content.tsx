@@ -36,7 +36,9 @@ import {
   PlayerLeftRoom,
   Room,
   RoomPlayer,
-  StartedRoom
+  StartedRoom,
+  isGuestPlayer,
+  isRankedMode
 } from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { useAuth } from "@/src/redux/global/selectors";
@@ -288,6 +290,12 @@ export default function ContentRoomDetail() {
         }
         setRoom(roomInfo.room);
 
+        if (isGuestPlayer(auth?.Id) && isRankedMode(roomInfo.room?.matchMode)) {
+          toast.error(t("ranked_need_account"));
+          router.push("/register");
+          return;
+        }
+
         if (roomInfo.room?.roomType === "Private") {
           setRoomType("Private");
 
@@ -331,6 +339,13 @@ export default function ContentRoomDetail() {
           sessionStorage.removeItem(`room_pwd_${roomId}`);
         } else if (!result?.success) {
           sessionStorage.removeItem(`room_pwd_${roomId}`);
+          if (result?.error === "NEED_ACCOUNT") {
+            toast.error(t("ranked_need_account"));
+            setIsJoining(false);
+            setIsLoading(false);
+            router.push("/register");
+            return;
+          }
           const toastKey = `joined-room-err`;
           if (!toastShownRef.current.has(toastKey)) {
             toast.error(result?.error ?? "Failed to join room");
@@ -348,7 +363,7 @@ export default function ContentRoomDetail() {
         setIsJoining(false);
       }
     },
-    [roomId, invoke, router]
+    [roomId, invoke, router, t]
   );
 
   // ─── Actions ─────────────────────────────────────────────────────────────────
@@ -540,6 +555,18 @@ export default function ContentRoomDetail() {
               {room.status}
             </Badge>
             <Badge variant="outline">{room.roomType}</Badge>
+            <Badge
+              variant="outline"
+              className={
+                isRankedMode(room.matchMode)
+                  ? "border-indigo-300 text-indigo-700"
+                  : ""
+              }
+            >
+              {isRankedMode(room.matchMode)
+                ? t("room_card_ranked")
+                : t("room_card_casual")}
+            </Badge>
           </div>
         </div>
 
@@ -572,7 +599,7 @@ export default function ContentRoomDetail() {
                   )}
                   {copied ? t("room_detail_copied") : t("room_detail_copy")}
                 </Button>
-                {isOwner && (
+                {isOwner && !isRankedMode(room.matchMode) && (
                   <Button
                     variant="secondary"
                     size="sm"

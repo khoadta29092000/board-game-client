@@ -1,4 +1,4 @@
-import { Room, RoomType } from "@/src/types/room";
+import { Room, RoomType, isRankedMode } from "@/src/types/room";
 import { Crown, Lock, Play, Swords, Users } from "lucide-react";
 import {
   Card,
@@ -54,7 +54,7 @@ export function RoomCard({
           <div className="flex items-center gap-2">
             <CardTitle className="capitalize text-lg">{room.roomId}</CardTitle>
           </div>
-          <div className="text-center">
+          <div className="text-center flex flex-col items-end gap-1">
             {isPrivate ? (
               <Badge className="flex items-center gap-1 hover:bg-yellow-200 bg-yellow-100 text-yellow-700 border border-yellow-300 text-xs">
                 <Lock className="w-3 h-3" />
@@ -65,6 +65,17 @@ export function RoomCard({
                 {t("room_card_public")}
               </Badge>
             )}
+            <Badge
+              className={`text-xs ${
+                isRankedMode(room.matchMode)
+                  ? "bg-indigo-100 text-indigo-700 border border-indigo-300"
+                  : "bg-gray-100 text-gray-600 border border-gray-200"
+              }`}
+            >
+              {isRankedMode(room.matchMode)
+                ? t("room_card_ranked")
+                : t("room_card_casual")}
+            </Badge>
           </div>
         </div>
         <div className="flex items-center gap-1.5 mt-1">

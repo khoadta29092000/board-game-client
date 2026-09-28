@@ -7,7 +7,7 @@ import { useRouter } from "@/src/i18n/navigation";
 import { Button } from "@/src/components/ui/button";
 import { Bot, Loader2, Plus, Wifi, WifiOff } from "lucide-react";
 import { toast } from "sonner";
-import { Room, RoomType } from "@/src/types/room";
+import { Room, RoomType, isGuestPlayer, isRankedMode } from "@/src/types/room";
 import { useSignalR } from "@/src/components/signalR/signalRProvider";
 import { LoadingOverlay } from "@/src/components/common/loading";
 import { RoomCard } from "@/src/components/splendor/room/roomCard";
@@ -15,6 +15,7 @@ import { LoginRequired } from "./LoginRequired";
 import { useTranslations } from "next-intl";
 import { CreateRoomModal } from "./modal/CreateRoomModal";
 import { JoinPrivateRoomModal } from "./modal/joinPrivateRoomModal";
+import { useAuth } from "@/src/redux/global/selectors";
 
 export default function ContentLobby() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function ContentLobby() {
   const [joiningRoomId, setJoiningRoomId] = useState<string | null>(null);
   const { isConnected, invoke, on, off } = useSignalR();
   const t = useTranslations();
+  const auth = useAuth();
   const [privateRoomId, setPrivateRoomId] = useState<string | null>(null);
   const {
     isOpen: isJoinPrivateOpen,
@@ -107,6 +109,13 @@ export default function ContentLobby() {
 
   const handleJoinRoom = async (roomId: string, roomType: string) => {
     if (!isConnected) return toast.error("Not connected");
+
+    const target = rooms.find(r => r.id === roomId);
+    if (isGuestPlayer(auth?.Id) && isRankedMode(target?.matchMode)) {
+      toast.error(t("ranked_need_account"));
+      router.push("/register");
+      return;
+    }
 
     if (roomType === RoomType.Private) {
       setPrivateRoomId(roomId);
